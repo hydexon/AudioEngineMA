@@ -1,0 +1,17 @@
+
+set(FILES
+    Source/AudioEngineMAModuleInterface.cpp
+    Source/AudioEngineMAModuleInterface.h
+    Source/Clients/AudioEngineMASystemComponent.cpp
+    Source/Clients/AudioEngineMASystemComponent.h
+    Source/Clients/AudioEngineImpl_MA.cpp
+    Source/Clients/AudioEngineImpl_MA.h
+    Source/Clients/Common_MA.cpp
+    Source/Clients/Common_MA.h
+    Source/Clients/Config_MA.cpp
+    Source/Clients/Config_MA.h
+    Source/Clients/ATLEntities_MA.cpp
+    Source/Clients/ATLEntities_MA.h
+    Source/Clients/FileIOVFS_MA.cpp
+    Source/Clients/FileIOVFS_MA.h
+)

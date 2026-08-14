@@ -1,0 +1,45 @@
+{
+    "Amazon": {
+        "AssetProcessor": {
+            "Settings": {
+                "ScanFolder AudioEngineMA/Assets": {
+                    "watch": "@GEMROOT:AudioEngineMA@/Assets",
+                    "recursive": 1,
+                    "order": 101
+                },
+                "ScanFolder AudioEngineMA/Registry": {
+                    "watch": "@GEMROOT:AudioEngineMA@/Registry",
+                    "recursive": 1,
+                    "order": 102
+                },
+                "RC MiniAudio Controls": {
+                    "pattern": "(.*libs\\\\/gameaudio\\\\/miniaudio\\\\/).*\\.xml",
+                    "params": "copy",
+                    "productAssetType": "{305C9250-E129-4694-A819-2975B1CF926A}"
+                },
+
+                "RC MiniAudio wav copy": {
+                    "glob": "*.wav",
+                    "params": "copy",
+                    "productAssetType": "{F1F2BFCA-0915-4195-B371-B324F65693BC}"
+                },
+                "RC MiniAudio mp3 copy": {
+                    "glob": "*.mp3",
+                    "params": "copy",
+                    "productAssetType": "{B0CB3A10-6460-40FA-8C89-AE4AD7F2C905}"
+                },
+                "RC MiniAudio ogg copy": {
+                    "glob": "*.ogg",
+                    "params": "copy",
+                    "productAssetType": "{4E23610E-E63D-40B1-82C2-9EE003592BC2}"
+                },
+                "RC MiniAudio flac copy": {
+                    "glob": "*.flac",
+                    "params": "copy",
+                    "productAssetType": "{3CB7B994-6F6B-4441-880C-FF047665D745}"
+                },
+
+            }
+        }
+    }
+}
