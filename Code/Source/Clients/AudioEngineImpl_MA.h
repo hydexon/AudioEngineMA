@@ -5,6 +5,7 @@
 #include <AzCore/std/smart_ptr/unique_ptr.h>
 #include <AzCore/IO/Path/Path.h>
 
+#include "ATLEntities_MA.h"
 #include <miniaudio.h>
 
 namespace AudioEngineMA
@@ -200,6 +201,7 @@ namespace AudioEngineMA
           }
         };
 
+        using AudioObjectPtr = AZStd::unique_ptr<SATLAudioObjectData_MA, AudioDeleter<SATLAudioObjectData_MA>>;
         using AudioSourcePtr = AZStd::unique_ptr<ma_decoder, AudioDeleter<ma_decoder>>;
 
         std::unique_ptr<ma_log> m_log;
@@ -207,9 +209,12 @@ namespace AudioEngineMA
         std::unique_ptr<ma_resource_manager> m_resourceManager;
 
         AZStd::unordered_map<AZ::IO::FixedMaxPath, AudioSourcePtr> m_audioSources;
+        AZStd::unordered_set<AudioObjectPtr> m_audioObjects;
 
         AZStd::string m_currentLanguage;
         AZ::IO::FixedMaxPath m_localizationPath;
+
+        void CheckObjectForExpiredMASounds(SATLAudioObjectData_MA& audioObj);
 
     };
 

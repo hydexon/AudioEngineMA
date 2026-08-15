@@ -3,10 +3,11 @@
 #include "Common_MA.h"
 #include "Config_MA.h"
 #include "FileIOVFS_MA.h"
-#include "ATLEntities_MA.h"
 
+#include <AzCore/Debug/Profiler.h>
 #include <AzCore/StringFunc/StringFunc.h>
 #include <AzCore/std/string/conversions.h>
+
 //MiniAudio Headers:
 #include <extras/decoders/libopus/miniaudio_libopus.h>
 #include <extras/decoders/libvorbis/miniaudio_libvorbis.h>
@@ -189,6 +190,13 @@ EAudioRequestStatus AudioSystemImpl_MA::ResetAudioObject(Audio::IATLAudioObjectD
 
 EAudioRequestStatus AudioSystemImpl_MA::UpdateAudioObject(Audio::IATLAudioObjectData *objectData)
 {
+    AZ_PROFILE_FUNCTION(Audio);
+    if(!objectData)
+    {
+        return EAudioRequestStatus::Failure;
+    }
+
+    CheckObjectForExpiredMASounds(*static_cast<SATLAudioObjectData_MA*>(objectData));
     return EAudioRequestStatus::Success;
 }
 
@@ -352,7 +360,7 @@ EAudioRequestStatus AudioSystemImpl_MA::ParseAudioFileEntry(const AZ::rapidxml::
 
 void AudioSystemImpl_MA::DeleteAudioFileEntryData(Audio::IATLAudioFileEntryData *oldAudioFileEntryData)
 {
-
+    azdestroy(oldAudioFileEntryData, Audio::AudioImplAllocator, SATLAudioFileEntryData_MA);
 }
 
 const char * const AudioSystemImpl_MA::GetAudioFileLocation(Audio::SATLAudioFileEntryInfo *fileEntryInfo)
@@ -413,16 +421,38 @@ void AudioSystemImpl_MA::DeleteAudioEnvironmentImplData(Audio::IATLEnvironmentIm
 
 IATLAudioObjectData *AudioSystemImpl_MA::NewGlobalAudioObjectData(Audio::TAudioObjectID objectId)
 {
-    return nullptr;
+    return NewAudioObjectData(objectId);
 }
 
 IATLAudioObjectData *AudioSystemImpl_MA::NewAudioObjectData(Audio::TAudioObjectID objectId)
 {
-    return nullptr;
+    AZ_UNUSED(objectId);
+    AudioObjectPtr obj(azcreate(SATLAudioObjectData_MA, (), Audio::AudioImplAllocator));
+    if(!obj)
+    {
+        return nullptr;
+    }
+
+    auto pair = m_audioObjects.emplace(AZStd::move(obj));
+    if(!pair.second)
+    {
+        return nullptr;
+    }
+
+    return pair.first->get();
 }
 
 void AudioSystemImpl_MA::DeleteAudioObjectData(Audio::IATLAudioObjectData *oldObjectData)
 {
+    if(!oldObjectData)
+        return;
+
+    auto pred = [&](AudioObjectPtr& ptr) { return ptr.get() == oldObjectData; };
+    auto it = AZStd::find_if(m_audioObjects.begin(), m_audioObjects.end(), pred);
+    if (it != m_audioObjects.end())
+    {
+        m_audioObjects.erase(it);
+    }
 }
 
 IATLListenerData *AudioSystemImpl_MA::NewDefaultAudioListenerObjectData(Audio::TATLIDType objectId)
@@ -532,6 +562,26 @@ void AudioSystemImpl_MA::OnAudioSystemUnmuteAll()
 void AudioSystemImpl_MA::OnAudioSystemRefresh()
 {
 
+}
+
+void AudioSystemImpl_MA::CheckObjectForExpiredMASounds(SATLAudioObjectData_MA &audioObj)
+{
+    AZStd::vector<decltype(audioObj.m_activeMASounds)::iterator> iterators;
+    iterators.reserve(audioObj.m_activeMASounds.size());
+
+    for(auto it = audioObj.m_activeMASounds.begin(); it != audioObj.m_activeMASounds.end(); ++it)
+    {
+        if(!ma_sound_is_playing(it->second.m_sound))
+        {
+            iterators.push_back(it);
+        }
+    }
+
+    for(auto it : iterators)
+    {
+        ma_sound_uninit(it->second.m_sound);
+        audioObj.m_activeMASounds.erase(it);
+    }
 }
 
 }
