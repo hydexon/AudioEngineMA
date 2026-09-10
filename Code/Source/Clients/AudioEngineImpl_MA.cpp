@@ -222,6 +222,25 @@ EAudioRequestStatus AudioSystemImpl_MA::UnprepareTriggerAsync(Audio::IATLAudioOb
 
 EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectData *objectData, const Audio::IATLTriggerImplData *triggerData, Audio::IATLEventData *eventData, const Audio::SATLSourceData *sourceData)
 {
+    auto object   = static_cast<SATLAudioObjectData_MA*>(objectData);
+    auto trigger  = static_cast<const SATLTriggerImplData_MA*>(triggerData);
+    auto event    = static_cast<SATLEventData_MA*>(eventData);
+
+    if(!object || !trigger || !event)
+    {
+        return EAudioRequestStatus::Failure;
+    }
+
+    auto audioSrcIt = m_audioSources.find(trigger->m_audioFilePath);
+    if(audioSrcIt == m_audioSources.end()) {
+        return EAudioRequestStatus::Failure;
+    }
+
+    ma_result mares = ma_sound_init_from_data_source(m_engine.get(), audioSrcIt->second.get(), 0, NULL, event->sndInstance);
+    if(mares != MA_SUCCESS) {
+        return EAudioRequestStatus::Failure;
+    }
+
     return EAudioRequestStatus::Success;
 }
 

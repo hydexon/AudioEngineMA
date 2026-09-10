@@ -14,4 +14,6 @@ set(FILES
     Source/Clients/ATLEntities_MA.h
     Source/Clients/FileIOVFS_MA.cpp
     Source/Clients/FileIOVFS_MA.h
+    Source/Clients/MASoundGrpManager.cpp
+    Source/Clients/MASoundGrpManager.h
 )

@@ -33,10 +33,12 @@ struct SATLAudioObjectData_MA : public Audio::IATLAudioObjectData
 
 struct SATLTriggerImplData_MA : public Audio::IATLTriggerImplData
 {
+    AZ::IO::FixedMaxPath m_audioFilePath;
 };
 
 struct SATLEventData_MA : public Audio::IATLEventData
 {
+    ma_sound* sndInstance;
 };
 
 
