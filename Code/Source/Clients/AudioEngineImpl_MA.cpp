@@ -236,10 +236,6 @@ EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectDa
         return EAudioRequestStatus::Failure;
     }
 
-    ma_result mares = ma_sound_init_from_data_source(m_engine.get(), audioSrcIt->second.get(), 0, NULL, event->sndInstance);
-    if(mares != MA_SUCCESS) {
-        return EAudioRequestStatus::Failure;
-    }
 
     return EAudioRequestStatus::Success;
 }
@@ -304,15 +300,31 @@ EAudioRequestStatus AudioSystemImpl_MA::RegisterInMemoryFile(Audio::SATLAudioFil
             return EAudioRequestStatus::Failure;
         }
 
-        AudioSourcePtr audioSource(azcreate(ma_decoder,(), Audio::AudioImplAllocator));
+        AudioSourcePtr audioSource(azcreate(ma_resource_manager_data_source,(), Audio::AudioImplAllocator));
         if(!audioSource)
         {
             return EAudioRequestStatus::Failure;
         }
 
-        ma_result result = ma_decoder_init_memory(audioFileEntry->pFileData, audioFileEntry->nSize, nullptr, audioSource.get());
+        ma_result result = ma_resource_manager_register_encoded_data(m_resourceManager.get(),
+                                                                     implData->m_audioFilePath.c_str(),
+                                                                     audioFileEntry->pFileData,
+                                                                     audioFileEntry->nSize);
+
         if(result != MA_SUCCESS)
         {
+            return EAudioRequestStatus::Failure;
+        }
+
+
+        result = ma_resource_manager_data_source_init(
+                    m_resourceManager.get(),
+                    implData->m_audioFilePath.c_str(),
+                    MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_DECODE,
+                    NULL,
+                    audioSource.get());
+
+        if(result != MA_SUCCESS) {
             return EAudioRequestStatus::Failure;
         }
 
@@ -335,7 +347,8 @@ EAudioRequestStatus AudioSystemImpl_MA::UnregisterInMemoryFile(Audio::SATLAudioF
     {
         return EAudioRequestStatus::Failure;
     }
-    ma_decoder_uninit(it->second.get());
+    ma_resource_manager_data_source_uninit(it->second.get());
+    ma_resource_manager_unregister_data(m_resourceManager.get(), it->first.c_str());
     m_audioSources.erase(it);
 
     return EAudioRequestStatus::Success;

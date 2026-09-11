@@ -202,7 +202,7 @@ namespace AudioEngineMA
         };
 
         using AudioObjectPtr = AZStd::unique_ptr<SATLAudioObjectData_MA, AudioDeleter<SATLAudioObjectData_MA>>;
-        using AudioSourcePtr = AZStd::unique_ptr<ma_decoder, AudioDeleter<ma_decoder>>;
+        using AudioSourcePtr = AZStd::unique_ptr<ma_resource_manager_data_source, AudioDeleter<ma_resource_manager_data_source>>;
 
         std::unique_ptr<ma_log> m_log;
         std::unique_ptr<ma_engine> m_engine;

@@ -3,6 +3,7 @@
 #include <ATLEntityData.h>
 #include <AzCore/IO/Path/Path.h>
 #include <AzCore/std/containers/unordered_map.h>
+#include <AzCore/Name/Name.h>
 
 #include <miniaudio.h>
 
@@ -34,11 +35,15 @@ struct SATLAudioObjectData_MA : public Audio::IATLAudioObjectData
 struct SATLTriggerImplData_MA : public Audio::IATLTriggerImplData
 {
     AZ::IO::FixedMaxPath m_audioFilePath;
+    //AudioFile Trigger Params:
+    AZ::Name m_soundGroupName;
+
+
 };
 
 struct SATLEventData_MA : public Audio::IATLEventData
 {
-    ma_sound* sndInstance;
+    ma_sound* m_soundInstance;
 };
 
 
