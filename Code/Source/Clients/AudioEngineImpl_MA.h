@@ -214,6 +214,8 @@ namespace AudioEngineMA
         AZStd::string m_currentLanguage;
         AZ::IO::FixedMaxPath m_localizationPath;
 
+        //Listeners:
+        AZStd::unordered_map<int, Audio::TATLIDType> m_activeListeners;
         void CheckObjectForExpiredMASounds(SATLAudioObjectData_MA& audioObj);
 
     };

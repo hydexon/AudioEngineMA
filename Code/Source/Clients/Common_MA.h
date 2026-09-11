@@ -4,6 +4,7 @@ namespace AudioEngineMA
 {
     namespace Constants {
         constexpr const char* LogWindow = "AudioEngine - MiniAudio";
+        constexpr const char* MasterGroupName = "Master";
     }
 
     namespace MAXMLTags {

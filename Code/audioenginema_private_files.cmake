@@ -10,6 +10,8 @@ set(FILES
     Source/Clients/Common_MA.h
     Source/Clients/Config_MA.cpp
     Source/Clients/Config_MA.h
+    Source/Clients/ATLData.cpp
+    Source/Clients/ATLData.h
     Source/Clients/ATLEntities_MA.cpp
     Source/Clients/ATLEntities_MA.h
     Source/Clients/FileIOVFS_MA.cpp
