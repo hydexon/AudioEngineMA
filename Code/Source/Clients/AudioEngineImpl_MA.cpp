@@ -3,6 +3,7 @@
 #include "Common_MA.h"
 #include "Config_MA.h"
 #include "FileIOVFS_MA.h"
+#include "ATLData.h"
 
 #include <AzCore/Debug/Profiler.h>
 #include <AzCore/StringFunc/StringFunc.h>
@@ -236,6 +237,31 @@ EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectDa
         return EAudioRequestStatus::Failure;
     }
 
+    AZ::IO::FixedMaxPath audioFilePath = audioSrcIt->first;
+    auto const audioDataSource = audioSrcIt->second.get();
+    const AudioFileTriggerParameters& params = trigger->m_audioTriggerParams;
+
+    switch(params.m_soundAction)
+    {
+    case SoundAction::Start:
+    {
+        ma_sound sound;
+        ma_sound_init_from_data_source(m_engine.get(), audioDataSource, 0, NULL, &sound);
+        ma_sound_start(&sound);
+        break;
+    }
+    case SoundAction::Stop:
+    {
+        auto range = object->m_activeMASounds.equal_range(audioFilePath);
+        for(auto it = range.first; it != range.second; ++it)
+        {
+            ma_sound_stop(it->second.m_sound);
+        }
+        object->m_activeMASounds.erase(audioFilePath);
+        break;
+    }
+
+    }
 
     return EAudioRequestStatus::Success;
 }
@@ -413,12 +439,51 @@ const char * const AudioSystemImpl_MA::GetAudioFileLocation(Audio::SATLAudioFile
 
 IATLTriggerImplData *AudioSystemImpl_MA::NewAudioTriggerImplData(const AZ::rapidxml::xml_node<char> *audioTriggerNode)
 {
-    return nullptr;
+    if(!audioTriggerNode)
+    {
+        return nullptr;
+    }
+
+    if(!AZ::StringFunc::Equal(audioTriggerNode->name(), MAXMLTags::AudioFileTag))
+    {
+        return nullptr;
+    }
+
+    auto attr = audioTriggerNode->first_attribute(MAXMLTags::AudioFilePathAttr);
+    if( !attr || !attr->value() || attr->value()[0] == '\0')
+    {
+        return nullptr;
+    }
+
+    const char* audioFilePath = attr->value();
+    bool isLocalized = false;
+
+    attr = audioTriggerNode->first_attribute(MAXMLTags::AudioFileLocalizedAttr);
+    if(attr)
+    {
+        isLocalized = AZ::StringFunc::Equal(attr->value(), "true") ? true : false;
+    }
+    AZ::IO::FixedMaxPath fullPath = audioFilePath;
+    if(isLocalized)
+    {
+        fullPath = AZ::IO::FixedMaxPath(Config::LocalizationDirName) / m_currentLanguage / fullPath;
+    }
+
+    SATLTriggerImplData_MA* triggerImpl =
+            azcreate(SATLTriggerImplData_MA, (), Audio::AudioImplAllocator);
+
+    if(!triggerImpl) {
+        return nullptr;
+    }
+
+    triggerImpl->m_audioFilePath = fullPath;
+    triggerImpl->m_audioTriggerParams.ReadFromXML(*audioTriggerNode);
+    return triggerImpl;
 }
 
 void AudioSystemImpl_MA::DeleteAudioTriggerImplData(Audio::IATLTriggerImplData *oldTriggerData)
 {
-
+    azdestroy(oldTriggerData, Audio::AudioImplAllocator, SATLTriggerImplData_MA);
 }
 
 IATLRtpcImplData *AudioSystemImpl_MA::NewAudioRtpcImplData(const AZ::rapidxml::xml_node<char> *audioRtpcNode)

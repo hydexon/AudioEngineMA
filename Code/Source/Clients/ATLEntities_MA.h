@@ -5,6 +5,7 @@
 #include <AzCore/std/containers/unordered_map.h>
 #include <AzCore/Name/Name.h>
 
+#include "ATLData.h"
 #include <miniaudio.h>
 
 namespace AudioEngineMA
@@ -35,15 +36,13 @@ struct SATLAudioObjectData_MA : public Audio::IATLAudioObjectData
 struct SATLTriggerImplData_MA : public Audio::IATLTriggerImplData
 {
     AZ::IO::FixedMaxPath m_audioFilePath;
-    //AudioFile Trigger Params:
-    AZ::Name m_soundGroupName;
-
-
+    AudioFileTriggerParameters m_audioTriggerParams;
 };
 
 struct SATLEventData_MA : public Audio::IATLEventData
 {
-    ma_sound* m_soundInstance;
+    ma_sound* m_soundInstance = nullptr;
+    bool m_isPlayingEvent = false;
 };
 
 

@@ -9,7 +9,7 @@ namespace AudioEngineMA
 {
     namespace SoundAction
     {
-        enum class Type : int
+        enum Type
         {
             Start = 0,
             Stop,
@@ -27,12 +27,14 @@ namespace AudioEngineMA
 
     namespace AttenuationMode
     {
-        enum class Type : int
+        enum Type
         {
             None,
             Inverse,
             Linear,
-            Exponential
+            Exponential,
+
+            Count
         };
 
         constexpr static const char* Tag = "AttenuationMode";
@@ -66,8 +68,8 @@ namespace AudioEngineMA
         float m_coneinnerAngle = 0.0f;
         float m_coneOuterAngle = 0.0f;
         float m_coneOuterGrain = 0.0f;
-        float m_minDistance = 0.0f;
-        float m_maxDistance = 0.0f;
+        float m_minDistance = 3.0f;
+        float m_maxDistance = 3.0f;
         float m_dopplerFactor = 0.0f;
         bool m_looping = false;
         bool m_spatialization = false;
