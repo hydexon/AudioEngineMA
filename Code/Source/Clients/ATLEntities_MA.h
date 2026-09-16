@@ -17,9 +17,7 @@ struct SATLAudioFileEntryData_MA : Audio::IATLAudioFileEntryData
 };
 
 struct ActiveMASoundData {
-    ActiveMASoundData() = default;
-    ~ActiveMASoundData() = default;
-
+    bool m_isPaused = false;
     ma_sound* m_sound;
     float m_volume = 0.0f;
 };

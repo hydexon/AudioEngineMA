@@ -245,9 +245,10 @@ EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectDa
     {
     case SoundAction::Start:
     {
-        ma_sound sound;
-        ma_sound_init_from_data_source(m_engine.get(), audioDataSource, 0, NULL, &sound);
-        ma_sound_start(&sound);
+        ma_sound* sound = azcreate(ma_sound, (), Audio::AudioImplAllocator);
+        ma_sound_init_from_data_source(m_engine.get(), audioDataSource, 0, NULL, sound);
+
+        object->m_activeMASounds.emplace(audioFilePath, ActiveMASoundData { false, sound, 0.0f });
         break;
     }
     case SoundAction::Stop:
@@ -260,7 +261,28 @@ EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectDa
         object->m_activeMASounds.erase(audioFilePath);
         break;
     }
-
+    case SoundAction::Pause:
+    {
+        auto range = object->m_activeMASounds.equal_range(audioFilePath);
+        for(auto it = range.first; it != range.second; ++it)
+        {
+            it->second.m_isPaused = true;
+            ma_sound_stop(it->second.m_sound);
+        }
+        break;
+    }
+    case SoundAction::Resume:
+    {
+        auto range = object->m_activeMASounds.equal_range(audioFilePath);
+        for(auto it = range.first; it != range.second; ++it)
+        {
+            it->second.m_isPaused = false;
+            ma_sound_start(it->second.m_sound);
+        }
+        break;
+    }
+    default:
+        return EAudioRequestStatus::Failure;
     }
 
     return EAudioRequestStatus::Success;
@@ -668,7 +690,7 @@ void AudioSystemImpl_MA::CheckObjectForExpiredMASounds(SATLAudioObjectData_MA &a
 
     for(auto it = audioObj.m_activeMASounds.begin(); it != audioObj.m_activeMASounds.end(); ++it)
     {
-        if(!ma_sound_is_playing(it->second.m_sound))
+        if(!ma_sound_is_playing(it->second.m_sound) && !it->second.m_isPaused)
         {
             iterators.push_back(it);
         }
@@ -677,6 +699,7 @@ void AudioSystemImpl_MA::CheckObjectForExpiredMASounds(SATLAudioObjectData_MA &a
     for(auto it : iterators)
     {
         ma_sound_uninit(it->second.m_sound);
+        azdestroy(it->second.m_sound, Audio::AudioImplAllocator, ma_sound);
         audioObj.m_activeMASounds.erase(it);
     }
 }

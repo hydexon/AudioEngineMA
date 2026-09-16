@@ -5,6 +5,8 @@
 
 #include <AzCore/EBus/EBus.h>
 #include <AzCore/Interface/Interface.h>
+#include <AzCore/std/functional.h>
+#include <AzCore/std/string/string.h>
 
 namespace AudioEngineMA
 {
@@ -25,6 +27,13 @@ namespace AudioEngineMA
         static constexpr AZ::EBusHandlerPolicy HandlerPolicy = AZ::EBusHandlerPolicy::Single;
         static constexpr AZ::EBusAddressPolicy AddressPolicy = AZ::EBusAddressPolicy::Single;
         //////////////////////////////////////////////////////////////////////////
+
+        using MutexType = AZStd::mutex;
+        static const bool EnableEventQueue = true;
+
+        virtual ~AudioEngineMABusTraits() = default;
+
+        virtual void LoadSoundGroupDefinitions(AZStd::string defFilePath) = 0;
     };
 
     using AudioEngineMARequestBus = AZ::EBus<AudioEngineMARequests, AudioEngineMABusTraits>;
