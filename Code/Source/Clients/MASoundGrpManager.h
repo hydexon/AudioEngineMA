@@ -18,12 +18,7 @@ class SoundGroup
 public:
     AUDIO_IMPL_CLASS_ALLOCATOR(SoundGroup);
     AZ_DISABLE_COPY_MOVE(SoundGroup);
-
-    SoundGroup(SoundGroupManager& manager, ma_engine* engine, ma_sound_group* parent, const AZ::Name& name);
 private:
-    SoundGroupManager& m_grpManager;
-    AZ::Name m_name;
-    ma_sound_group* m_group;
 };
 
 class SoundGroupManager
@@ -36,10 +31,6 @@ public:
     ~SoundGroupManager();
 
     void Reset();
-
-    SoundGroup *CreateSoundGroup(const AZ::Name& grpName);
-    bool DestroyGroup(const AZ::Name& grpName);
-    bool DestroyGroup(int32_t grpIndex);
 
     bool LoadGroupDefinitions(AZ::IO::PathView definitionFilePath);
     bool SaveGroupDefinitions(AZ::IO::PathView definitionFilePath);
