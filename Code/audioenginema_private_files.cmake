@@ -12,6 +12,8 @@ set(FILES
     Source/Clients/Config_MA.h
     Source/Clients/ATLData.cpp
     Source/Clients/ATLData.h
+    Source/Clients/SoundGroupData.cpp
+    Source/Clients/SoundGroupData.h
     Source/Clients/ATLEntities_MA.cpp
     Source/Clients/ATLEntities_MA.h
     Source/Clients/FileIOVFS_MA.cpp
