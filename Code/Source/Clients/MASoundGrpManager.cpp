@@ -18,6 +18,11 @@ SoundGroup::SoundGroup(SoundGroupManager& manager, SoundGroup* parent, ma_engine
     }
 
 }
+
+void SoundGroup::AddChildren(SoundGroup *group)
+{
+}
+
 SoundGroupManager::SoundGroupManager(ma_engine *engine)
     : m_engine(engine)
 {
@@ -46,15 +51,14 @@ bool SoundGroupManager::LoadGroupDefinitions(AZ::IO::PathView definitionFilePath
 
     for(const auto& rootGroup : layout.m_groups)
     {
-        SoundGroup* grp = nullptr;
+        [[maybe_unused]] SoundGroup* grp = nullptr;
+
         bool isMasterGroup = rootGroup.m_groupName == AZ::Name(Constants::MasterGroupName);
         if(isMasterGroup)
         {
         }
         else
         {
-            grp = CreateSoundGroups(rootGroup.m_groupName, nullptr, rootGroup.m_children);
-            AZ_UNUSED(grp);
         }
 
     }
@@ -66,15 +70,6 @@ bool SoundGroupManager::SaveGroupDefinitions(AZ::IO::PathView definitionFilePath
     return true;
 }
 
-SoundGroup *SoundGroupManager::CreateSoundGroups(const AZ::Name &name, SoundGroup *parent, const AZStd::vector<SoundGroupData>& childData)
-{
-    auto group = AZStd::make_unique<SoundGroup>(*this, parent, m_engine, name);
-    for(auto child : childData)
-    {
-        CreateSoundGroups(child.m_groupName, group.get(), child.m_children);
-    }
-    return nullptr;
-}
 
 
 
