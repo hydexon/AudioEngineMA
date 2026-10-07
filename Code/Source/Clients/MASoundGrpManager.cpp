@@ -25,10 +25,7 @@ SoundGroup::SoundGroup(SoundGroup *parent, ma_engine *engine, const SoundGroupDa
     , m_name(data.m_groupName)
     , m_engine(engine)
 {
-    ma_uint32 flags = 0;
-    flags ^= (data.m_noDefaultAttachment? MA_SOUND_FLAG_NO_DEFAULT_ATTACHMENT : 0U);
-    flags ^= (data.m_noSpatialization ? MA_SOUND_FLAG_NO_SPATIALIZATION : 0U);
-    flags ^= (data.m_noPitch ? MA_SOUND_FLAG_NO_PITCH : 0U);
+    ma_uint32 flags = GetFlags(data.m_noPitch, data.m_noDefaultAttachment, data.m_noSpatialization);
 
     if(ma_sound_group_init(m_engine, flags, parent ? parent->GetMAGroup() : nullptr, &m_soundGrp) == MA_SUCCESS)
     {
@@ -40,6 +37,28 @@ SoundGroup::SoundGroup(SoundGroup *parent, ma_engine *engine, const SoundGroupDa
     else {
         m_isValid = false;
     }
+}
+
+SoundGroup::SoundGroup(SoundGroup *parent, ma_engine *engine, const AZ::Name &name, bool noPitch, bool noDefaultAttach, bool noSpatialization)
+    : m_parent(parent)
+    , m_engine(engine)
+    , m_name(name)
+{
+    m_isValid = false;
+
+    ma_uint32 flags = GetFlags(noPitch, noDefaultAttach, noSpatialization);
+    if(ma_sound_group_init(m_engine, flags, parent ? parent->GetMAGroup() : nullptr, &m_soundGrp) == MA_SUCCESS) {
+        m_isValid = true;
+    }
+}
+
+ma_uint32 SoundGroup::GetFlags(bool noPitch, bool noDefaultAttach, bool noSpatialization)
+{
+    ma_uint32 flags = 0;
+    flags ^= (noDefaultAttach ? MA_SOUND_FLAG_NO_DEFAULT_ATTACHMENT : 0U);
+    flags ^= (noSpatialization ? MA_SOUND_FLAG_NO_SPATIALIZATION : 0U);
+    flags ^= (noPitch ? MA_SOUND_FLAG_NO_PITCH : 0U);
+    return flags;
 }
 
 bool SoundGroupManager::IsSoundGroupExist(const AZ::Name &name)

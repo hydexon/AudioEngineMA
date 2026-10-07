@@ -314,6 +314,20 @@ EAudioRequestStatus AudioSystemImpl_MA::StopAllEvents(Audio::IATLAudioObjectData
 
 EAudioRequestStatus AudioSystemImpl_MA::SetPosition(Audio::IATLAudioObjectData *objectData, const Audio::SATLWorldPosition &worldPosition)
 {
+    auto object = static_cast<SATLAudioObjectData_MA*>(objectData);
+    if(!object)
+    {
+        return EAudioRequestStatus::Failure;
+    }
+
+    AZ::Vector3 posVec = worldPosition.GetPositionVec();
+    object->m_position = posVec;
+
+    for(auto pair : object->m_activeMASounds)
+    {
+        ma_sound_set_position(pair.second.m_sound, posVec.GetX(), posVec.GetY(), posVec.GetZ());
+    }
+
     return EAudioRequestStatus::Success;
 }
 
