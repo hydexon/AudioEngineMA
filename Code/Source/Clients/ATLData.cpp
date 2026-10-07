@@ -75,5 +75,16 @@ void AudioFileTriggerParameters::WriteToXML(AZ::rapidxml::xml_node<char> &node, 
 
 }
 
+ma_attenuation_model AttenuationMode::ToMAModel(Type type)
+{
+    switch(type) {
+    case AttenuationMode::None: return ma_attenuation_model_none;
+    case AttenuationMode::Linear: return ma_attenuation_model_linear;
+    case AttenuationMode::Inverse: return ma_attenuation_model_inverse;
+    case AttenuationMode::Exponential: return ma_attenuation_model_exponential;
+    default: return ma_attenuation_model_none;
+    }
+}
+
 
 } // namespace AudioEngineMA

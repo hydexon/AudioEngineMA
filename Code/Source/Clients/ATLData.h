@@ -4,6 +4,7 @@
 #include <AzCore/XML/rapidxml.h>
 
 #include "Common_MA.h"
+#include <miniaudio.h>
 
 namespace AudioEngineMA
 {
@@ -41,6 +42,7 @@ namespace AudioEngineMA
 
         const char* ToString(Type type);
         Type FromString(const char* str);
+        ma_attenuation_model ToMAModel(Type type);
     }
 
     struct AudioFileTriggerParameters

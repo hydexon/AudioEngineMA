@@ -147,6 +147,7 @@ EAudioRequestStatus AudioSystemImpl_MA::Initialize()
         return EAudioRequestStatus::Failure;
     }
 
+    m_soundGroupsManager = AZStd::make_unique<SoundGroupManager>(m_engine.get());
     AZ_Info(Constants::LogWindow, "MiniAudio-backend for AudioSystem initalialized");
     return EAudioRequestStatus::Success;
 }
@@ -246,8 +247,21 @@ EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectDa
     case SoundAction::Start:
     {
         ma_sound* sound = azcreate(ma_sound, (), Audio::AudioImplAllocator);
-        ma_sound_init_from_data_source(m_engine.get(), audioDataSource, 0, NULL, sound);
+        SoundGroup* grp = m_soundGroupsManager->GetSoundGroup(params.m_soundGroupName);
+        ma_sound_init_from_data_source(m_engine.get(), audioDataSource, 0, grp->GetMAGroup(), sound);
+        if(params.m_spatialization)
+        {
+            auto posVec = object->m_position;
+            ma_sound_set_position(sound, posVec.GetX(), posVec.GetY(), posVec.GetZ());
+            ma_sound_set_attenuation_model(sound, AttenuationMode::ToMAModel(params.m_attenuationMode));
+            ma_sound_set_min_distance(sound, params.m_minDistance);
+            ma_sound_set_max_distance(sound, params.m_maxDistance);
+            ma_sound_set_cone(sound, params.m_coneinnerAngle, params.m_coneOuterAngle, params.m_coneOuterGrain);
+        }
 
+        ma_sound_set_looping(sound, params.m_looping ? MA_TRUE : MA_FALSE);
+
+        ma_sound_start(sound);
         object->m_activeMASounds.emplace(audioFilePath, ActiveMASoundData { false, sound, 0.0f });
         break;
     }

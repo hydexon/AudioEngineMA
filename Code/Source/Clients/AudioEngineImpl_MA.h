@@ -6,6 +6,7 @@
 #include <AzCore/IO/Path/Path.h>
 
 #include "ATLEntities_MA.h"
+#include "MASoundGrpManager.h"
 #include <miniaudio.h>
 
 namespace AudioEngineMA
@@ -211,6 +212,7 @@ namespace AudioEngineMA
         AZStd::unordered_map<AZ::IO::FixedMaxPath, AudioSourcePtr> m_audioSources;
         AZStd::unordered_set<AudioObjectPtr> m_audioObjects;
 
+        AZStd::unique_ptr<SoundGroupManager> m_soundGroupsManager;
         AZStd::string m_currentLanguage;
         AZ::IO::FixedMaxPath m_localizationPath;
 
