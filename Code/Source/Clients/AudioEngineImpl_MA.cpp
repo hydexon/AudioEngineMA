@@ -258,10 +258,12 @@ EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectDa
             ma_sound_set_max_distance(sound, params.m_maxDistance);
             ma_sound_set_cone(sound, params.m_coneinnerAngle, params.m_coneOuterAngle, params.m_coneOuterGrain);
         }
-
+        //ma_sound_set_volume(sound, params.linearVolume);
         ma_sound_set_looping(sound, params.m_looping ? MA_TRUE : MA_FALSE);
-
         ma_sound_start(sound);
+
+        event->m_isPlayingEvent = true;
+        event->m_soundInstance = sound;
         object->m_activeMASounds.emplace(audioFilePath, ActiveMASoundData { false, sound, 0.0f });
         break;
     }
@@ -304,11 +306,45 @@ EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectDa
 
 EAudioRequestStatus AudioSystemImpl_MA::StopEvent(Audio::IATLAudioObjectData *objectData, const Audio::IATLEventData *eventData)
 {
+    auto object = static_cast<SATLAudioObjectData_MA*>(objectData);
+    auto event  = static_cast<const SATLEventData_MA*>(eventData);
+
+    if(!object || !event) {
+        return EAudioRequestStatus::Failure;
+    }
+
+    if(!event->m_isPlayingEvent)
+    {
+        return EAudioRequestStatus::Success;
+    }
+
+    ma_sound_stop(event->m_soundInstance);
+    for(auto& pair : object->m_activeMASounds)
+    {
+        if(pair.second.m_sound == event->m_soundInstance)
+        {
+            object->m_activeMASounds.erase(pair.first);
+            break;
+        }
+    }
+
     return EAudioRequestStatus::Success;
 }
 
 EAudioRequestStatus AudioSystemImpl_MA::StopAllEvents(Audio::IATLAudioObjectData *objectData)
 {
+    auto object = static_cast<SATLAudioObjectData_MA*>(objectData);
+    if(!object)
+    {
+        return EAudioRequestStatus::Failure;
+    }
+
+    for(auto& pair : object->m_activeMASounds)
+    {
+        ma_sound_stop(pair.second.m_sound);
+    }
+
+    object->m_activeMASounds.clear();
     return EAudioRequestStatus::Success;
 }
 
@@ -321,9 +357,10 @@ EAudioRequestStatus AudioSystemImpl_MA::SetPosition(Audio::IATLAudioObjectData *
     }
 
     AZ::Vector3 posVec = worldPosition.GetPositionVec();
+
     object->m_position = posVec;
 
-    for(auto pair : object->m_activeMASounds)
+    for(auto& pair : object->m_activeMASounds)
     {
         ma_sound_set_position(pair.second.m_sound, posVec.GetX(), posVec.GetY(), posVec.GetZ());
     }
@@ -333,7 +370,7 @@ EAudioRequestStatus AudioSystemImpl_MA::SetPosition(Audio::IATLAudioObjectData *
 
 EAudioRequestStatus AudioSystemImpl_MA::SetMultiplePositions(Audio::IATLAudioObjectData *objectData, const Audio::MultiPositionParams &multiPositions)
 {
-    return EAudioRequestStatus::Success;
+    return EAudioRequestStatus::Failure;
 }
 
 EAudioRequestStatus AudioSystemImpl_MA::SetRtpc(Audio::IATLAudioObjectData *objectData, const Audio::IATLRtpcImplData *rtpcData, float value)

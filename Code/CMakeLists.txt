@@ -128,6 +128,9 @@ if(PAL_TRAIT_BUILD_HOST_TOOLS)
     ly_add_target(
         NAME ${gem_name}.Editor.Private.Object STATIC
         NAMESPACE Gem
+        AUTORCC
+        #AUTOUIC
+        AUTOMOC
         FILES_CMAKE
             audioenginema_editor_private_files.cmake
         TARGET_PROPERTIES
@@ -136,12 +139,15 @@ if(PAL_TRAIT_BUILD_HOST_TOOLS)
             PRIVATE
                 Include
                 Source
+                Source/Tools/
         BUILD_DEPENDENCIES
             PUBLIC
                 AZ::AzToolsFramework
-                Gem::AudioSystem.Editor.API
                 ${gem_name}.Private.Object
+                Gem::AudioSystem.Editor.API
+                AZ::AssetBuilderSDK
             PRIVATE
+                EditorCore
                 3rdParty::miniaudio
                 3rdParty::miniaudio_libvorbis
     )

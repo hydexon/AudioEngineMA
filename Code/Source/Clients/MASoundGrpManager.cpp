@@ -61,6 +61,22 @@ ma_uint32 SoundGroup::GetFlags(bool noPitch, bool noDefaultAttach, bool noSpatia
     return flags;
 }
 
+SoundGroupManager::SoundGroupManager(ma_engine *engine)
+    : m_engine(engine)
+{
+
+}
+
+SoundGroupManager::~SoundGroupManager()
+{
+
+}
+
+void SoundGroupManager::Reset()
+{
+
+}
+
 bool SoundGroupManager::IsSoundGroupExist(const AZ::Name &name)
 {
     return m_groups.find(name) != m_groups.end();

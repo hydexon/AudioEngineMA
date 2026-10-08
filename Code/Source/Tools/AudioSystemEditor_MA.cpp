@@ -10,7 +10,14 @@
 #include "../Clients/Config_MA.h"
 #include "../Clients/Common_MA.h"
 
+#include <QtViewPaneManager.h>
+
 using namespace AudioControls;
+
+void InitQtResources()
+{
+    Q_INIT_RESOURCE(EditorMA);
+}
 
 void EraseSubStr(AZStd::string& str, AZStd::string_view strToErase)
 {
@@ -35,8 +42,12 @@ namespace MAControlTypes {
 
 CAudioSystemEditor_MiniAudio::CAudioSystemEditor_MiniAudio()
 {
+    InitQtResources();
+
     m_localizedParentControl.SetParent(&m_rootControl);
     m_rootControl.AddChild(&m_localizedParentControl);
+
+    //RegisterQtViewPane<SoundGroupManagerWindow>(nullptr, "MiniAudio Sound Group Manager", LyViewPane::CategoryOther);
 }
 
 void CAudioSystemEditor_MiniAudio::Reload()
