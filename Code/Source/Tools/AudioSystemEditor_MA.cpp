@@ -10,6 +10,7 @@
 #include "../Clients/Config_MA.h"
 #include "../Clients/Common_MA.h"
 
+#include "SoundGroupManagerForm.h"
 #include <QtViewPaneManager.h>
 
 using namespace AudioControls;
@@ -47,7 +48,7 @@ CAudioSystemEditor_MiniAudio::CAudioSystemEditor_MiniAudio()
     m_localizedParentControl.SetParent(&m_rootControl);
     m_rootControl.AddChild(&m_localizedParentControl);
 
-    //RegisterQtViewPane<SoundGroupManagerWindow>(nullptr, "MiniAudio Sound Group Manager", LyViewPane::CategoryOther);
+    RegisterQtViewPane<SoundGroupManagerForm>(nullptr, "MiniAudio Sound Group Manager", LyViewPane::CategoryOther);
 }
 
 void CAudioSystemEditor_MiniAudio::Reload()

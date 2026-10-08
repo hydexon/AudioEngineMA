@@ -129,7 +129,7 @@ if(PAL_TRAIT_BUILD_HOST_TOOLS)
         NAME ${gem_name}.Editor.Private.Object STATIC
         NAMESPACE Gem
         AUTORCC
-        #AUTOUIC
+        AUTOUIC
         AUTOMOC
         FILES_CMAKE
             audioenginema_editor_private_files.cmake

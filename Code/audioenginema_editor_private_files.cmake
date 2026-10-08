@@ -6,4 +6,7 @@ set(FILES
     Source/Tools/AudioSystemEditor_MA.cpp
     Source/Tools/AudioSystemEditor_MA.h
     Source/Tools/AudioConnections.h
+    Source/Tools/SoundGroupManagerForm.cpp
+    Source/Tools/SoundGroupManagerForm.h
+    Source/Tools/SoundGroupManagerForm.ui
 )
