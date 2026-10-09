@@ -14,7 +14,6 @@ class SoundGroupManagerForm : public QWidget
 public:
     explicit SoundGroupManagerForm(QWidget *parent = nullptr);
     ~SoundGroupManagerForm();
-
 private:
     Ui::SoundGroupManagerForm *ui;
 };

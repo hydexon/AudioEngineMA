@@ -52,6 +52,15 @@ SoundGroup::SoundGroup(SoundGroup *parent, ma_engine *engine, const AZ::Name &na
     }
 }
 
+SoundGroup::~SoundGroup()
+{
+    if(!m_isValid)
+        return;
+
+    ma_sound_group_uninit(&m_soundGrp);
+    m_isValid = false;
+}
+
 ma_uint32 SoundGroup::GetFlags(bool noPitch, bool noDefaultAttach, bool noSpatialization)
 {
     ma_uint32 flags = 0;

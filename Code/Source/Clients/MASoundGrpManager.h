@@ -25,6 +25,7 @@ public:
     SoundGroup(SoundGroup* parent, ma_engine* engine, const AZ::Name& name);
     SoundGroup(SoundGroup* parent, ma_engine* engine, const SoundGroupData& data);
     SoundGroup(SoundGroup* parent, ma_engine* engine, const AZ::Name& name, bool noPitch = false, bool noDefaultAttach = false, bool noSpatialization = false);
+    ~SoundGroup();
 
     const bool IsValid() { return m_isValid; }
     const bool IsRootGroup() { return !m_parent; }
