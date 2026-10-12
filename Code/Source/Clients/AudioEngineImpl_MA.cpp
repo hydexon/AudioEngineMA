@@ -248,7 +248,7 @@ EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectDa
     {
         ma_sound* sound = azcreate(ma_sound, (), Audio::AudioImplAllocator);
         SoundGroup* grp = m_soundGroupsManager->GetSoundGroup(params.m_soundGroupName);
-        ma_sound_init_from_data_source(m_engine.get(), audioDataSource, 0, grp->GetMAGroup(), sound);
+        ma_sound_init_from_data_source(m_engine.get(), audioDataSource, 0, grp ? grp->GetMASoundGroup() : nullptr, sound);
         if(params.m_spatialization)
         {
             auto posVec = object->m_position;

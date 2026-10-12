@@ -5,75 +5,46 @@
 namespace AudioEngineMA
 {
 
-SoundGroup::SoundGroup(SoundGroup *parent, ma_engine *engine, const AZ::Name &name)
+
+SoundGroup::SoundGroup(SoundGroup *parent, ma_engine *engine, const AZ::Name &name, ma_uint32 flags)
     : m_parent(parent)
     , m_name(name)
+    , m_flags(flags)
     , m_engine(engine)
+    , m_isInitialized(false)
 {
-    if(ma_sound_group_init(m_engine, 0, parent ? parent->GetMAGroup() : nullptr, &m_soundGrp) != MA_SUCCESS)
+}
+
+bool SoundGroup::Initialize()
+{
+    ma_result res = ma_sound_group_init(m_engine, m_flags, m_parent ? m_parent->GetMASoundGroup() : nullptr, &m_group);
+    if(res != MA_SUCCESS)
     {
-        AZ_Error(Constants::LogWindow, false, "Error trying to initialize an sound group (with no data definitions)");
-        m_isValid = false;
-        return;
+        AZ_Error(Constants::LogWindow, res == MA_SUCCESS, "Error trying creating ma_sound_group!: %d", res);
+        return false;
     }
 
-    m_isValid = true;
+    m_isInitialized = true;
+    return true;
 }
 
-SoundGroup::SoundGroup(SoundGroup *parent, ma_engine *engine, const SoundGroupData &data)
-    : m_parent(parent)
-    , m_name(data.m_groupName)
-    , m_engine(engine)
+void SoundGroup::Uninitialize()
 {
-    ma_uint32 flags = GetFlags(data.m_noPitch, data.m_noDefaultAttachment, data.m_noSpatialization);
+    ma_sound_group_stop(&m_group);
+    ma_sound_group_uninit(&m_group);
 
-    if(ma_sound_group_init(m_engine, flags, parent ? parent->GetMAGroup() : nullptr, &m_soundGrp) == MA_SUCCESS)
-    {
-        ma_sound_group_set_volume(&m_soundGrp, data.m_volume);
-        ma_sound_group_set_pitch(&m_soundGrp, data.m_pitch);
-        ma_sound_group_set_pan(&m_soundGrp, data.m_pan);
-        m_isValid = true;
-    }
-    else {
-        m_isValid = false;
-    }
+    m_isInitialized = false;
 }
 
-SoundGroup::SoundGroup(SoundGroup *parent, ma_engine *engine, const AZ::Name &name, bool noPitch, bool noDefaultAttach, bool noSpatialization)
-    : m_parent(parent)
-    , m_engine(engine)
-    , m_name(name)
+AZStd::vector<AZStd::unique_ptr<SoundGroup> > &SoundGroup::GetChildren()
 {
-    m_isValid = false;
-
-    ma_uint32 flags = GetFlags(noPitch, noDefaultAttach, noSpatialization);
-    if(ma_sound_group_init(m_engine, flags, parent ? parent->GetMAGroup() : nullptr, &m_soundGrp) == MA_SUCCESS) {
-        m_isValid = true;
-    }
-}
-
-SoundGroup::~SoundGroup()
-{
-    if(!m_isValid)
-        return;
-
-    ma_sound_group_uninit(&m_soundGrp);
-    m_isValid = false;
-}
-
-ma_uint32 SoundGroup::GetFlags(bool noPitch, bool noDefaultAttach, bool noSpatialization)
-{
-    ma_uint32 flags = 0;
-    flags ^= (noDefaultAttach ? MA_SOUND_FLAG_NO_DEFAULT_ATTACHMENT : 0U);
-    flags ^= (noSpatialization ? MA_SOUND_FLAG_NO_SPATIALIZATION : 0U);
-    flags ^= (noPitch ? MA_SOUND_FLAG_NO_PITCH : 0U);
-    return flags;
+    return m_children;
 }
 
 SoundGroupManager::SoundGroupManager(ma_engine *engine)
     : m_engine(engine)
 {
-
+    
 }
 
 SoundGroupManager::~SoundGroupManager()
@@ -83,23 +54,88 @@ SoundGroupManager::~SoundGroupManager()
 
 void SoundGroupManager::Reset()
 {
-
-}
-
-bool SoundGroupManager::IsSoundGroupExist(const AZ::Name &name)
-{
-    return m_groups.find(name) != m_groups.end();
+    m_groups.clear();
+    m_groupsMap.clear();
 }
 
 SoundGroup *SoundGroupManager::GetSoundGroup(const AZ::Name &name)
 {
-    const auto entry = m_groups.find(name);
-    if(entry == m_groups.end())
+    auto grp = m_groupsMap.find(name);
+    return grp != m_groupsMap.end() ? grp->second : nullptr;
+}
+
+const bool SoundGroupManager::SoundGroupExists(const AZ::Name &name)
+{
+    return GetSoundGroup(name) != nullptr;
+}
+
+SoundGroup *SoundGroupManager::CreateSoundGroup(const AZ::Name &name, SoundGroup *parent, bool noDefaultAttach, bool noSpatial, bool noPitch)
+{
+    ma_uint32 flags = GetFlagsFromBools(noDefaultAttach, noSpatial, noPitch);
+    auto newGrp = AZStd::make_unique<SoundGroup>(parent, m_engine, name, flags);
+
+    if(!newGrp->Initialize())
     {
         return nullptr;
     }
 
-    return entry->second.get();
+    SoundGroup* grp = nullptr;
+    if(!parent) //No parent, must be root.
+    {
+        m_groups.emplace_back(AZStd::move(newGrp));
+        grp = m_groups.back().get();
+
+    }
+    else
+    {
+        parent->GetChildren().emplace_back(AZStd::move(newGrp));
+        grp = parent->GetChildren().back().get();
+    }
+
+    m_groupsMap[name] = grp;
+    return grp;
+}
+
+bool SoundGroupManager::RenameSoundGroup(const AZ::Name &oldName, const AZ::Name &newName)
+{
+    if( oldName == newName )
+        return false;
+
+    if(newName.IsEmpty())
+    {
+        AZ_Error(Constants::LogWindow, false, "Unable to rename sound group \"%s\" because the name supplied is empty.", oldName.GetCStr());
+        return false;
+    }
+
+    if(SoundGroupExists(newName))
+    {
+        AZ_Error(
+            Constants::LogWindow, false, "Unable to change the name of the sound group from \"%s\" to \"%s\". A sound group with this name already exists.",
+            oldName.GetCStr(), newName.GetCStr());
+
+        return false;
+    }
+
+    SoundGroup* group = GetSoundGroup(oldName);
+    if (!group)
+    {
+        AZ_Error(Constants::LogWindow, false, "Unable to rename sound group \"%s\" because it doesn't exist.", oldName.GetCStr());
+        return false;
+    }
+
+    //The map cache must reflect this, otherwise it will fail.
+    auto nodeHandle = m_groupsMap.extract(oldName);
+    if(nodeHandle.empty())
+    {
+        AZ_Error(Constants::LogWindow, false, "Unable to rename sound group \"%s\", it's lookup cache map entry is non-existent.", oldName.GetCStr());
+        return false;
+    }
+
+    group->m_name = newName;
+    nodeHandle.key() = newName;
+    m_groupsMap.insert(AZStd::move(nodeHandle));
+
+    return true;
 }
 
 bool SoundGroupManager::LoadGroupDefinitions(AZ::IO::PathView definitionFilePath)
@@ -114,25 +150,48 @@ bool SoundGroupManager::LoadGroupDefinitions(AZ::IO::PathView definitionFilePath
 
     for(const auto& rootGroup : layout.m_groups)
     {
-        BuildSoundGroupTree(rootGroup, nullptr);
+        auto root = PopulateSoundGroup(rootGroup, nullptr);
+        if(!root)
+            continue;
+
+        m_groups.emplace_back(AZStd::move(root));
     }
 
     return true;
 }
 
-void SoundGroupManager::BuildSoundGroupTree(const SoundGroupData &data, SoundGroup *parent)
+ma_uint32 SoundGroupManager::GetFlagsFromBools(bool noDefaultAttach, bool noSpatial, bool noPitch) const
 {
-    auto newGroup = AZStd::make_unique<SoundGroup>(parent, m_engine, data);
-
-    if(newGroup->IsValid())
-    {
-        m_groups[data.m_groupName] = AZStd::move(newGroup);
-        for(const SoundGroupData& childData : data.m_children)
-        {
-            BuildSoundGroupTree(childData, m_groups[data.m_groupName].get());
-        }
-    }
+    ma_uint32 flags = 0;
+    flags ^= (noDefaultAttach ? MA_SOUND_FLAG_NO_DEFAULT_ATTACHMENT : 0U);
+    flags ^= (noSpatial ? MA_SOUND_FLAG_NO_SPATIALIZATION : 0U);
+    flags ^= (noPitch ? MA_SOUND_FLAG_NO_PITCH : 0U);
+    return flags;
 }
 
+AZStd::unique_ptr<SoundGroup> SoundGroupManager::PopulateSoundGroup(const SoundGroupData &data, SoundGroup *parent)
+{
+    ma_uint32 flags = GetFlagsFromBools(data.m_noDefaultAttachment, data.m_noSpatialization, data.m_noPitch);
+    auto groupNode = AZStd::make_unique<SoundGroup>(parent, m_engine, data.m_groupName, flags);
+    if(!groupNode->Initialize())
+    {
+        return nullptr;
+    }
+
+    m_groupsMap[data.m_groupName] = groupNode.get();
+    groupNode->GetChildren().reserve(data.m_children.size());
+
+    //Init miniaudio-specific parameters:
+    ma_sound_group_set_pan(groupNode->GetMASoundGroup(), data.m_pan);
+    ma_sound_group_set_pitch(groupNode->GetMASoundGroup(), data.m_pitch);
+    ma_sound_group_set_volume(groupNode->GetMASoundGroup(), data.m_volume);
+
+    for(const auto& child : data.m_children)
+    {
+        groupNode->GetChildren().push_back(PopulateSoundGroup(child, groupNode.get()));
+    }
+
+    return groupNode;
+}
 
 }
