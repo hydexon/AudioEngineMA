@@ -166,12 +166,10 @@
      <property name="orientation">
       <enum>Qt::Orientation::Horizontal</enum>
      </property>
-     <widget class="QTreeWidget" name="treeWidget">
-      <column>
-       <property name="text">
-        <string>Sound Group</string>
-       </property>
-      </column>
+     <widget class="QTreeView" name="treeView">
+      <property name="dragEnabled">
+       <bool>true</bool>
+      </property>
      </widget>
      <widget class="QGroupBox" name="groupBox">
       <property name="enabled">

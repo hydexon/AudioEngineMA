@@ -56,12 +56,15 @@ public:
     void Reset();
 
     SoundGroup* GetSoundGroup(const AZ::Name& name);
+    SoundGroup* GetRootSoundGroupAtIndex(const int index);
     const bool SoundGroupExists(const AZ::Name& name);
     SoundGroup* CreateSoundGroup(const AZ::Name& name, SoundGroup* parent = nullptr, bool noDefaultAttach = false, bool noSpatial = false, bool noPitch = false);
     bool RenameSoundGroup(const AZ::Name& oldName, const AZ::Name& newName);
 
     bool LoadGroupDefinitions(AZ::IO::PathView definitionFilePath);
     //bool SaveGroupDefinitions(AZ::IO::PathView definitionFilePath);
+
+    size_t GetRootNodeCount() const;
 private:
     ma_engine* m_engine;
     AZStd::vector<AZStd::unique_ptr<SoundGroup>> m_groups;

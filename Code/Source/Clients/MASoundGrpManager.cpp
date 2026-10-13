@@ -64,6 +64,11 @@ SoundGroup *SoundGroupManager::GetSoundGroup(const AZ::Name &name)
     return grp != m_groupsMap.end() ? grp->second : nullptr;
 }
 
+SoundGroup *SoundGroupManager::GetRootSoundGroupAtIndex(const int index)
+{
+    return m_groups[index].get();
+}
+
 const bool SoundGroupManager::SoundGroupExists(const AZ::Name &name)
 {
     return GetSoundGroup(name) != nullptr;
@@ -158,6 +163,11 @@ bool SoundGroupManager::LoadGroupDefinitions(AZ::IO::PathView definitionFilePath
     }
 
     return true;
+}
+
+size_t SoundGroupManager::GetRootNodeCount() const
+{
+    return m_groups.size();
 }
 
 ma_uint32 SoundGroupManager::GetFlagsFromBools(bool noDefaultAttach, bool noSpatial, bool noPitch) const
