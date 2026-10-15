@@ -15,6 +15,7 @@ SoundGroupManagerForm::SoundGroupManagerForm(QWidget *parent) :
     AzQtComponents::CheckBox::applyToggleSwitchStyle(ui->chk_NoSpatial);
     AzQtComponents::CheckBox::applyToggleSwitchStyle(ui->chk_NoPitch);
 
+
 }
 
 SoundGroupManagerForm::~SoundGroupManagerForm()

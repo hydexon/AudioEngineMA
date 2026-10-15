@@ -166,11 +166,15 @@
      <property name="orientation">
       <enum>Qt::Orientation::Horizontal</enum>
      </property>
+<<<<<<< Updated upstream
      <widget class="QTreeView" name="treeView">
       <property name="dragEnabled">
        <bool>true</bool>
       </property>
      </widget>
+=======
+     <widget class="QTreeView" name="treeView"/>
+>>>>>>> Stashed changes
      <widget class="QGroupBox" name="groupBox">
       <property name="enabled">
        <bool>true</bool>

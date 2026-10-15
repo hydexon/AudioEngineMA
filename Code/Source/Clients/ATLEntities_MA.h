@@ -43,5 +43,12 @@ struct SATLEventData_MA : public Audio::IATLEventData
     bool m_isPlayingEvent = false;
 };
 
+struct SATLListenerData_MA : public Audio::IATLListenerData
+{
+    explicit SATLListenerData_MA(int listenerIndex) : m_listenerIndex(listenerIndex) {}
+    ~SATLListenerData_MA() override {}
+    const int m_listenerIndex;
+};
+
 
 }

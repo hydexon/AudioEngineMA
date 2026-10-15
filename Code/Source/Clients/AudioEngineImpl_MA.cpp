@@ -134,7 +134,8 @@ EAudioRequestStatus AudioSystemImpl_MA::Initialize()
     engineCfg.allocationCallbacks = azMemCallbacks;
     engineCfg.pResourceManagerVFS = reinterpret_cast<ma_vfs*>(&vfsCb);
     engineCfg.pLog = m_log.get();
-    engineCfg.channels = 0;
+    engineCfg.channels = 2;
+    engineCfg.listenerCount = MA_ENGINE_MAX_LISTENERS;
 
     if(ma_result eng_res = ma_engine_init(&engineCfg, m_engine.get());
             eng_res != MA_SUCCESS)
@@ -145,6 +146,12 @@ EAudioRequestStatus AudioSystemImpl_MA::Initialize()
 
         AZ_Error(Constants::LogWindow, false, "Failure initializing MiniAudio: %d", eng_res);
         return EAudioRequestStatus::Failure;
+    }
+
+    //The listener #0 is reserved for the default listener.
+    for(int i = MA_ENGINE_MAX_LISTENERS-1; i>=1; --i)
+    {
+        m_availableListeners.push_back(i);
     }
 
     m_soundGroupsManager = AZStd::make_unique<SoundGroupManager>(m_engine.get());
@@ -342,6 +349,7 @@ EAudioRequestStatus AudioSystemImpl_MA::StopAllEvents(Audio::IATLAudioObjectData
     for(auto& pair : object->m_activeMASounds)
     {
         ma_sound_stop(pair.second.m_sound);
+        pair.second.m_isPaused = false;
     }
 
     object->m_activeMASounds.clear();
@@ -395,6 +403,13 @@ EAudioRequestStatus AudioSystemImpl_MA::SetEnvironment(Audio::IATLAudioObjectDat
 
 EAudioRequestStatus AudioSystemImpl_MA::SetListenerPosition(Audio::IATLListenerData *listenerData, const Audio::SATLWorldPosition &newPosition)
 {
+    auto listener = static_cast<SATLListenerData_MA*>(listenerData);
+    AZ::Vector3 pos = newPosition.GetPositionVec();
+    AZ::Vector3 up  = newPosition.GetUpVec();
+
+    ma_engine_listener_set_position(m_engine.get(), listener->m_listenerIndex, pos.GetX(), pos.GetY(), pos.GetZ());
+    ma_engine_listener_set_world_up(m_engine.get(), listener->m_listenerIndex, up.GetX(), up.GetY(), up.GetZ());
+
     return EAudioRequestStatus::Success;
 }
 
@@ -641,32 +656,56 @@ void AudioSystemImpl_MA::DeleteAudioObjectData(Audio::IATLAudioObjectData *oldOb
 
 IATLListenerData *AudioSystemImpl_MA::NewDefaultAudioListenerObjectData(Audio::TATLIDType objectId)
 {
-    return nullptr;
+    //Index 0 is always reserved for this default audio listener, and it's enabled by default.
+    auto listener = azcreate(SATLListenerData_MA, (0), Audio::AudioImplAllocator);
+    return listener;
 }
 
 IATLListenerData *AudioSystemImpl_MA::NewAudioListenerObjectData(Audio::TATLIDType objectId)
 {
-    return nullptr;
+    if(m_availableListeners.empty())
+    {
+        AZ_Error(Constants::LogWindow, false, "Error: We reached the amount listeners max supported by MiniAudio!");
+        return nullptr;
+    }
+
+    int newListenerIndex = m_availableListeners.back();
+    m_availableListeners.pop_back();
+
+    ma_engine_listener_set_enabled(m_engine.get(), newListenerIndex, MA_TRUE);
+    auto listener = azcreate(SATLListenerData_MA, (newListenerIndex), Audio::AudioImplAllocator);
+    return listener;
 }
 
 void AudioSystemImpl_MA::DeleteAudioListenerObjectData(Audio::IATLListenerData *oldListenerData)
 {
+    auto listener = static_cast<SATLListenerData_MA*>(oldListenerData);
+    if(listener->m_listenerIndex != 0)
+    {
+        ma_engine_listener_set_enabled(m_engine.get(), listener->m_listenerIndex, MA_FALSE);
+        m_availableListeners.push_back(listener->m_listenerIndex);
+    }
 
+    azdestroy(oldListenerData, Audio::AudioImplAllocator, Audio::IATLListenerData);
 }
 
 IATLEventData *AudioSystemImpl_MA::NewAudioEventData(Audio::TAudioEventID eventID)
 {
-    return nullptr;
+    return azcreate(SATLEventData_MA, (), Audio::AudioImplAllocator);
 }
 
 void AudioSystemImpl_MA::DeleteAudioEventData(Audio::IATLEventData *oldEventData)
 {
-
+    azdestroy(oldEventData, Audio::AudioImplAllocator, Audio::IATLEventData);
 }
 
 void AudioSystemImpl_MA::ResetAudioEventData(Audio::IATLEventData *eventData)
 {
-
+    auto event = static_cast<SATLEventData_MA*>(eventData);
+    if(event)
+    {
+        *event = SATLEventData_MA();
+    }
 }
 
 void AudioSystemImpl_MA::SetLanguage(const char *language)
@@ -735,12 +774,13 @@ void AudioSystemImpl_MA::OnAudioSystemGetFocus()
 
 void AudioSystemImpl_MA::OnAudioSystemMuteAll()
 {
-
+    m_globalVolume = ma_engine_get_volume(m_engine.get());
+    ma_engine_set_volume(m_engine.get(), 0.0);
 }
 
 void AudioSystemImpl_MA::OnAudioSystemUnmuteAll()
 {
-
+    ma_engine_set_volume(m_engine.get(), m_globalVolume);
 }
 
 void AudioSystemImpl_MA::OnAudioSystemRefresh()
