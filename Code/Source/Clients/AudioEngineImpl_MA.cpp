@@ -179,6 +179,14 @@ EAudioRequestStatus AudioSystemImpl_MA::Release()
 
 EAudioRequestStatus AudioSystemImpl_MA::StopAllSounds()
 {
+    ma_engine_stop(m_engine.get());
+    for(auto& obj : m_audioObjects) {
+        for(auto& v : obj->m_activeMASounds) {
+            ma_sound_uninit(v.second.m_sound);
+            azdestroy(v.second.m_sound, Audio::AudioImplAllocator, ma_sound);
+        }
+        obj->m_activeMASounds.clear();
+    }
     return EAudioRequestStatus::Success;
 }
 
@@ -194,6 +202,12 @@ EAudioRequestStatus AudioSystemImpl_MA::UnregisterAudioObject(Audio::IATLAudioOb
 
 EAudioRequestStatus AudioSystemImpl_MA::ResetAudioObject(Audio::IATLAudioObjectData *objectData)
 {
+    auto object = static_cast<SATLAudioObjectData_MA*>(objectData);
+    if(!object) {
+        return EAudioRequestStatus::Failure;
+    }
+
+    *object = SATLAudioObjectData_MA(); //TODO: I don't like this bit, this might cause a memory leak in the map!
     return EAudioRequestStatus::Success;
 }
 
@@ -785,7 +799,7 @@ void AudioSystemImpl_MA::OnAudioSystemUnmuteAll()
 
 void AudioSystemImpl_MA::OnAudioSystemRefresh()
 {
-
+    m_audioSources.clear();
 }
 
 void AudioSystemImpl_MA::CheckObjectForExpiredMASounds(SATLAudioObjectData_MA &audioObj)
