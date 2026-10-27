@@ -65,16 +65,6 @@ AttenuationMode::Type AttenuationMode::FromString(const char *str)
     }
 }
 
-void AudioFileTriggerParameters::ReadFromXML(const AZ::rapidxml::xml_node<char> &node)
-{
-
-}
-
-void AudioFileTriggerParameters::WriteToXML(AZ::rapidxml::xml_node<char> &node, AZ::rapidxml::memory_pool<> &xmlAlloc) const
-{
-
-}
-
 ma_attenuation_model AttenuationMode::ToMAModel(Type type)
 {
     switch(type) {
@@ -85,6 +75,45 @@ ma_attenuation_model AttenuationMode::ToMAModel(Type type)
     default: return ma_attenuation_model_none;
     }
 }
+
+const char* PanMode::ToString(Type type)
+{
+    static const char* strings[PanMode::Count] = { "Balanced", "Pan" };
+    return strings[type];
+}
+
+PanMode::Type PanMode::FromString(const char* str)
+{
+    if(AZ::StringFunc::Equal(str, "Balanced"))
+    {
+        return PanMode::Balance;
+    }
+    else if(AZ::StringFunc::Equal(str, "Pan"))
+    {
+        return PanMode::Pan;
+    }
+
+    return PanMode::Balance;
+}
+
+ma_pan_mode PanMode::ToMA(Type type)
+{
+    if(type == PanMode::Pan)
+        return ma_pan_mode_pan;
+
+    return ma_pan_mode_balance;
+}
+
+void AudioFileTriggerParameters::ReadFromXML(const AZ::rapidxml::xml_node<char> &node)
+{
+
+}
+
+void AudioFileTriggerParameters::WriteToXML(AZ::rapidxml::xml_node<char> &node, AZ::rapidxml::memory_pool<> &xmlAlloc) const
+{
+
+}
+
 
 
 } // namespace AudioEngineMA

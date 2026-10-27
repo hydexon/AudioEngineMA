@@ -209,19 +209,20 @@ namespace AudioEngineMA
         std::unique_ptr<ma_engine> m_engine;
         std::unique_ptr<ma_resource_manager> m_resourceManager;
 
+        AZStd::string m_currentLanguage;
+        AZ::IO::FixedMaxPath m_localizationPath;
+
+        float m_globalVolume = 1.0f;
+
+        //OLD SYSTEM.
         AZStd::unordered_map<AZ::IO::FixedMaxPath, AudioSourcePtr> m_audioSources;
         AZStd::unordered_set<AudioObjectPtr> m_audioObjects;
 
         AZStd::unique_ptr<SoundGroupManager> m_soundGroupsManager;
-        AZStd::string m_currentLanguage;
-        AZ::IO::FixedMaxPath m_localizationPath;
-
-        float m_globalVolume = 0.5f;
-
         //Listeners:
         AZStd::vector<int> m_availableListeners;
         void CheckObjectForExpiredMASounds(SATLAudioObjectData_MA& audioObj);
-
+        //END OF THE OLD SYSTEM.
     };
 
 }

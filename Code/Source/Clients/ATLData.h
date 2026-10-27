@@ -45,6 +45,22 @@ namespace AudioEngineMA
         ma_attenuation_model ToMAModel(Type type);
     }
 
+    namespace PanMode
+    {
+        enum Type
+        {
+            Balance,
+            Pan,
+            Count
+        };
+
+        constexpr static const char* Tag = "PanMode";
+
+        const char* ToString(Type type);
+        Type FromString(const char* str);
+        ma_pan_mode ToMA(Type type);
+    }
+
     struct AudioFileTriggerParameters
     {
         AudioFileTriggerParameters() = default;
@@ -62,10 +78,13 @@ namespace AudioEngineMA
         constexpr static const char* TagDopplerFactor = "DopplerFactor";
         constexpr static const char* TagLooping = "Looping";
         constexpr static const char* TagSpatialization = "Spatialization";
+        constexpr static const char* TagPanMode = "PanMode";
+        constexpr static const char* TagVolumeLinear = "Volume";
 
         AZ::Name m_soundGroupName = AZ::Name(Constants::MasterGroupName);
         SoundAction::Type m_soundAction = SoundAction::Type::Start;
         AttenuationMode::Type m_attenuationMode = AttenuationMode::Type::None;
+        PanMode::Type m_panMode = PanMode::Balance;
         float m_rolloff = 0.0f;
         float m_coneinnerAngle = 0.0f;
         float m_coneOuterAngle = 0.0f;
@@ -73,6 +92,7 @@ namespace AudioEngineMA
         float m_minDistance = 3.0f;
         float m_maxDistance = 3.0f;
         float m_dopplerFactor = 0.0f;
+        float m_volume = 1.0f;
         bool m_looping = false;
         bool m_spatialization = false;
     };

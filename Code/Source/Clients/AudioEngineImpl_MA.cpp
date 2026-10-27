@@ -179,14 +179,6 @@ EAudioRequestStatus AudioSystemImpl_MA::Release()
 
 EAudioRequestStatus AudioSystemImpl_MA::StopAllSounds()
 {
-    ma_engine_stop(m_engine.get());
-    for(auto& obj : m_audioObjects) {
-        for(auto& v : obj->m_activeMASounds) {
-            ma_sound_uninit(v.second.m_sound);
-            azdestroy(v.second.m_sound, Audio::AudioImplAllocator, ma_sound);
-        }
-        obj->m_activeMASounds.clear();
-    }
     return EAudioRequestStatus::Success;
 }
 
@@ -202,12 +194,6 @@ EAudioRequestStatus AudioSystemImpl_MA::UnregisterAudioObject(Audio::IATLAudioOb
 
 EAudioRequestStatus AudioSystemImpl_MA::ResetAudioObject(Audio::IATLAudioObjectData *objectData)
 {
-    auto object = static_cast<SATLAudioObjectData_MA*>(objectData);
-    if(!object) {
-        return EAudioRequestStatus::Failure;
-    }
-
-    *object = SATLAudioObjectData_MA(); //TODO: I don't like this bit, this might cause a memory leak in the map!
     return EAudioRequestStatus::Success;
 }
 
@@ -258,115 +244,16 @@ EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectDa
     if(audioSrcIt == m_audioSources.end()) {
         return EAudioRequestStatus::Failure;
     }
-
-    AZ::IO::FixedMaxPath audioFilePath = audioSrcIt->first;
-    auto const audioDataSource = audioSrcIt->second.get();
-    const AudioFileTriggerParameters& params = trigger->m_audioTriggerParams;
-
-    switch(params.m_soundAction)
-    {
-    case SoundAction::Start:
-    {
-        ma_sound* sound = azcreate(ma_sound, (), Audio::AudioImplAllocator);
-        SoundGroup* grp = m_soundGroupsManager->GetSoundGroup(params.m_soundGroupName);
-        ma_sound_init_from_data_source(m_engine.get(), audioDataSource, 0, grp ? grp->GetMASoundGroup() : nullptr, sound);
-        if(params.m_spatialization)
-        {
-            auto posVec = object->m_position;
-            ma_sound_set_position(sound, posVec.GetX(), posVec.GetY(), posVec.GetZ());
-            ma_sound_set_attenuation_model(sound, AttenuationMode::ToMAModel(params.m_attenuationMode));
-            ma_sound_set_min_distance(sound, params.m_minDistance);
-            ma_sound_set_max_distance(sound, params.m_maxDistance);
-            ma_sound_set_cone(sound, params.m_coneinnerAngle, params.m_coneOuterAngle, params.m_coneOuterGrain);
-        }
-        //ma_sound_set_volume(sound, params.linearVolume);
-        ma_sound_set_looping(sound, params.m_looping ? MA_TRUE : MA_FALSE);
-        ma_sound_start(sound);
-
-        event->m_isPlayingEvent = true;
-        event->m_soundInstance = sound;
-        object->m_activeMASounds.emplace(audioFilePath, ActiveMASoundData { false, sound, 0.0f });
-        break;
-    }
-    case SoundAction::Stop:
-    {
-        auto range = object->m_activeMASounds.equal_range(audioFilePath);
-        for(auto it = range.first; it != range.second; ++it)
-        {
-            ma_sound_stop(it->second.m_sound);
-        }
-        object->m_activeMASounds.erase(audioFilePath);
-        break;
-    }
-    case SoundAction::Pause:
-    {
-        auto range = object->m_activeMASounds.equal_range(audioFilePath);
-        for(auto it = range.first; it != range.second; ++it)
-        {
-            it->second.m_isPaused = true;
-            ma_sound_stop(it->second.m_sound);
-        }
-        break;
-    }
-    case SoundAction::Resume:
-    {
-        auto range = object->m_activeMASounds.equal_range(audioFilePath);
-        for(auto it = range.first; it != range.second; ++it)
-        {
-            it->second.m_isPaused = false;
-            ma_sound_start(it->second.m_sound);
-        }
-        break;
-    }
-    default:
-        return EAudioRequestStatus::Failure;
-    }
-
     return EAudioRequestStatus::Success;
 }
 
 EAudioRequestStatus AudioSystemImpl_MA::StopEvent(Audio::IATLAudioObjectData *objectData, const Audio::IATLEventData *eventData)
 {
-    auto object = static_cast<SATLAudioObjectData_MA*>(objectData);
-    auto event  = static_cast<const SATLEventData_MA*>(eventData);
-
-    if(!object || !event) {
-        return EAudioRequestStatus::Failure;
-    }
-
-    if(!event->m_isPlayingEvent)
-    {
-        return EAudioRequestStatus::Success;
-    }
-
-    ma_sound_stop(event->m_soundInstance);
-    for(auto& pair : object->m_activeMASounds)
-    {
-        if(pair.second.m_sound == event->m_soundInstance)
-        {
-            object->m_activeMASounds.erase(pair.first);
-            break;
-        }
-    }
-
     return EAudioRequestStatus::Success;
 }
 
 EAudioRequestStatus AudioSystemImpl_MA::StopAllEvents(Audio::IATLAudioObjectData *objectData)
 {
-    auto object = static_cast<SATLAudioObjectData_MA*>(objectData);
-    if(!object)
-    {
-        return EAudioRequestStatus::Failure;
-    }
-
-    for(auto& pair : object->m_activeMASounds)
-    {
-        ma_sound_stop(pair.second.m_sound);
-        pair.second.m_isPaused = false;
-    }
-
-    object->m_activeMASounds.clear();
     return EAudioRequestStatus::Success;
 }
 
@@ -489,8 +376,10 @@ EAudioRequestStatus AudioSystemImpl_MA::UnregisterInMemoryFile(Audio::SATLAudioF
     {
         return EAudioRequestStatus::Failure;
     }
-    ma_resource_manager_data_source_uninit(it->second.get());
-    ma_resource_manager_unregister_data(m_resourceManager.get(), it->first.c_str());
+    auto res = ma_resource_manager_data_source_uninit(it->second.get());
+    AZ_Assert(res == MA_SUCCESS, "Error uninitializing resource manager data source: %s", data->m_audioFilePath.c_str());
+    res = ma_resource_manager_unregister_data(m_resourceManager.get(), it->first.c_str());
+    AZ_Assert(res == MA_SUCCESS, "Error trying to unregister data from Resource Manager: %s", it->first.c_str());
     m_audioSources.erase(it);
 
     return EAudioRequestStatus::Success;
@@ -551,7 +440,8 @@ const char * const AudioSystemImpl_MA::GetAudioFileLocation(Audio::SATLAudioFile
     else
     {
         return Config::AudioFilesPath.c_str();
-    }}
+    }
+}
 
 IATLTriggerImplData *AudioSystemImpl_MA::NewAudioTriggerImplData(const AZ::rapidxml::xml_node<char> *audioTriggerNode)
 {
@@ -773,17 +663,17 @@ void AudioSystemImpl_MA::DestroyAudioSource(Audio::TAudioSourceId sourceId)
 
 void AudioSystemImpl_MA::SetPanningMode(Audio::PanningMode mode)
 {
-
+    //Not available in MiniAudio.
 }
 
 void AudioSystemImpl_MA::OnAudioSystemLoseFocus()
 {
-
+    ma_engine_stop(m_engine.get());
 }
 
 void AudioSystemImpl_MA::OnAudioSystemGetFocus()
 {
-
+    ma_engine_start(m_engine.get());
 }
 
 void AudioSystemImpl_MA::OnAudioSystemMuteAll()
@@ -804,23 +694,6 @@ void AudioSystemImpl_MA::OnAudioSystemRefresh()
 
 void AudioSystemImpl_MA::CheckObjectForExpiredMASounds(SATLAudioObjectData_MA &audioObj)
 {
-    AZStd::vector<decltype(audioObj.m_activeMASounds)::iterator> iterators;
-    iterators.reserve(audioObj.m_activeMASounds.size());
-
-    for(auto it = audioObj.m_activeMASounds.begin(); it != audioObj.m_activeMASounds.end(); ++it)
-    {
-        if(!ma_sound_is_playing(it->second.m_sound) && !it->second.m_isPaused)
-        {
-            iterators.push_back(it);
-        }
-    }
-
-    for(auto it : iterators)
-    {
-        ma_sound_uninit(it->second.m_sound);
-        azdestroy(it->second.m_sound, Audio::AudioImplAllocator, ma_sound);
-        audioObj.m_activeMASounds.erase(it);
-    }
 }
 
 }
