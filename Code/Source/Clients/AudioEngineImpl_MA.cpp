@@ -231,19 +231,35 @@ EAudioRequestStatus AudioSystemImpl_MA::UnprepareTriggerAsync(Audio::IATLAudioOb
 
 EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectData *objectData, const Audio::IATLTriggerImplData *triggerData, Audio::IATLEventData *eventData, const Audio::SATLSourceData *sourceData)
 {
+    AZ_Info(Constants::LogWindow, "Trying Activating Trigger");
     auto object   = static_cast<SATLAudioObjectData_MA*>(objectData);
     auto trigger  = static_cast<const SATLTriggerImplData_MA*>(triggerData);
     auto event    = static_cast<SATLEventData_MA*>(eventData);
 
     if(!object || !trigger || !event)
     {
+        AZ_Warning(Constants::LogWindow, false, "Activating Trigger becaause one of the following objects failed typecast: object, trigger or event");
         return EAudioRequestStatus::Failure;
     }
 
     auto audioSrcIt = m_audioSources.find(trigger->m_audioFilePath);
     if(audioSrcIt == m_audioSources.end()) {
+        AZ_Warning(Constants::LogWindow, false, "We coudln't find audio source: %s", trigger->m_audioFilePath.c_str());
         return EAudioRequestStatus::Failure;
     }
+
+    ActiveMASoundData activeSoundData;
+    AZ_UNUSED(activeSoundData);
+    //ma_result res = ma_sound_init_from_data_source(m_engine.get(), audioSrcIt->second.get(), 0, nullptr, &activeSoundData.m_sound);
+    /*
+    if(res != MA_SUCCESS)
+    {
+        AZ_Error(Constants::LogWindow, false,
+                 "Error trying to initialize sound from source: %s for trigger: %s", audioSrcIt->first.c_str(), trigger->m_audioFilePath.c_str());
+        return EAudioRequestStatus::Failure;
+    }*/
+
+    AZ_Info(Constants::LogWindow, "Trigger executed!: %s", trigger->m_audioFilePath.c_str());
     return EAudioRequestStatus::Success;
 }
 
@@ -271,7 +287,7 @@ EAudioRequestStatus AudioSystemImpl_MA::SetPosition(Audio::IATLAudioObjectData *
 
     for(auto& pair : object->m_activeMASounds)
     {
-        ma_sound_set_position(pair.second.m_sound, posVec.GetX(), posVec.GetY(), posVec.GetZ());
+        ma_sound_set_position(&pair.second.m_sound, posVec.GetX(), posVec.GetY(), posVec.GetZ());
     }
 
     return EAudioRequestStatus::Success;
@@ -324,7 +340,7 @@ EAudioRequestStatus AudioSystemImpl_MA::RegisterInMemoryFile(Audio::SATLAudioFil
     if(audioFileEntry)
     {
         auto implData = static_cast<SATLAudioFileEntryData_MA*>(audioFileEntry->pImplData);
-        if(implData)
+        if(!implData)
         {
             return EAudioRequestStatus::Failure;
         }
@@ -342,6 +358,7 @@ EAudioRequestStatus AudioSystemImpl_MA::RegisterInMemoryFile(Audio::SATLAudioFil
 
         if(result != MA_SUCCESS)
         {
+            AZ_Error(Constants::LogWindow, false, "ma_resource_manager_register_encoded_data failed to register encoded '%s', code: %d", implData->m_audioFilePath.c_str(), result);
             return EAudioRequestStatus::Failure;
         }
 
@@ -354,9 +371,11 @@ EAudioRequestStatus AudioSystemImpl_MA::RegisterInMemoryFile(Audio::SATLAudioFil
                     audioSource.get());
 
         if(result != MA_SUCCESS) {
+            AZ_Error(Constants::LogWindow, false, "ma_resource_manager_data_source_init failed to init for '%s', code: %d", implData->m_audioFilePath.c_str(), result);
             return EAudioRequestStatus::Failure;
         }
 
+        AZ_Info(Constants::LogWindow, "Audio File '%s' loaded into memory!", implData->m_audioFilePath.c_str());
         m_audioSources.emplace(implData->m_audioFilePath, AZStd::move(audioSource));
         return EAudioRequestStatus::Success;
     }

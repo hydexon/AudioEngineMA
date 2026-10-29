@@ -214,7 +214,6 @@ namespace AudioEngineMA
 
         float m_globalVolume = 1.0f;
 
-        //OLD SYSTEM.
         AZStd::unordered_map<AZ::IO::FixedMaxPath, AudioSourcePtr> m_audioSources;
         AZStd::unordered_set<AudioObjectPtr> m_audioObjects;
 
@@ -222,7 +221,6 @@ namespace AudioEngineMA
         //Listeners:
         AZStd::vector<int> m_availableListeners;
         void CheckObjectForExpiredMASounds(SATLAudioObjectData_MA& audioObj);
-        //END OF THE OLD SYSTEM.
     };
 
 }
