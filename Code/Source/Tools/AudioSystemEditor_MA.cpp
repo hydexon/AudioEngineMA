@@ -11,6 +11,8 @@
 #include "../Clients/Common_MA.h"
 
 #include "SoundGroupManagerForm.h"
+#include "ConnectionWidgets/AudioFileToTriggerParamsWidget.h"
+
 #include <QtViewPaneManager.h>
 
 using namespace AudioControls;
@@ -172,9 +174,31 @@ AudioControls::TConnectionPtr CAudioSystemEditor_MiniAudio::CreateConnectionToCo
         return nullptr;
     }
 
-    middlewareControl->SetConnected(true);
-    ++m_connectionsByID[middlewareControl->GetId()];
-    return AZStd::make_shared<IAudioConnection>(middlewareControl->GetId());
+    TConnectionPtr connection;
+    switch(middlewareControl->GetType())
+    {
+    case MAControlTypes::AudioFile: {
+        switch(atlControlType)
+        {
+        case AudioControls::eACET_TRIGGER:
+            connection = AZStd::make_shared<AudioFileToTriggerConnection>(middlewareControl->GetId());
+            break;
+        case AudioControls::eACET_PRELOAD:
+            connection = AZStd::make_shared<IAudioConnection>(middlewareControl->GetId());
+            break;
+        default: break;
+        }
+    }
+        //TODO MAControlTypes::RTPC, and friends.
+    default: break;
+    }
+
+    if(connection)
+    {
+        middlewareControl->SetConnected(true);
+        ++m_connectionsByID[middlewareControl->GetId()];
+    }
+    return connection;
 }
 
 AudioControls::TConnectionPtr CAudioSystemEditor_MiniAudio::CreateConnectionFromXMLNode(AZ::rapidxml::xml_node<char> *node, AudioControls::EACEControlType atlControlType)
@@ -211,9 +235,24 @@ AudioControls::TConnectionPtr CAudioSystemEditor_MiniAudio::CreateConnectionFrom
             control->SetPlaceholder(true);
         }
 
-        //TODO switch(atlControlType)
-        connection = AZStd::make_shared<IAudioConnection>(control->GetId());
+        switch(atlControlType)
+        {
+        case AudioControls::eACET_TRIGGER: {
+            auto conn = AZStd::make_shared<AudioFileToTriggerConnection>(control->GetId());
+            conn->m_params.ReadFromXML(*node);
+            connection = conn;
+            break;
+        }
+        case AudioControls::eACET_PRELOAD: {
+            auto conn = AZStd::make_shared<IAudioConnection>(control->GetId());
+            connection = conn;
+        }
+        default:
+            return nullptr;
+        }
     }
+
+    //TODO: Connections globalrtpcs, switches and states, maybe environment?
 
     return connection;
 }
@@ -242,6 +281,18 @@ AZ::rapidxml::xml_node<char> *CAudioSystemEditor_MiniAudio::CreateXMLNodeFromCon
 
         attr = xmlAlloc.allocate_attribute(MAXMLTags::AudioFileLocalizedAttr, xmlAlloc.allocate_string(control->IsLocalized() ? "true" : "false"));
         connNode->append_attribute(attr);
+
+        switch(atlControlType) {
+        case AudioControls::eACET_TRIGGER: {
+            auto conn = static_cast<const AudioFileToTriggerConnection*>(connection.get());
+            conn->m_params.WriteToXML(*connNode, xmlAlloc);
+            break;
+        }
+        case AudioControls::eACET_PRELOAD: break;
+            //TODO, the rest of ATL control types.
+        default:
+            return nullptr;
+        }
     }
     else
     {
@@ -287,6 +338,35 @@ AZ::IO::FixedMaxPath CAudioSystemEditor_MiniAudio::GetDataPath() const
 void CAudioSystemEditor_MiniAudio::DataSaved()
 {
 
+}
+
+QWidget *CAudioSystemEditor_MiniAudio::CreateConnectionPropertiesWidget(const AudioControls::TConnectionPtr connection, AudioControls::EACEControlType atlControlType)
+{
+    if(!connection)
+    {
+        return nullptr;
+    }
+
+    auto control = GetControl(connection->GetID());
+    if(!control)
+    {
+        return nullptr;
+    }
+
+    switch(control->GetType())
+    {
+    case MAControlTypes::AudioFile:
+    {
+        switch(atlControlType) {
+        case AudioControls::eACET_TRIGGER:
+            return new AudioFileToTriggerParamsWidget(connection);
+        default:
+            return nullptr;
+        }
+    }
+    default:
+        return nullptr;
+    }
 }
 
 AudioControls::IAudioSystemControl *CAudioSystemEditor_MiniAudio::GetControlByName(AZStd::string name, bool isLocalized, AudioControls::IAudioSystemControl *parent) const

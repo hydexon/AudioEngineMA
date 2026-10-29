@@ -140,6 +140,7 @@ if(PAL_TRAIT_BUILD_HOST_TOOLS)
                 Include
                 Source
                 Source/Tools/
+                Source/Tools/ConnectionWidgets
         BUILD_DEPENDENCIES
             PUBLIC
                 AZ::AzToolsFramework

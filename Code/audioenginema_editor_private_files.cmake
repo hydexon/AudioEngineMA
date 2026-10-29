@@ -11,4 +11,8 @@ set(FILES
     Source/Tools/SoundGroupManagerForm.cpp
     Source/Tools/SoundGroupManagerForm.h
     Source/Tools/SoundGroupManagerForm.ui
+    Source/Tools/ConnectionWidgets/AudioFileToTriggerParamsWidget.cpp
+    Source/Tools/ConnectionWidgets/AudioFileToTriggerParamsWidget.h
+    Source/Tools/ConnectionWidgets/AudioFileToTriggerParamsWidget.ui
+
 )

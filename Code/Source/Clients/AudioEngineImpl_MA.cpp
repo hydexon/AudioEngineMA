@@ -248,18 +248,21 @@ EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectDa
         return EAudioRequestStatus::Failure;
     }
 
-    ActiveMASoundData activeSoundData;
-    AZ_UNUSED(activeSoundData);
-    //ma_result res = ma_sound_init_from_data_source(m_engine.get(), audioSrcIt->second.get(), 0, nullptr, &activeSoundData.m_sound);
-    /*
-    if(res != MA_SUCCESS)
-    {
-        AZ_Error(Constants::LogWindow, false,
-                 "Error trying to initialize sound from source: %s for trigger: %s", audioSrcIt->first.c_str(), trigger->m_audioFilePath.c_str());
-        return EAudioRequestStatus::Failure;
-    }*/
-
     AZ_Info(Constants::LogWindow, "Trigger executed!: %s", trigger->m_audioFilePath.c_str());
+
+    switch(trigger->m_audioTriggerParams.m_soundAction)
+    {
+    case SoundAction::Start: {
+
+    }
+    case SoundAction::Stop:
+    case SoundAction::Pause:
+    case SoundAction::Resume:
+        break;
+    default:
+        return EAudioRequestStatus::Failure;
+    }
+
     return EAudioRequestStatus::Success;
 }
 

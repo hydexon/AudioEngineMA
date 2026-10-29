@@ -28,7 +28,7 @@ namespace AudioEngineMA
         AZStd::string GetName() const override;
         AZ::IO::FixedMaxPath GetDataPath() const override;
         void DataSaved() override;
-
+        QWidget* CreateConnectionPropertiesWidget(const AudioControls::TConnectionPtr connection, AudioControls::EACEControlType atlControlType) override;
     private:
         AZStd::string m_currentLanguageName;
         AudioControls::IAudioSystemControl m_rootControl;
