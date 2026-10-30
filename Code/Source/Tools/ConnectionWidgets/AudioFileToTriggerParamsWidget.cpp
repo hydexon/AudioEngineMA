@@ -16,6 +16,9 @@ AudioFileToTriggerParamsWidget::AudioFileToTriggerParamsWidget(AudioControls::TC
     AzQtComponents::CheckBox::applyToggleSwitchStyle(ui->chkBox_loop);
     AzQtComponents::CheckBox::applyToggleSwitchStyle(ui->chkBox_spatialization);
 
+    ui->dsb_maxDistance->setMaximum(DBL_MAX);
+    ui->dsb_minDistance->setMaximum(DBL_MAX);
+
     connect(ui->cb_SoundAction, &QComboBox::currentIndexChanged, this, &AudioFileToTriggerParamsWidget::OnSoundActionChanged);
     connect(ui->cb_SoundAction, &QComboBox::currentIndexChanged, this, &AudioFileToTriggerParamsWidget::UpdateConnectionFromWidgets);
     //TODO: SoundGroup.

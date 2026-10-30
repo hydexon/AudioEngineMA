@@ -5,6 +5,7 @@
 
 #include "Common_MA.h"
 #include <miniaudio.h>
+#include <float.h>
 
 namespace AudioEngineMA
 {
@@ -101,23 +102,23 @@ namespace AudioEngineMA
 
         AZ::Name m_soundGroupName = AZ::Name(Constants::MasterGroupName);
         SoundAction::Type m_soundAction = SoundAction::Type::Start;
-        AttenuationMode::Type m_attenuationMode = AttenuationMode::Type::None;
+        AttenuationMode::Type m_attenuationMode = AttenuationMode::Type::Inverse;
         PanMode::Type m_panMode = PanMode::Balance;
         PositioningMode::Type m_positioning = PositioningMode::Absolute;
-        float m_rolloff = 0.0f;
+        float m_rolloff = 1.0f;
         float m_pitch = 1.0f;
         float m_pan = 0.0f;
-        float m_coneinnerAngle = 0.0f;
-        float m_coneOuterAngle = 0.0f;
-        float m_coneOuterGrain = 0.0f;
-        float m_minDistance = 3.0f;
-        float m_maxDistance = 3.0f;
-        float m_dopplerFactor = 0.0f;
+        float m_coneinnerAngle = (2 * 3.14159265358979323846264f);
+        float m_coneOuterAngle = (2 * 3.14159265358979323846264f);
+        float m_coneOuterGrain = 1.0f;
+        float m_minDistance = 1.0f;
+        float m_maxDistance = FLT_MAX;
+        float m_dopplerFactor = 1.0f;
         float m_volume = 1.0f;
-        float m_minGains = 0.0f;
+        float m_minGains = 0.1f;
         float m_maxGains = 1.0f;
         bool m_looping = false;
-        bool m_spatialization = false;
+        bool m_spatialization = true;
     };
 
 }

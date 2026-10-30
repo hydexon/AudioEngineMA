@@ -205,6 +205,7 @@ EAudioRequestStatus AudioSystemImpl_MA::UpdateAudioObject(Audio::IATLAudioObject
         return EAudioRequestStatus::Failure;
     }
 
+    //TODO: This should use a global deletion queue instead of deleting in the same object scope.?
     CheckObjectForExpiredMASounds(*static_cast<SATLAudioObjectData_MA*>(objectData));
     return EAudioRequestStatus::Success;
 }
@@ -256,6 +257,7 @@ EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectDa
     case SoundAction::Start: {
         ma_sound* sound = azcreate(ma_sound, (), Audio::AudioImplAllocator);
         ma_result res = ma_sound_init_from_data_source(m_engine.get(), audioSrcIt->second.get(), 0, nullptr, sound); //@TODO: sound groups!
+        ma_sound_seek_to_pcm_frame(sound, 0); //rewind it because the memory block
 
         if(res != MA_SUCCESS)
         {
@@ -294,6 +296,7 @@ EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectDa
         for(auto it = range.first; it != range.second; ++it)
         {
             ma_sound_stop(it->second.m_sound);
+            ma_sound_uninit(it->second.m_sound);
             azdestroy(it->second.m_sound, Audio::AudioImplAllocator);
         }
         object->m_activeMASounds.erase(audioFilePath);
@@ -349,7 +352,9 @@ EAudioRequestStatus AudioSystemImpl_MA::StopEvent(Audio::IATLAudioObjectData *ob
     {
         if(pair.second.m_sound == event->m_soundInstance)
         {
-            AZ_Trace(Constants::LogWindow, "Stopping Trigger: %s", pair.first.c_str());
+            AZ_Info(Constants::LogWindow, "Stopping Trigger: %s", pair.first.c_str());
+            ma_sound_stop(pair.second.m_sound);
+            ma_sound_uninit(pair.second.m_sound);
             azdestroy(pair.second.m_sound, Audio::AudioImplAllocator, ma_sound);
             object->m_activeMASounds.erase(pair.first);
             break;
@@ -367,10 +372,11 @@ EAudioRequestStatus AudioSystemImpl_MA::StopAllEvents(Audio::IATLAudioObjectData
         return EAudioRequestStatus::Failure;
     }
 
-    AZ_Trace(Constants::LogWindow, "Stopping all events!");
+    AZ_Info(Constants::LogWindow, "Stopping all events!");
     for(auto& pair : object->m_activeMASounds)
     {
         ma_sound_stop(pair.second.m_sound);
+        ma_sound_uninit(pair.second.m_sound);
         azdestroy(pair.second.m_sound, Audio::AudioImplAllocator, ma_sound);
     }
 
@@ -542,6 +548,7 @@ EAudioRequestStatus AudioSystemImpl_MA::ParseAudioFileEntry(const AZ::rapidxml::
             result = EAudioRequestStatus::Success;
         }
     }
+    AZ_Warning(Constants::LogWindow, result == EAudioRequestStatus::Success, "Failure trying to parse a data file entry node!");
     return result;
 }
 
@@ -826,16 +833,17 @@ void AudioSystemImpl_MA::CheckObjectForExpiredMASounds(SATLAudioObjectData_MA &a
         if(it->second.m_isPaused)
             continue;
 
-        bool isPlaying = ma_sound_is_playing(it->second.m_sound) == MA_TRUE;
         bool isAtEnd   = ma_sound_at_end(it->second.m_sound) == MA_TRUE;
 
-        if(isPlaying && isAtEnd)
+        if(isAtEnd)
         {
             iterators.push_back(it);
         }
     }
 
-    AZ_Trace(Constants::LogWindow, "Found %d expired ma_sounds ready for deletion/cleanup", iterators.size());
+    if(!iterators.empty())
+        AZ_Info(Constants::LogWindow, "Found %d expired ma_sounds ready for deletion/cleanup", iterators.size());
+
     for(auto it : iterators)
     {
         ma_sound_uninit(it->second.m_sound);

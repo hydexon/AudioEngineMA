@@ -246,6 +246,7 @@ AudioControls::TConnectionPtr CAudioSystemEditor_MiniAudio::CreateConnectionFrom
         case AudioControls::eACET_PRELOAD: {
             auto conn = AZStd::make_shared<IAudioConnection>(control->GetId());
             connection = conn;
+            break;
         }
         default:
             return nullptr;
