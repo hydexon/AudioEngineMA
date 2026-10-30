@@ -179,6 +179,20 @@ EAudioRequestStatus AudioSystemImpl_MA::Release()
 
 EAudioRequestStatus AudioSystemImpl_MA::StopAllSounds()
 {
+    for(auto& object : m_audioObjects)
+    {
+        for(auto& activeSnd : object->m_activeMASounds)
+        {
+            ma_sound_stop(activeSnd.second.m_sound);
+            ma_sound_uninit(activeSnd.second.m_sound);
+            azdestroy(activeSnd.second.m_sound, Audio::AudioImplAllocator, ma_sound);
+
+            ma_decoder_uninit(activeSnd.second.m_decoder);
+            azdestroy(activeSnd.second.m_sound, Audio::AudioImplAllocator, ma_decoder);
+        }
+        object->m_activeMASounds.clear();
+    }
+
     return EAudioRequestStatus::Success;
 }
 
@@ -250,21 +264,37 @@ EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectDa
     }
 
     AZ_Info(Constants::LogWindow, "Trigger executed!: %s", trigger->m_audioFilePath.c_str());
-
     auto audioFilePath = audioSrcIt->first;
+    AudioSourceBuffer& dataBuffer = audioSrcIt->second;
+
     switch(trigger->m_audioTriggerParams.m_soundAction)
     {
     case SoundAction::Start: {
+        ma_decoder* decoder = azcreate(ma_decoder, (), Audio::AudioImplAllocator);
         ma_sound* sound = azcreate(ma_sound, (), Audio::AudioImplAllocator);
-        ma_result res = ma_sound_init_from_data_source(m_engine.get(), audioSrcIt->second.get(), 0, nullptr, sound); //@TODO: sound groups!
-        ma_sound_seek_to_pcm_frame(sound, 0); //rewind it because the memory block
+
+        ma_result res = ma_decoder_init_memory(dataBuffer.first, dataBuffer.second, nullptr, decoder);
+        if(res != MA_SUCCESS)
+        {
+            AZ_Error(Constants::LogWindow, false, "Error trying to initialize decoder instance for '%s', code: %d", trigger->m_audioFilePath.c_str(), res);
+            azdestroy(decoder, Audio::AudioImplAllocator, ma_decoder);
+            azdestroy(sound, Audio::AudioImplAllocator, ma_sound);
+
+            return EAudioRequestStatus::Failure;
+        }
+
+        res = ma_sound_init_from_data_source(m_engine.get(), decoder, MA_SOUND_FLAG_DECODE, nullptr, sound); //@TODO: sound groups!
 
         if(res != MA_SUCCESS)
         {
             AZ_Error(Constants::LogWindow, false, "Error trying to initialize sound instance for '%s', code: %d", trigger->m_audioFilePath.c_str(), res);
+            azdestroy(decoder, Audio::AudioImplAllocator, ma_decoder);
+            azdestroy(sound, Audio::AudioImplAllocator, ma_sound);
+
             return EAudioRequestStatus::Failure;
         }
 
+        ma_sound_seek_to_pcm_frame(sound, 0);
         {
             ma_sound_set_spatialization_enabled(sound, trigger->m_audioTriggerParams.m_spatialization ? MA_TRUE : MA_FALSE);
             ma_sound_set_attenuation_model(sound, AttenuationMode::ToMAModel(trigger->m_audioTriggerParams.m_attenuationMode));
@@ -288,7 +318,7 @@ EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectDa
         ma_sound_start(sound);
         event->m_isPlayingEvent = true;
         event->m_soundInstance = sound;
-        object->m_activeMASounds.emplace(audioFilePath, ActiveMASoundData { false, sound, trigger->m_audioTriggerParams.m_volume });
+        object->m_activeMASounds.emplace(audioFilePath, ActiveMASoundData { false, decoder, sound, trigger->m_audioTriggerParams.m_volume });
         break;
     }
     case SoundAction::Stop: {
@@ -297,7 +327,10 @@ EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectDa
         {
             ma_sound_stop(it->second.m_sound);
             ma_sound_uninit(it->second.m_sound);
-            azdestroy(it->second.m_sound, Audio::AudioImplAllocator);
+            azdestroy(it->second.m_sound, Audio::AudioImplAllocator, ma_sound);
+
+            ma_decoder_uninit(it->second.m_decoder);
+            azdestroy(it->second.m_decoder, Audio::AudioImplAllocator, ma_decoder);
         }
         object->m_activeMASounds.erase(audioFilePath);
         break;
@@ -356,6 +389,10 @@ EAudioRequestStatus AudioSystemImpl_MA::StopEvent(Audio::IATLAudioObjectData *ob
             ma_sound_stop(pair.second.m_sound);
             ma_sound_uninit(pair.second.m_sound);
             azdestroy(pair.second.m_sound, Audio::AudioImplAllocator, ma_sound);
+
+            ma_decoder_uninit(pair.second.m_decoder);
+            azdestroy(pair.second.m_decoder);
+
             object->m_activeMASounds.erase(pair.first);
             break;
         }
@@ -372,12 +409,15 @@ EAudioRequestStatus AudioSystemImpl_MA::StopAllEvents(Audio::IATLAudioObjectData
         return EAudioRequestStatus::Failure;
     }
 
-    AZ_Info(Constants::LogWindow, "Stopping all events!");
+    AZ_Info(Constants::LogWindow, "Stopping all events of objects!");
     for(auto& pair : object->m_activeMASounds)
     {
         ma_sound_stop(pair.second.m_sound);
         ma_sound_uninit(pair.second.m_sound);
         azdestroy(pair.second.m_sound, Audio::AudioImplAllocator, ma_sound);
+
+        ma_decoder_uninit(pair.second.m_decoder);
+        azdestroy(pair.second.m_decoder);
     }
 
     object->m_activeMASounds.clear();
@@ -456,38 +496,9 @@ EAudioRequestStatus AudioSystemImpl_MA::RegisterInMemoryFile(Audio::SATLAudioFil
             return EAudioRequestStatus::Failure;
         }
 
-        AudioSourcePtr audioSource(azcreate(ma_resource_manager_data_source,(), Audio::AudioImplAllocator));
-        if(!audioSource)
-        {
-            return EAudioRequestStatus::Failure;
-        }
-
-        ma_result result = ma_resource_manager_register_encoded_data(m_resourceManager.get(),
-                                                                     implData->m_audioFilePath.c_str(),
-                                                                     audioFileEntry->pFileData,
-                                                                     audioFileEntry->nSize);
-
-        if(result != MA_SUCCESS)
-        {
-            AZ_Error(Constants::LogWindow, false, "ma_resource_manager_register_encoded_data failed to register encoded '%s', code: %d", implData->m_audioFilePath.c_str(), result);
-            return EAudioRequestStatus::Failure;
-        }
-
-
-        result = ma_resource_manager_data_source_init(
-                    m_resourceManager.get(),
-                    implData->m_audioFilePath.c_str(),
-                    MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_DECODE,
-                    NULL,
-                    audioSource.get());
-
-        if(result != MA_SUCCESS) {
-            AZ_Error(Constants::LogWindow, false, "ma_resource_manager_data_source_init failed to init for '%s', code: %d", implData->m_audioFilePath.c_str(), result);
-            return EAudioRequestStatus::Failure;
-        }
-
+        AudioSourceBuffer audioBuffer(audioFileEntry->pFileData, audioFileEntry->nSize);
         AZ_Info(Constants::LogWindow, "Audio File '%s' loaded into memory!", implData->m_audioFilePath.c_str());
-        m_audioSources.emplace(implData->m_audioFilePath, AZStd::move(audioSource));
+        m_audioSources.emplace(implData->m_audioFilePath, AZStd::move(audioBuffer));
         return EAudioRequestStatus::Success;
     }
     return EAudioRequestStatus::Failure;
@@ -506,10 +517,8 @@ EAudioRequestStatus AudioSystemImpl_MA::UnregisterInMemoryFile(Audio::SATLAudioF
     {
         return EAudioRequestStatus::Failure;
     }
-    auto res = ma_resource_manager_data_source_uninit(it->second.get());
-    AZ_Assert(res == MA_SUCCESS, "Error uninitializing resource manager data source: %s", data->m_audioFilePath.c_str());
-    res = ma_resource_manager_unregister_data(m_resourceManager.get(), it->first.c_str());
-    AZ_Assert(res == MA_SUCCESS, "Error trying to unregister data from Resource Manager: %s", it->first.c_str());
+
+
     m_audioSources.erase(it);
 
     return EAudioRequestStatus::Success;
@@ -847,7 +856,11 @@ void AudioSystemImpl_MA::CheckObjectForExpiredMASounds(SATLAudioObjectData_MA &a
     for(auto it : iterators)
     {
         ma_sound_uninit(it->second.m_sound);
-        azdestroy(it->second.m_sound, Audio::AudioImplAllocator);
+        azdestroy(it->second.m_sound, Audio::AudioImplAllocator, ma_sound);
+
+        ma_decoder_uninit(it->second.m_decoder);
+        azdestroy(it->second.m_decoder, Audio::AudioImplAllocator, ma_decoder);
+
         audioObj.m_activeMASounds.erase(it);
     }
 }

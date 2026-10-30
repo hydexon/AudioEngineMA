@@ -18,7 +18,8 @@ struct SATLAudioFileEntryData_MA : Audio::IATLAudioFileEntryData
 
 struct ActiveMASoundData {
     bool m_isPaused = false;
-    ma_sound* m_sound;
+    ma_decoder* m_decoder = nullptr;
+    ma_sound* m_sound = nullptr;
     float m_volume = 1.0f;
 };
 
@@ -29,6 +30,8 @@ struct SATLAudioObjectData_MA : public Audio::IATLAudioObjectData
 
     AZ::Vector3 m_position;
     AZStd::unordered_multimap<AZ::IO::FixedMaxPath, ActiveMASoundData> m_activeMASounds;
+
+    void ClearAll();
 };
 
 struct SATLTriggerImplData_MA : public Audio::IATLTriggerImplData

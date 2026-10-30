@@ -203,7 +203,7 @@ namespace AudioEngineMA
         };
 
         using AudioObjectPtr = AZStd::unique_ptr<SATLAudioObjectData_MA, AudioDeleter<SATLAudioObjectData_MA>>;
-        using AudioSourcePtr = AZStd::unique_ptr<ma_resource_manager_data_source, AudioDeleter<ma_resource_manager_data_source>>;
+        using AudioSourceBuffer = AZStd::pair<void*, size_t>;
 
         std::unique_ptr<ma_log> m_log;
         std::unique_ptr<ma_engine> m_engine;
@@ -214,7 +214,7 @@ namespace AudioEngineMA
 
         float m_globalVolume = 1.0f;
 
-        AZStd::unordered_map<AZ::IO::FixedMaxPath, AudioSourcePtr> m_audioSources;
+        AZStd::unordered_map<AZ::IO::FixedMaxPath, AudioSourceBuffer> m_audioSources;
         AZStd::unordered_set<AudioObjectPtr> m_audioObjects;
 
         AZStd::unique_ptr<SoundGroupManager> m_soundGroupsManager;
