@@ -24,7 +24,12 @@ AudioFileToTriggerParamsWidget::AudioFileToTriggerParamsWidget(AudioControls::TC
     connect(ui->chkBox_spatialization, &QCheckBox::checkStateChanged, this, &AudioFileToTriggerParamsWidget::UpdateConnectionFromWidgets);
     connect(ui->cb_attenuationMode, &QComboBox::currentIndexChanged, this, &AudioFileToTriggerParamsWidget::UpdateConnectionFromWidgets);
     connect(ui->cb_panMode, &QComboBox::currentIndexChanged, this, &AudioFileToTriggerParamsWidget::UpdateConnectionFromWidgets);
+    connect(ui->cb_positioning, &QComboBox::currentIndexChanged, this, &AudioFileToTriggerParamsWidget::UpdateConnectionFromWidgets);
     connect(ui->dsb_rolloff, &QDoubleSpinBox::valueChanged, this, &AudioFileToTriggerParamsWidget::UpdateConnectionFromWidgets);
+    connect(ui->dsb_pan, &QDoubleSpinBox::valueChanged, this, &AudioFileToTriggerParamsWidget::UpdateConnectionFromWidgets);
+    connect(ui->dsb_pitch, &QDoubleSpinBox::valueChanged, this, &AudioFileToTriggerParamsWidget::UpdateConnectionFromWidgets);
+    connect(ui->dsb_gainsMin, &QDoubleSpinBox::valueChanged, this, &AudioFileToTriggerParamsWidget::UpdateConnectionFromWidgets);
+    connect(ui->dsb_gainsMax, &QDoubleSpinBox::valueChanged, this, &AudioFileToTriggerParamsWidget::UpdateConnectionFromWidgets);
     connect(ui->dsb_minDistance, &QDoubleSpinBox::valueChanged, this, &AudioFileToTriggerParamsWidget::UpdateConnectionFromWidgets);
     connect(ui->dsb_maxDistance, &QDoubleSpinBox::valueChanged, this, &AudioFileToTriggerParamsWidget::UpdateConnectionFromWidgets);
     connect(ui->dsb_innerAngle, &QDoubleSpinBox::valueChanged, this, &AudioFileToTriggerParamsWidget::UpdateConnectionFromWidgets);
@@ -59,7 +64,12 @@ void AudioFileToTriggerParamsWidget::UpdateConnectionFromWidgets()
     conn->m_params.m_spatialization = ui->chkBox_spatialization->isChecked();
     conn->m_params.m_attenuationMode = static_cast<AttenuationMode::Type>(ui->cb_attenuationMode->currentIndex());
     conn->m_params.m_panMode = static_cast<PanMode::Type>(ui->cb_panMode->currentIndex());
+    conn->m_params.m_positioning = static_cast<PositioningMode::Type>(ui->cb_positioning->currentIndex());
     conn->m_params.m_rolloff = ui->dsb_rolloff->value();
+    conn->m_params.m_pan = ui->dsb_pan->value();
+    conn->m_params.m_pitch = ui->dsb_pitch->value();
+    conn->m_params.m_minGains = ui->dsb_gainsMin->value();
+    conn->m_params.m_maxGains = ui->dsb_gainsMax->value();
     conn->m_params.m_minDistance = ui->dsb_minDistance->value();
     conn->m_params.m_maxDistance = ui->dsb_maxDistance->value();
     conn->m_params.m_coneinnerAngle = ui->dsb_innerAngle->value();
@@ -83,7 +93,12 @@ void AudioFileToTriggerParamsWidget::UpdateWidgetsFromConnection()
     ui->chkBox_spatialization->setChecked(conn->m_params.m_spatialization);
     ui->cb_attenuationMode->setCurrentIndex(conn->m_params.m_attenuationMode);
     ui->cb_panMode->setCurrentIndex(conn->m_params.m_panMode);
+    ui->cb_positioning->setCurrentIndex(conn->m_params.m_positioning);
     ui->dsb_rolloff->setValue(conn->m_params.m_rolloff);
+    ui->dsb_pan->setValue(conn->m_params.m_pan);
+    ui->dsb_pitch->setValue(conn->m_params.m_pitch);
+    ui->dsb_gainsMin->setValue(conn->m_params.m_minGains);
+    ui->dsb_gainsMax->setValue(conn->m_params.m_maxGains);
     ui->dsb_minDistance->setValue(conn->m_params.m_minDistance);
     ui->dsb_maxDistance->setValue(conn->m_params.m_maxDistance);
     ui->dsb_innerAngle->setValue(conn->m_params.m_coneinnerAngle);

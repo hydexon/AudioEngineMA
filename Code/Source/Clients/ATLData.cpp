@@ -104,6 +104,36 @@ ma_pan_mode PanMode::ToMA(Type type)
     return ma_pan_mode_balance;
 }
 
+const char *PositioningMode::ToString(Type type)
+{
+    static const char* strings[PositioningMode::Count] = { "Absolute", "Relative" };
+    return strings[type];
+}
+
+PositioningMode::Type PositioningMode::FromString(const char *str)
+{
+    if(AZ::StringFunc::Equal(str, "Absolute"))
+    {
+        return PositioningMode::Absolute;
+    }
+    else if(AZ::StringFunc::Equal(str, "Pan"))
+    {
+        return PositioningMode::Relative;
+    }
+
+    return PositioningMode::Absolute;
+
+}
+
+ma_positioning PositioningMode::ToMA(Type type)
+{
+    if(type == PositioningMode::Relative)
+        return ma_positioning_relative;
+
+    return ma_positioning_absolute;
+}
+
+
 void AudioFileTriggerParameters::ReadFromXML(const AZ::rapidxml::xml_node<char> &node)
 {
     auto triggerParamsNode = node.first_node(TagTriggerParams);
@@ -134,10 +164,30 @@ void AudioFileTriggerParameters::ReadFromXML(const AZ::rapidxml::xml_node<char> 
         m_panMode = PanMode::FromString(cnode->value());
     }
 
+    cnode = triggerParamsNode->first_node(PositioningMode::Tag);
+    if(cnode)
+    {
+        m_positioning = PositioningMode::FromString(cnode->value());
+    }
+
+
     cnode = triggerParamsNode->first_node(TagRolloff);
     if(cnode)
     {
         m_rolloff = AZ::StringFunc::ToFloat(cnode->value());
+    }
+
+    cnode = triggerParamsNode->first_node(TagPitch);
+    if(cnode)
+    {
+        m_pitch = AZ::StringFunc::ToFloat(cnode->value());
+    }
+
+
+    cnode = triggerParamsNode->first_node(TagPan);
+    if(cnode)
+    {
+        m_pan = AZ::StringFunc::ToFloat(cnode->value());
     }
 
     cnode = triggerParamsNode->first_node(TagDopplerFactor);
@@ -180,6 +230,23 @@ void AudioFileTriggerParameters::ReadFromXML(const AZ::rapidxml::xml_node<char> 
         }
     }
 
+    cnode = triggerParamsNode->first_node(TagGains);
+    if(cnode)
+    {
+        auto attr = cnode->first_attribute("Min");
+        if(attr)
+        {
+            m_minGains = AZ::StringFunc::ToFloat(attr->value());
+        }
+
+        attr = cnode->first_attribute("Max");
+        if(attr)
+        {
+            m_maxGains = AZ::StringFunc::ToFloat(attr->value());
+        }
+    }
+
+
     cnode = triggerParamsNode->first_node(TagCone);
     if(cnode)
     {
@@ -216,21 +283,27 @@ void AudioFileTriggerParameters::WriteToXML(AZ::rapidxml::xml_node<char> &node, 
         auto soundGrpNode  = xmlAlloc.allocate_node(AZ::rapidxml::node_element, TagGroupName, m_soundGroupName.GetCStr());
         auto attenModeNode = xmlAlloc.allocate_node(AZ::rapidxml::node_element, AttenuationMode::Tag, AttenuationMode::ToString(m_attenuationMode));
         auto panModeNode   = xmlAlloc.allocate_node(AZ::rapidxml::node_element, PanMode::Tag, PanMode::ToString(m_panMode));
+        auto posNode       = xmlAlloc.allocate_node(AZ::rapidxml::node_element, PositioningMode::Tag, PositioningMode::ToString(m_positioning));
         auto rolloffNode   = xmlAlloc.allocate_node(AZ::rapidxml::node_element, TagRolloff, xmlAlloc.allocate_string(AZStd::to_string(m_rolloff).c_str()));
         auto dopplerNode   = xmlAlloc.allocate_node(AZ::rapidxml::node_element, TagDopplerFactor, xmlAlloc.allocate_string(AZStd::to_string(m_dopplerFactor).c_str()));
         auto loopingNode   = xmlAlloc.allocate_node(AZ::rapidxml::node_element, TagLooping, xmlAlloc.allocate_string(AZStd::to_string(m_looping).c_str()));
         auto spatialNode   = xmlAlloc.allocate_node(AZ::rapidxml::node_element, TagSpatialization, xmlAlloc.allocate_string(AZStd::to_string(m_spatialization).c_str()));
         auto volumeNode    = xmlAlloc.allocate_node(AZ::rapidxml::node_element, TagVolumeLinear, xmlAlloc.allocate_string(AZStd::to_string(m_volume).c_str()));
+        auto panNode       = xmlAlloc.allocate_node(AZ::rapidxml::node_element, TagVolumeLinear, xmlAlloc.allocate_string(AZStd::to_string(m_pan).c_str()));
+        auto pitchNode     = xmlAlloc.allocate_node(AZ::rapidxml::node_element, TagVolumeLinear, xmlAlloc.allocate_string(AZStd::to_string(m_pitch).c_str()));
 
         subnode->append_node(actionNode);
         subnode->append_node(soundGrpNode);
         subnode->append_node(attenModeNode);
         subnode->append_node(panModeNode);
+        subnode->append_node(posNode);
         subnode->append_node(rolloffNode);
         subnode->append_node(dopplerNode);
         subnode->append_node(loopingNode);
         subnode->append_node(spatialNode);
         subnode->append_node(volumeNode);
+        subnode->append_node(panNode);
+        subnode->append_node(pitchNode);
     }
 
     {
@@ -257,6 +330,17 @@ void AudioFileTriggerParameters::WriteToXML(AZ::rapidxml::xml_node<char> &node, 
         attConeNode->append_attribute(attr);
 
         subnode->append_node(attConeNode);
+    }
+
+    {
+        auto gainsNode = xmlAlloc.allocate_node(AZ::rapidxml::node_element, TagGains);
+        auto attr = xmlAlloc.allocate_attribute("Min", xmlAlloc.allocate_string(AZStd::to_string(m_minGains).c_str()));
+        gainsNode->append_attribute(attr);
+
+        attr = xmlAlloc.allocate_attribute("Max", xmlAlloc.allocate_string(AZStd::to_string(m_maxGains).c_str()));
+        gainsNode->append_attribute(attr);
+
+        subnode->append_node(gainsNode);
     }
 
     node.append_node(subnode);

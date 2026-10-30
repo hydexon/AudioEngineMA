@@ -250,15 +250,76 @@ EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectDa
 
     AZ_Info(Constants::LogWindow, "Trigger executed!: %s", trigger->m_audioFilePath.c_str());
 
+    auto audioFilePath = audioSrcIt->first;
     switch(trigger->m_audioTriggerParams.m_soundAction)
     {
     case SoundAction::Start: {
+        ma_sound* sound = azcreate(ma_sound, (), Audio::AudioImplAllocator);
+        ma_result res = ma_sound_init_from_data_source(m_engine.get(), audioSrcIt->second.get(), 0, nullptr, sound); //@TODO: sound groups!
 
-    }
-    case SoundAction::Stop:
-    case SoundAction::Pause:
-    case SoundAction::Resume:
+        if(res != MA_SUCCESS)
+        {
+            AZ_Error(Constants::LogWindow, false, "Error trying to initialize sound instance for '%s', code: %d", trigger->m_audioFilePath.c_str(), res);
+            return EAudioRequestStatus::Failure;
+        }
+
+        {
+            ma_sound_set_spatialization_enabled(sound, trigger->m_audioTriggerParams.m_spatialization ? MA_TRUE : MA_FALSE);
+            ma_sound_set_attenuation_model(sound, AttenuationMode::ToMAModel(trigger->m_audioTriggerParams.m_attenuationMode));
+            ma_sound_set_pan_mode(sound, PanMode::ToMA(trigger->m_audioTriggerParams.m_panMode));
+            ma_sound_set_positioning(sound, PositioningMode::ToMA(trigger->m_audioTriggerParams.m_positioning));
+            ma_sound_set_pan(sound, trigger->m_audioTriggerParams.m_pan);
+            ma_sound_set_min_distance(sound, trigger->m_audioTriggerParams.m_minDistance);
+            ma_sound_set_max_distance(sound, trigger->m_audioTriggerParams.m_maxDistance);
+            ma_sound_set_cone(sound, trigger->m_audioTriggerParams.m_coneinnerAngle, trigger->m_audioTriggerParams.m_coneOuterAngle, trigger->m_audioTriggerParams.m_coneOuterGrain);
+            ma_sound_set_pitch(sound, trigger->m_audioTriggerParams.m_pitch);
+            ma_sound_set_doppler_factor(sound, trigger->m_audioTriggerParams.m_dopplerFactor);
+            ma_sound_set_looping(sound, trigger->m_audioTriggerParams.m_looping ? MA_TRUE : MA_FALSE);
+            ma_sound_set_volume(sound, trigger->m_audioTriggerParams.m_volume);
+            ma_sound_set_min_gain(sound, trigger->m_audioTriggerParams.m_minGains);
+            ma_sound_set_max_gain(sound, trigger->m_audioTriggerParams.m_maxGains);
+
+            auto posVec = object->m_position;
+            ma_sound_set_position(sound, posVec.GetX(), posVec.GetY(), posVec.GetZ());
+        }
+
+        ma_sound_start(sound);
+        event->m_isPlayingEvent = true;
+        event->m_soundInstance = sound;
+        object->m_activeMASounds.emplace(audioFilePath, ActiveMASoundData { false, sound, trigger->m_audioTriggerParams.m_volume });
         break;
+    }
+    case SoundAction::Stop: {
+        auto range = object->m_activeMASounds.equal_range(audioFilePath);
+        for(auto it = range.first; it != range.second; ++it)
+        {
+            ma_sound_stop(it->second.m_sound);
+            azdestroy(it->second.m_sound, Audio::AudioImplAllocator);
+        }
+        object->m_activeMASounds.erase(audioFilePath);
+        break;
+    }
+    case SoundAction::Pause: {
+        auto range = object->m_activeMASounds.equal_range(audioFilePath);
+        for(auto it = range.first; it != range.second; ++it)
+        {
+            ma_sound_stop(it->second.m_sound);
+            it->second.m_isPaused = true;
+        }
+        break;
+    }
+    case SoundAction::Resume: {
+        auto range = object->m_activeMASounds.equal_range(audioFilePath);
+        for(auto it = range.first; it != range.second; ++it)
+        {
+            if(!it->second.m_isPaused)
+                continue;
+
+            ma_sound_start(it->second.m_sound);
+            it->second.m_isPaused = false;
+        }
+        break;
+    }
     default:
         return EAudioRequestStatus::Failure;
     }
@@ -268,11 +329,52 @@ EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectDa
 
 EAudioRequestStatus AudioSystemImpl_MA::StopEvent(Audio::IATLAudioObjectData *objectData, const Audio::IATLEventData *eventData)
 {
+    auto object = static_cast<SATLAudioObjectData_MA*>(objectData);
+    auto event  = static_cast<const SATLEventData_MA*>(eventData);
+
+    if(!object || !event)
+    {
+        return EAudioRequestStatus::Failure;
+    }
+
+    if(!event->m_isPlayingEvent)
+    {
+        return EAudioRequestStatus::Success;
+    }
+
+    AZ_Trace(Constants::LogWindow, "Trying to stop event... ");
+    ma_sound_stop(event->m_soundInstance);
+
+    for(auto& pair : object->m_activeMASounds)
+    {
+        if(pair.second.m_sound == event->m_soundInstance)
+        {
+            AZ_Trace(Constants::LogWindow, "Stopping Trigger: %s", pair.first.c_str());
+            azdestroy(pair.second.m_sound, Audio::AudioImplAllocator, ma_sound);
+            object->m_activeMASounds.erase(pair.first);
+            break;
+        }
+    }
+
     return EAudioRequestStatus::Success;
 }
 
 EAudioRequestStatus AudioSystemImpl_MA::StopAllEvents(Audio::IATLAudioObjectData *objectData)
 {
+    auto object = static_cast<SATLAudioObjectData_MA*>(objectData);
+    if(!object)
+    {
+        return EAudioRequestStatus::Failure;
+    }
+
+    AZ_Trace(Constants::LogWindow, "Stopping all events!");
+    for(auto& pair : object->m_activeMASounds)
+    {
+        ma_sound_stop(pair.second.m_sound);
+        azdestroy(pair.second.m_sound, Audio::AudioImplAllocator, ma_sound);
+    }
+
+    object->m_activeMASounds.clear();
     return EAudioRequestStatus::Success;
 }
 
@@ -290,7 +392,7 @@ EAudioRequestStatus AudioSystemImpl_MA::SetPosition(Audio::IATLAudioObjectData *
 
     for(auto& pair : object->m_activeMASounds)
     {
-        ma_sound_set_position(&pair.second.m_sound, posVec.GetX(), posVec.GetY(), posVec.GetZ());
+        ma_sound_set_position(pair.second.m_sound, posVec.GetX(), posVec.GetY(), posVec.GetZ());
     }
 
     return EAudioRequestStatus::Success;
@@ -716,6 +818,30 @@ void AudioSystemImpl_MA::OnAudioSystemRefresh()
 
 void AudioSystemImpl_MA::CheckObjectForExpiredMASounds(SATLAudioObjectData_MA &audioObj)
 {
+    AZStd::vector<decltype(audioObj.m_activeMASounds)::iterator> iterators;
+    iterators.reserve(audioObj.m_activeMASounds.size());
+
+    for(auto it = audioObj.m_activeMASounds.begin(); it != audioObj.m_activeMASounds.end(); ++it)
+    {
+        if(it->second.m_isPaused)
+            continue;
+
+        bool isPlaying = ma_sound_is_playing(it->second.m_sound) == MA_TRUE;
+        bool isAtEnd   = ma_sound_at_end(it->second.m_sound) == MA_TRUE;
+
+        if(isPlaying && isAtEnd)
+        {
+            iterators.push_back(it);
+        }
+    }
+
+    AZ_Trace(Constants::LogWindow, "Found %d expired ma_sounds ready for deletion/cleanup", iterators.size());
+    for(auto it : iterators)
+    {
+        ma_sound_uninit(it->second.m_sound);
+        azdestroy(it->second.m_sound, Audio::AudioImplAllocator);
+        audioObj.m_activeMASounds.erase(it);
+    }
 }
 
 }

@@ -61,6 +61,22 @@ namespace AudioEngineMA
         ma_pan_mode ToMA(Type type);
     }
 
+    namespace PositioningMode
+    {
+        enum Type
+        {
+            Absolute,
+            Relative,
+            Count
+        };
+
+        constexpr static const char* Tag = "PositioningMode";
+
+        const char* ToString(Type type);
+        Type FromString(const char* str);
+        ma_positioning ToMA(Type type);
+    }
+
     struct AudioFileTriggerParameters
     {
         AudioFileTriggerParameters() = default;
@@ -73,18 +89,24 @@ namespace AudioEngineMA
         constexpr static const char* TagGroupName   = "SoundGroupName";
         constexpr static const char* TagSoundAction = "SoundAction";
         constexpr static const char* TagRolloff  = "Rolloff";
+        constexpr static const char* TagPitch    = "Pitch";
         constexpr static const char* TagDistances = "Distances"; //Takes m_minDistance, m_maxDistance
         constexpr static const char* TagCone = "AttenuationCone"; //Takes m_cone* variables.
         constexpr static const char* TagDopplerFactor = "DopplerFactor";
         constexpr static const char* TagLooping = "Looping";
         constexpr static const char* TagSpatialization = "Spatialization";
         constexpr static const char* TagVolumeLinear = "Volume";
+        constexpr static const char* TagGains = "Gains";
+        constexpr static const char* TagPan = "Pan";
 
         AZ::Name m_soundGroupName = AZ::Name(Constants::MasterGroupName);
         SoundAction::Type m_soundAction = SoundAction::Type::Start;
         AttenuationMode::Type m_attenuationMode = AttenuationMode::Type::None;
         PanMode::Type m_panMode = PanMode::Balance;
+        PositioningMode::Type m_positioning = PositioningMode::Absolute;
         float m_rolloff = 0.0f;
+        float m_pitch = 1.0f;
+        float m_pan = 0.0f;
         float m_coneinnerAngle = 0.0f;
         float m_coneOuterAngle = 0.0f;
         float m_coneOuterGrain = 0.0f;
@@ -92,6 +114,8 @@ namespace AudioEngineMA
         float m_maxDistance = 3.0f;
         float m_dopplerFactor = 0.0f;
         float m_volume = 1.0f;
+        float m_minGains = 0.0f;
+        float m_maxGains = 1.0f;
         bool m_looping = false;
         bool m_spatialization = false;
     };

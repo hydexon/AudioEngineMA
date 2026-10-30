@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>490</width>
-    <height>532</height>
+    <width>653</width>
+    <height>757</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_6">
+  <layout class="QVBoxLayout" name="verticalLayout_8">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
@@ -74,6 +74,9 @@
       <enum>QFrame::Shadow::Raised</enum>
      </property>
      <layout class="QFormLayout" name="formLayout">
+      <property name="labelAlignment">
+       <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+      </property>
       <item row="0" column="0">
        <widget class="QLabel" name="label_2">
         <property name="text">
@@ -181,24 +184,94 @@
         </item>
        </widget>
       </item>
-      <item row="6" column="0">
+      <item row="7" column="0">
        <widget class="QLabel" name="label_6">
         <property name="text">
          <string>Rolloff Factor:</string>
         </property>
        </widget>
       </item>
-      <item row="6" column="1">
+      <item row="7" column="1">
        <widget class="QDoubleSpinBox" name="dsb_rolloff"/>
       </item>
-      <item row="7" column="0">
+      <item row="8" column="0">
+       <widget class="QLabel" name="label_17">
+        <property name="text">
+         <string>Pitch:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1">
+       <widget class="QDoubleSpinBox" name="dsb_pitch"/>
+      </item>
+      <item row="9" column="0">
+       <widget class="QLabel" name="label_18">
+        <property name="text">
+         <string>Pan:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="1">
+       <widget class="QDoubleSpinBox" name="dsb_pan"/>
+      </item>
+      <item row="10" column="0">
+       <widget class="QLabel" name="label_21">
+        <property name="text">
+         <string>Gains:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="1">
+       <widget class="QGroupBox" name="groupBox_3">
+        <property name="title">
+         <string/>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_6">
+           <item>
+            <widget class="QLabel" name="label_19">
+             <property name="text">
+              <string>Min</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="dsb_gainsMin"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_7">
+           <item>
+            <widget class="QLabel" name="label_20">
+             <property name="text">
+              <string>Max</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="dsb_gainsMax"/>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="11" column="0">
        <widget class="QLabel" name="label_7">
         <property name="text">
          <string>Distances:</string>
         </property>
        </widget>
       </item>
-      <item row="7" column="1">
+      <item row="11" column="1">
        <widget class="QGroupBox" name="groupBox">
         <property name="title">
          <string/>
@@ -241,14 +314,14 @@
         </layout>
        </widget>
       </item>
-      <item row="8" column="0">
+      <item row="12" column="0">
        <widget class="QLabel" name="label_10">
         <property name="text">
          <string>Attenuation Cone:</string>
         </property>
        </widget>
       </item>
-      <item row="8" column="1">
+      <item row="12" column="1">
        <widget class="QGroupBox" name="groupBox_2">
         <property name="title">
          <string/>
@@ -308,15 +381,36 @@
         </layout>
        </widget>
       </item>
-      <item row="9" column="0">
+      <item row="13" column="0">
        <widget class="QLabel" name="label_14">
         <property name="text">
          <string>Doppler Factor:</string>
         </property>
        </widget>
       </item>
-      <item row="9" column="1">
+      <item row="13" column="1">
        <widget class="QDoubleSpinBox" name="dsb_dopplerFactor"/>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="label_22">
+        <property name="text">
+         <string>Positioning</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QComboBox" name="cb_positioning">
+        <item>
+         <property name="text">
+          <string>Absolute</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Relative</string>
+         </property>
+        </item>
+       </widget>
       </item>
      </layout>
     </widget>
