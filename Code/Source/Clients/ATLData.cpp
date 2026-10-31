@@ -348,7 +348,7 @@ void AudioFileTriggerParameters::WriteToXML(AZ::rapidxml::xml_node<char> &node, 
 
 const char *AudioFileRTPC::ToString(Type type)
 {
-    static const char* strings[AudioFileRTPC::Count] = {"Volume", "Pitch", "Seek"};
+    static const char* strings[AudioFileRTPC::Count] = {"Volume", "Pitch"};
     return strings[type];
 }
 
@@ -361,10 +361,6 @@ AudioFileRTPC::Type AudioFileRTPC::FromString(const char *str)
     else if(AZ::StringFunc::Equal(str, "Pitch"))
     {
         return AudioFileRTPC::Pitch;
-    }
-    else if(AZ::StringFunc::Equal(str, "Seek"))
-    {
-        return AudioFileRTPC::Seek;
     }
 
     return AudioFileRTPC::Count;

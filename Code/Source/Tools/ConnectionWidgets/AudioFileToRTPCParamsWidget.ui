@@ -33,11 +33,6 @@
        <string>Pitch</string>
       </property>
      </item>
-     <item>
-      <property name="text">
-       <string>Seek</string>
-      </property>
-     </item>
     </widget>
    </item>
    <item row="1" column="0">

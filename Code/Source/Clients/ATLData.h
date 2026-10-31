@@ -127,7 +127,6 @@ namespace AudioEngineMA
         {
             Volume,
             Pitch,
-            Seek,
             Count
         };
 

@@ -188,7 +188,7 @@ EAudioRequestStatus AudioSystemImpl_MA::StopAllSounds()
             azdestroy(activeSnd.second.m_sound, Audio::AudioImplAllocator, ma_sound);
 
             ma_decoder_uninit(activeSnd.second.m_decoder);
-            azdestroy(activeSnd.second.m_sound, Audio::AudioImplAllocator, ma_decoder);
+            azdestroy(activeSnd.second.m_decoder, Audio::AudioImplAllocator, ma_decoder);
         }
         object->m_activeMASounds.clear();
     }
@@ -390,7 +390,7 @@ EAudioRequestStatus AudioSystemImpl_MA::StopEvent(Audio::IATLAudioObjectData *ob
             azdestroy(pair.second.m_sound, Audio::AudioImplAllocator, ma_sound);
 
             ma_decoder_uninit(pair.second.m_decoder);
-            azdestroy(pair.second.m_decoder);
+            azdestroy(pair.second.m_decoder, Audio::AudioImplAllocator, ma_decoder);
 
             object->m_activeMASounds.erase(pair.first);
             break;
@@ -416,7 +416,7 @@ EAudioRequestStatus AudioSystemImpl_MA::StopAllEvents(Audio::IATLAudioObjectData
         azdestroy(pair.second.m_sound, Audio::AudioImplAllocator, ma_sound);
 
         ma_decoder_uninit(pair.second.m_decoder);
-        azdestroy(pair.second.m_decoder);
+        azdestroy(pair.second.m_decoder, Audio::AudioImplAllocator, ma_decoder);
     }
 
     object->m_activeMASounds.clear();
@@ -450,6 +450,25 @@ EAudioRequestStatus AudioSystemImpl_MA::SetMultiplePositions(Audio::IATLAudioObj
 
 EAudioRequestStatus AudioSystemImpl_MA::SetRtpc(Audio::IATLAudioObjectData *objectData, const Audio::IATLRtpcImplData *rtpcData, float value)
 {
+    auto object = static_cast<SATLAudioObjectData_MA*>(objectData);
+    auto rtpc = static_cast<const SATLRtpcImplData_MA*>(rtpcData);
+
+    if(!object || !rtpc)
+    {
+        return EAudioRequestStatus::Failure;
+    }
+
+    switch(rtpc->m_type)
+    {
+    case RtpcImplementation::Global:
+        return SetGlobalRTPC(*rtpc, value);
+    case RtpcImplementation::AudioFile:
+        return SetAudioFileRTPC(*object, *rtpc, value);
+    default:
+        //TODO: SetSoundGroupRTPC.
+        break;
+    }
+
     return EAudioRequestStatus::Success;
 }
 
@@ -482,6 +501,7 @@ EAudioRequestStatus AudioSystemImpl_MA::SetListenerPosition(Audio::IATLListenerD
 
 EAudioRequestStatus AudioSystemImpl_MA::ResetRtpc(Audio::IATLAudioObjectData *objectData, const Audio::IATLRtpcImplData *rtpcData)
 {
+    //¯\_(ツ)_/¯
     return EAudioRequestStatus::Success;
 }
 
@@ -879,6 +899,91 @@ void AudioSystemImpl_MA::CheckObjectForExpiredMASounds(SATLAudioObjectData_MA &a
 
         audioObj.m_activeMASounds.erase(it);
     }
+}
+
+EAudioRequestStatus AudioSystemImpl_MA::SetAudioFileRTPC(SATLAudioObjectData_MA &object, const SATLRtpcImplData_MA &rtpc, float value)
+{
+    auto audioSrcIt = m_audioSources.find(rtpc.m_audioFile.m_audioFilePath);
+    if(audioSrcIt == m_audioSources.end())
+    {
+        return EAudioRequestStatus::Failure;
+    }
+    auto soundsRange = object.m_activeMASounds.equal_range(audioSrcIt->first);
+    auto& params = rtpc.m_audioFile.m_params;
+
+    float newValue = params.m_mult * value + params.m_shift;
+    switch(params.m_type)
+    {
+    case AudioFileRTPC::Volume:
+    {
+        if(params.m_perObject)
+        {
+            for(auto it = soundsRange.first; it != soundsRange.second; ++it)
+            {
+                it->second.m_volume = newValue;
+                ma_sound_set_volume(it->second.m_sound, newValue);
+            }
+        }
+        else
+        {
+            for(auto& obj : m_audioObjects)
+            {
+                for(auto& pair : obj->m_activeMASounds)
+                {
+                    if(pair.first == rtpc.m_audioFile.m_audioFilePath)
+                    {
+                        ma_sound_set_volume(pair.second.m_sound, pair.second.m_volume + newValue);
+                    }
+                }
+            }
+        }
+        break;
+    }
+    case AudioFileRTPC::Pitch:
+    {
+        if(params.m_perObject)
+        {
+            for(auto it = soundsRange.first; it != soundsRange.second; ++it)
+            {
+                ma_sound_set_pitch(it->second.m_sound, newValue);
+            }
+        }
+        else
+        {
+            for(auto& obj : m_audioObjects)
+            {
+                for(auto& pair : obj->m_activeMASounds)
+                {
+                    if(pair.first == rtpc.m_audioFile.m_audioFilePath)
+                    {
+                        ma_sound_set_pitch(pair.second.m_sound, newValue);
+                    }
+                }
+            }
+        }
+        break;
+    }
+    default:
+        return EAudioRequestStatus::Failure;
+    }
+
+    return EAudioRequestStatus::Success;
+}
+
+EAudioRequestStatus AudioSystemImpl_MA::SetGlobalRTPC(const SATLRtpcImplData_MA &rtpc, float value)
+{
+    auto& rtpcParams = rtpc.m_global.m_params;
+    float newValue = rtpcParams.m_mult * value + rtpcParams.m_shift;
+
+    switch(rtpcParams.m_type) {
+    case GlobalRTPC::GlobalVolume:
+        ma_engine_set_volume(m_engine.get(), newValue);
+        break;
+    default:
+        return EAudioRequestStatus::Failure;
+    }
+
+    return EAudioRequestStatus::Success;
 }
 
 }
