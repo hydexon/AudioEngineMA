@@ -2,10 +2,10 @@
     "gem_name": "AudioEngineMA",
     "version": "1.0.0",
     "display_name": "AudioEngineMA",
-    "license": "License used i.e. Apache-2.0 or MIT",
-    "license_url": "Link to the license web site i.e. https://opensource.org/licenses/Apache-2.0",
-    "origin": "The name of the originator or creator",
-    "origin_url": "The website for this Gem",
+    "license": "MIT",
+    "license_url": "https://opensource.org/license/MIT0",
+    "origin": "hydexon",
+    "origin_url": "https://github.com/hydexon/AudioEngineMA",
     "type": "Code",
     "summary": "A short description of this Gem",
     "canonical_tags": [
@@ -18,11 +18,11 @@
         ""
     ],
     "icon_path": "preview.png",
-    "requirements": "Notice of any requirements for this Gem i.e. This requires X other gem",
+    "requirements": "The gem needs to disable the MiniAudio gem that's enabled by default in new projects",
     "documentation_url": "Link to any documentation of your Gem",
     "dependencies": [
     ],
-    "repo_uri": "",
+    "repo_uri": "https://github.com/hydexon/AudioEngineMA",
     "compatible_engines": [
     ],
     "engine_api_dependencies":[
