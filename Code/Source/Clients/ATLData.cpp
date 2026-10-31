@@ -269,8 +269,6 @@ void AudioFileTriggerParameters::ReadFromXML(const AZ::rapidxml::xml_node<char> 
         }
 
     }
-
-
 }
 
 void AudioFileTriggerParameters::WriteToXML(AZ::rapidxml::xml_node<char> &node, AZ::rapidxml::memory_pool<> &xmlAlloc) const
@@ -388,22 +386,76 @@ GlobalRTPC::Type GlobalRTPC::FromString(const char *str)
 
 void AudioFileRTPCParams::ReadFromXML(const AZ::rapidxml::xml_node<char> &node)
 {
+    auto attr = node.first_attribute(AudioFileRTPC::Tag);
+    if(attr)
+    {
+        m_type = AudioFileRTPC::FromString(attr->value());
+    }
 
+    attr = node.first_attribute(TagPerObject);
+    if(attr)
+    {
+        m_perObject = AZ::StringFunc::ToBool(attr->value());
+    }
+
+    attr = node.first_attribute(TagMult);
+    if(attr)
+    {
+        m_mult = AZ::StringFunc::ToFloat(attr->value());
+    }
+
+    attr = node.first_attribute(TagShift);
+    if(attr)
+    {
+        m_shift = AZ::StringFunc::ToFloat(attr->value());
+    }
 }
 
 void AudioFileRTPCParams::WriteToXML(AZ::rapidxml::xml_node<char> &node, AZ::rapidxml::memory_pool<> &xmlAlloc) const
 {
+    auto attr = xmlAlloc.allocate_attribute(AudioFileRTPC::Tag, AudioFileRTPC::ToString(m_type));
+    node.append_attribute(attr);
 
+    attr = xmlAlloc.allocate_attribute(TagPerObject, xmlAlloc.allocate_string(AZStd::to_string(m_perObject).c_str()));
+    node.append_attribute(attr);
+
+    attr = xmlAlloc.allocate_attribute(TagMult, xmlAlloc.allocate_string(AZStd::to_string(m_mult).c_str()));
+    node.append_attribute(attr);
+
+    attr = xmlAlloc.allocate_attribute(TagShift, xmlAlloc.allocate_string(AZStd::to_string(m_shift).c_str()));
+    node.append_attribute(attr);
 }
 
 void GlobalRTPCParams::ReadFromXML(const AZ::rapidxml::xml_node<char> &node)
 {
+    auto attr = node.first_attribute(AudioFileRTPC::Tag);
+    if(attr)
+    {
+        m_type = GlobalRTPC::FromString(attr->value());
+    }
 
+    attr = node.first_attribute(TagMult);
+    if(attr)
+    {
+        m_mult = AZ::StringFunc::ToFloat(attr->value());
+    }
+
+    attr = node.first_attribute(TagShift);
+    if(attr)
+    {
+        m_shift = AZ::StringFunc::ToFloat(attr->value());
+    }
 }
 
 void GlobalRTPCParams::WriteToXML(AZ::rapidxml::xml_node<char> &node, AZ::rapidxml::memory_pool<> &xmlAlloc) const
 {
+    auto attr = xmlAlloc.allocate_attribute(GlobalRTPC::Tag, GlobalRTPC::ToString(m_type));
+    node.append_attribute(attr);
+    attr = xmlAlloc.allocate_attribute(TagMult, xmlAlloc.allocate_string(AZStd::to_string(m_mult).c_str()));
+    node.append_attribute(attr);
 
+    attr = xmlAlloc.allocate_attribute(TagShift, xmlAlloc.allocate_string(AZStd::to_string(m_shift).c_str()));
+    node.append_attribute(attr);
 }
 
 

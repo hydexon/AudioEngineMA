@@ -12,6 +12,7 @@
 
 #include "SoundGroupManagerForm.h"
 #include "ConnectionWidgets/AudioFileToTriggerParamsWidget.h"
+#include "ConnectionWidgets/AudioFileToRTPCParamsWidget.h"
 
 #include <QtViewPaneManager.h>
 
@@ -54,7 +55,7 @@ CAudioSystemEditor_MiniAudio::CAudioSystemEditor_MiniAudio()
     m_audioFilesCtrl.SetParent(&m_rootControl);
     m_rootControl.AddChild(&m_audioFilesCtrl);
 
-    m_rtpcCtrl.SetName("RTPCs");
+    m_rtpcCtrl.SetName("Global RTPCs");
     m_rtpcCtrl.SetParent(&m_rootControl);
     m_rootControl.AddChild(&m_rtpcCtrl);
 
@@ -197,6 +198,9 @@ AudioControls::TConnectionPtr CAudioSystemEditor_MiniAudio::CreateConnectionToCo
         case AudioControls::eACET_TRIGGER:
             connection = AZStd::make_shared<AudioFileToTriggerConnection>(middlewareControl->GetId());
             break;
+        case AudioControls::eACET_RTPC:
+            connection = AZStd::make_shared<AudioFileToTriggerConnection>(middlewareControl->GetId());
+            break;
         case AudioControls::eACET_PRELOAD:
             connection = AZStd::make_shared<IAudioConnection>(middlewareControl->GetId());
             break;
@@ -257,6 +261,12 @@ AudioControls::TConnectionPtr CAudioSystemEditor_MiniAudio::CreateConnectionFrom
             connection = conn;
             break;
         }
+        case AudioControls::eACET_RTPC: {
+            auto conn = AZStd::make_shared<AudioFileToRTPCConnection>(control->GetId());
+            conn->m_params.ReadFromXML(*node);
+            connection = conn;
+            break;
+        }
         case AudioControls::eACET_PRELOAD: {
             auto conn = AZStd::make_shared<IAudioConnection>(control->GetId());
             connection = conn;
@@ -300,6 +310,11 @@ AZ::rapidxml::xml_node<char> *CAudioSystemEditor_MiniAudio::CreateXMLNodeFromCon
         switch(atlControlType) {
         case AudioControls::eACET_TRIGGER: {
             auto conn = static_cast<const AudioFileToTriggerConnection*>(connection.get());
+            conn->m_params.WriteToXML(*connNode, xmlAlloc);
+            break;
+        }
+        case AudioControls::eACET_RTPC: {
+            auto conn = static_cast<const AudioFileToRTPCConnection*>(connection.get());
             conn->m_params.WriteToXML(*connNode, xmlAlloc);
             break;
         }
@@ -385,6 +400,8 @@ QWidget *CAudioSystemEditor_MiniAudio::CreateConnectionPropertiesWidget(const Au
         switch(atlControlType) {
         case AudioControls::eACET_TRIGGER:
             return new AudioFileToTriggerParamsWidget(connection);
+        case AudioControls::eACET_RTPC:
+            return new AudioFileToRTPCParamsWidget(connection);
         default:
             return nullptr;
         }

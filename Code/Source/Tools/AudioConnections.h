@@ -19,4 +19,18 @@ namespace AudioEngineMA
         AudioFileTriggerParameters m_params;
     };
 
+    class AudioFileToRTPCConnection : public AudioControls::IAudioConnection
+    {
+    public:
+        explicit AudioFileToRTPCConnection(AudioControls::CID id)
+            : AudioControls::IAudioConnection(id)
+        {}
+
+        ~AudioFileToRTPCConnection() = default;
+
+        bool HasProperties() override { return true; }
+
+        AudioFileRTPCParams m_params;
+    };
+
 }

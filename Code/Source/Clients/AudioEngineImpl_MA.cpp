@@ -259,13 +259,12 @@ EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectDa
 
     auto audioSrcIt = m_audioSources.find(trigger->m_audioFilePath);
     if(audioSrcIt == m_audioSources.end()) {
-        AZ_Warning(Constants::LogWindow, false, "We coudln't find audio source: %s", trigger->m_audioFilePath.c_str());
+        AZ_Warning(Constants::LogWindow, false, "We coudln't find audio source: %s, did you forgot to put the audio file into a preload control?", trigger->m_audioFilePath.c_str());
         return EAudioRequestStatus::Failure;
     }
 
     AZ_Info(Constants::LogWindow, "Trigger executed!: %s", trigger->m_audioFilePath.c_str());
     auto audioFilePath = audioSrcIt->first;
-    AudioSourceBuffer& dataBuffer = audioSrcIt->second;
 
     switch(trigger->m_audioTriggerParams.m_soundAction)
     {
@@ -273,7 +272,7 @@ EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectDa
         ma_decoder* decoder = azcreate(ma_decoder, (), Audio::AudioImplAllocator);
         ma_sound* sound = azcreate(ma_sound, (), Audio::AudioImplAllocator);
 
-        ma_result res = ma_decoder_init_memory(dataBuffer.first, dataBuffer.second, nullptr, decoder);
+        ma_result res = ma_decoder_init_memory(audioSrcIt->second.first, audioSrcIt->second.second, nullptr, decoder);
         if(res != MA_SUCCESS)
         {
             AZ_Error(Constants::LogWindow, false, "Error trying to initialize decoder instance for '%s', code: %d", trigger->m_audioFilePath.c_str(), res);

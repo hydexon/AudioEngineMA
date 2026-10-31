@@ -151,7 +151,6 @@ namespace AudioEngineMA
 
         AudioFileRTPC::Type m_type = AudioFileRTPC::Volume;
         bool m_perObject = false;
-
         float m_mult = 1.0f;
         float m_shift = 0.0f;
     };

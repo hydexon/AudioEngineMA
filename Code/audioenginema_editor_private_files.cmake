@@ -14,5 +14,7 @@ set(FILES
     Source/Tools/ConnectionWidgets/AudioFileToTriggerParamsWidget.cpp
     Source/Tools/ConnectionWidgets/AudioFileToTriggerParamsWidget.h
     Source/Tools/ConnectionWidgets/AudioFileToTriggerParamsWidget.ui
-
+    Source/Tools/ConnectionWidgets/AudioFileToRTPCParamsWidget.cpp
+    Source/Tools/ConnectionWidgets/AudioFileToRTPCParamsWidget.h
+    Source/Tools/ConnectionWidgets/AudioFileToRTPCParamsWidget.ui
 )
