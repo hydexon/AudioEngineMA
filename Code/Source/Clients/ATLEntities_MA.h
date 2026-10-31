@@ -30,8 +30,6 @@ struct SATLAudioObjectData_MA : public Audio::IATLAudioObjectData
 
     AZ::Vector3 m_position;
     AZStd::unordered_multimap<AZ::IO::FixedMaxPath, ActiveMASoundData> m_activeMASounds;
-
-    void ClearAll();
 };
 
 struct SATLTriggerImplData_MA : public Audio::IATLTriggerImplData

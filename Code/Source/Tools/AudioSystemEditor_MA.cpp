@@ -39,7 +39,7 @@ namespace MAControlTypes {
     enum Types {
         Invalid = 0,
         AudioFile = AUDIO_BIT(0),
-        RTPC      = AUDIO_BIT(1)
+        GlobalRTPC= AUDIO_BIT(1),
     };
 }
 
@@ -49,6 +49,14 @@ CAudioSystemEditor_MiniAudio::CAudioSystemEditor_MiniAudio()
 
     m_localizedParentControl.SetParent(&m_rootControl);
     m_rootControl.AddChild(&m_localizedParentControl);
+
+    m_audioFilesCtrl.SetName("Audio Files");
+    m_audioFilesCtrl.SetParent(&m_rootControl);
+    m_rootControl.AddChild(&m_audioFilesCtrl);
+
+    m_rtpcCtrl.SetName("RTPCs");
+    m_rtpcCtrl.SetParent(&m_rootControl);
+    m_rootControl.AddChild(&m_rtpcCtrl);
 
     RegisterQtViewPane<SoundGroupManagerForm>(nullptr, "MiniAudio Sound Group Manager", LyViewPane::CategoryOther);
 }
@@ -63,7 +71,13 @@ void CAudioSystemEditor_MiniAudio::Reload()
             control->SetPlaceholder(true);
         }
     }
-    //TODO: Create global basic RTPCs.
+
+    for(int i = 0; i < GlobalRTPC::Count; ++i)
+    {
+        SControlDef controlDef(GlobalRTPC::ToString(static_cast<GlobalRTPC::Type>(i)), MAControlTypes::GlobalRTPC, false, &m_rtpcCtrl);
+        CreateControl(controlDef);
+    }
+
     {
         m_currentLanguageName.clear();
         if(auto console = AZ::Interface<AZ::IConsole>::Get())
@@ -146,7 +160,7 @@ AudioControls::EACEControlType CAudioSystemEditor_MiniAudio::ImplTypeToATLType(A
     {
     case MAControlTypes::AudioFile:
         return eACET_PRELOAD;
-    case MAControlTypes::RTPC:
+    case MAControlTypes::GlobalRTPC:
         return eACET_RTPC;
     default:
         return eACET_NUM_TYPES;
@@ -161,7 +175,7 @@ AudioControls::TImplControlTypeMask CAudioSystemEditor_MiniAudio::GetCompatibleT
     case eACET_TRIGGER:
         return MAControlTypes::AudioFile;
     case eACET_RTPC:
-        return MAControlTypes::RTPC;
+        return MAControlTypes::GlobalRTPC | MAControlTypes::AudioFile;
     default:
         return AUDIO_IMPL_INVALID_TYPE;
     }
@@ -317,12 +331,22 @@ void CAudioSystemEditor_MiniAudio::ConnectionRemoved(AudioControls::IAudioSystem
 
 const AZStd::string_view CAudioSystemEditor_MiniAudio::GetTypeIcon(AudioControls::TImplControlType type) const
 {
-    return AZStd::string_view();
+    switch(type)
+    {
+    case MAControlTypes::AudioFile:
+        return ":/AudioMAEditor/icons/ctrls/audio_file.png";
+    case MAControlTypes::GlobalRTPC:
+        return ":/AudioMAEditor/icons/ctrls/rtpc.png";
+    default:
+        break;
+    }
+
+    return ":/AudioMAEditor/icons/ctrls/folder.png";
 }
 
 const AZStd::string_view CAudioSystemEditor_MiniAudio::GetTypeIconSelected(AudioControls::TImplControlType type) const
 {
-    return AZStd::string_view();
+    return GetTypeIcon(type);
 }
 
 AZStd::string CAudioSystemEditor_MiniAudio::GetName() const
@@ -449,7 +473,7 @@ void CAudioSystemEditor_MiniAudio::ScanAudioFilesAndCreateControlsRecursively(AZ
             }
             filePathRelToAudioBaseDir.MakePreferred();
             filePathRelToAudioBaseDir = filePathRelToAudioBaseDir.RelativePath();
-            IAudioSystemControl* parentControl = isInL10nDir ? &m_localizedParentControl : nullptr;
+            IAudioSystemControl* parentControl = isInL10nDir ? &m_localizedParentControl : &m_audioFilesCtrl;
 
             SControlDef controlDef(
                 filePathRelToAudioBaseDir.c_str(), MAControlTypes::AudioFile, isInL10nDir, parentControl);

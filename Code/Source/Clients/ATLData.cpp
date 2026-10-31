@@ -348,6 +348,63 @@ void AudioFileTriggerParameters::WriteToXML(AZ::rapidxml::xml_node<char> &node, 
 
 }
 
+const char *AudioFileRTPC::ToString(Type type)
+{
+    static const char* strings[AudioFileRTPC::Count] = {"Volume", "Pitch", "Seek"};
+    return strings[type];
+}
+
+AudioFileRTPC::Type AudioFileRTPC::FromString(const char *str)
+{
+    if(AZ::StringFunc::Equal(str, "Volume"))
+    {
+        return AudioFileRTPC::Volume;
+    }
+    else if(AZ::StringFunc::Equal(str, "Pitch"))
+    {
+        return AudioFileRTPC::Pitch;
+    }
+    else if(AZ::StringFunc::Equal(str, "Seek"))
+    {
+        return AudioFileRTPC::Seek;
+    }
+
+    return AudioFileRTPC::Count;
+}
+
+const char *GlobalRTPC::ToString(Type type)
+{
+    static const char* strings[GlobalRTPC::Count] = { "GlobalVolume" };
+    return strings[type];
+}
+
+GlobalRTPC::Type GlobalRTPC::FromString(const char *str)
+{
+    if(AZ::StringFunc::Equal(str, "GlobalVolume"))
+        return GlobalRTPC::GlobalVolume;
+
+    return GlobalRTPC::Count;
+}
+
+void AudioFileRTPCParams::ReadFromXML(const AZ::rapidxml::xml_node<char> &node)
+{
+
+}
+
+void AudioFileRTPCParams::WriteToXML(AZ::rapidxml::xml_node<char> &node, AZ::rapidxml::memory_pool<> &xmlAlloc) const
+{
+
+}
+
+void GlobalRTPCParams::ReadFromXML(const AZ::rapidxml::xml_node<char> &node)
+{
+
+}
+
+void GlobalRTPCParams::WriteToXML(AZ::rapidxml::xml_node<char> &node, AZ::rapidxml::memory_pool<> &xmlAlloc) const
+{
+
+}
 
 
 } // namespace AudioEngineMA

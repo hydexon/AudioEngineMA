@@ -121,4 +121,69 @@ namespace AudioEngineMA
         bool m_spatialization = true;
     };
 
+    namespace AudioFileRTPC
+    {
+        enum Type
+        {
+            Volume,
+            Pitch,
+            Seek,
+            Count
+        };
+
+        constexpr static const char* Tag = "AudioFileRTPCType";
+
+        const char* ToString(Type type);
+        Type FromString(const char* str);
+    }
+
+    struct AudioFileRTPCParams
+    {
+        AudioFileRTPCParams() = default;
+        ~AudioFileRTPCParams() = default;
+
+        constexpr static const char* TagPerObject = "PerObject";
+        constexpr static const char* TagMult = "Mult";
+        constexpr static const char* TagShift = "Shift";
+
+        void ReadFromXML(const AZ::rapidxml::xml_node<char>& node);
+        void WriteToXML(AZ::rapidxml::xml_node<char>& node, AZ::rapidxml::memory_pool<>& xmlAlloc) const;
+
+        AudioFileRTPC::Type m_type = AudioFileRTPC::Volume;
+        bool m_perObject = false;
+
+        float m_mult = 1.0f;
+        float m_shift = 0.0f;
+    };
+
+    namespace GlobalRTPC
+    {
+        enum Type
+        {
+            GlobalVolume,
+            Count
+        };
+
+        constexpr static const char* Tag = "GlobalRTPCType";
+
+        const char* ToString(Type type);
+        Type FromString(const char* str);
+    }
+
+    struct GlobalRTPCParams
+    {
+        GlobalRTPCParams()  = default;
+        ~GlobalRTPCParams() = default;
+
+        constexpr static const char* TagMult = "Mult";
+        constexpr static const char* TagShift = "Shift";
+
+        void ReadFromXML(const AZ::rapidxml::xml_node<char>& node);
+        void WriteToXML(AZ::rapidxml::xml_node<char>& node, AZ::rapidxml::memory_pool<>& xmlAlloc) const;
+
+        GlobalRTPC::Type m_type = GlobalRTPC::GlobalVolume;
+        float m_mult  = 1.0f;
+        float m_shift = 0.0f;
+    };
+
 }

@@ -33,6 +33,7 @@ namespace AudioEngineMA
         AZStd::string m_currentLanguageName;
         AudioControls::IAudioSystemControl m_rootControl;
         AudioControls::IAudioSystemControl m_localizedParentControl;
+        AudioControls::IAudioSystemControl m_audioFilesCtrl, m_rtpcCtrl;
 
         using TControlPtr = AZStd::shared_ptr<AudioControls::IAudioSystemControl>;
         using TControlMap = AZStd::unordered_map<AudioControls::CID, TControlPtr>;

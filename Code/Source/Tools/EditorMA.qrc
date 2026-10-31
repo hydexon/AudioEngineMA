@@ -1,10 +1,7 @@
 <RCC>
-    <qresource prefix="/">
-        <file>MAEditorIcons/toolbar/list-remove.png</file>
-        <file>MAEditorIcons/toolbar/list-add.png</file>
-        <file>MAEditorIcons/toolbar/document-save.png</file>
-        <file>MAEditorIcons/toolbar/document-save-as.png</file>
-        <file>MAEditorIcons/toolbar/document-open.png</file>
-        <file>MAEditorIcons/toolbar/document-new.png</file>
+    <qresource prefix="/AudioMAEditor">
+        <file>icons/ctrls/audio_file.png</file>
+        <file>icons/ctrls/folder.png</file>
+        <file>icons/ctrls/rtpc.png</file>
     </qresource>
 </RCC>
