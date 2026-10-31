@@ -146,7 +146,7 @@ namespace AudioEngineMA
         constexpr static const char* TagMult = "Mult";
         constexpr static const char* TagShift = "Shift";
 
-        void ReadFromXML(const AZ::rapidxml::xml_node<char>& node);
+        bool ReadFromXML(const AZ::rapidxml::xml_node<char>& node);
         void WriteToXML(AZ::rapidxml::xml_node<char>& node, AZ::rapidxml::memory_pool<>& xmlAlloc) const;
 
         AudioFileRTPC::Type m_type = AudioFileRTPC::Volume;
@@ -177,7 +177,7 @@ namespace AudioEngineMA
         constexpr static const char* TagMult = "Mult";
         constexpr static const char* TagShift = "Shift";
 
-        void ReadFromXML(const AZ::rapidxml::xml_node<char>& node);
+        bool ReadFromXML(const AZ::rapidxml::xml_node<char>& node);
         void WriteToXML(AZ::rapidxml::xml_node<char>& node, AZ::rapidxml::memory_pool<>& xmlAlloc) const;
 
         GlobalRTPC::Type m_type = GlobalRTPC::GlobalVolume;

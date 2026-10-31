@@ -633,12 +633,29 @@ void AudioSystemImpl_MA::DeleteAudioTriggerImplData(Audio::IATLTriggerImplData *
 
 IATLRtpcImplData *AudioSystemImpl_MA::NewAudioRtpcImplData(const AZ::rapidxml::xml_node<char> *audioRtpcNode)
 {
-    return nullptr;
+    if(!audioRtpcNode)
+    {
+        return nullptr;
+    }
+
+    auto rtpcData = azcreate(SATLRtpcImplData_MA, (), Audio::AudioImplAllocator);
+    if(!rtpcData)
+    {
+        return nullptr;
+    }
+
+    if(!rtpcData->ReadFromXML(*audioRtpcNode))
+    {
+        azdestroy(rtpcData, Audio::AudioImplAllocator, SATLRtpcImplData_MA);
+        return nullptr;
+    }
+
+    return rtpcData;
 }
 
 void AudioSystemImpl_MA::DeleteAudioRtpcImplData(Audio::IATLRtpcImplData *oldRtpcData)
 {
-
+    azdestroy(oldRtpcData, Audio::AudioImplAllocator, SATLRtpcImplData_MA);
 }
 
 IATLSwitchStateImplData *AudioSystemImpl_MA::NewAudioSwitchStateImplData(const AZ::rapidxml::xml_node<char> *audioSwitchStateNode)

@@ -287,8 +287,8 @@ void AudioFileTriggerParameters::WriteToXML(AZ::rapidxml::xml_node<char> &node, 
         auto loopingNode   = xmlAlloc.allocate_node(AZ::rapidxml::node_element, TagLooping, xmlAlloc.allocate_string(AZStd::to_string(m_looping).c_str()));
         auto spatialNode   = xmlAlloc.allocate_node(AZ::rapidxml::node_element, TagSpatialization, xmlAlloc.allocate_string(AZStd::to_string(m_spatialization).c_str()));
         auto volumeNode    = xmlAlloc.allocate_node(AZ::rapidxml::node_element, TagVolumeLinear, xmlAlloc.allocate_string(AZStd::to_string(m_volume).c_str()));
-        auto panNode       = xmlAlloc.allocate_node(AZ::rapidxml::node_element, TagVolumeLinear, xmlAlloc.allocate_string(AZStd::to_string(m_pan).c_str()));
-        auto pitchNode     = xmlAlloc.allocate_node(AZ::rapidxml::node_element, TagVolumeLinear, xmlAlloc.allocate_string(AZStd::to_string(m_pitch).c_str()));
+        auto panNode       = xmlAlloc.allocate_node(AZ::rapidxml::node_element, TagPan, xmlAlloc.allocate_string(AZStd::to_string(m_pan).c_str()));
+        auto pitchNode     = xmlAlloc.allocate_node(AZ::rapidxml::node_element, TagPitch, xmlAlloc.allocate_string(AZStd::to_string(m_pitch).c_str()));
 
         subnode->append_node(actionNode);
         subnode->append_node(soundGrpNode);
@@ -384,11 +384,15 @@ GlobalRTPC::Type GlobalRTPC::FromString(const char *str)
     return GlobalRTPC::Count;
 }
 
-void AudioFileRTPCParams::ReadFromXML(const AZ::rapidxml::xml_node<char> &node)
+bool AudioFileRTPCParams::ReadFromXML(const AZ::rapidxml::xml_node<char> &node)
 {
     auto attr = node.first_attribute(AudioFileRTPC::Tag);
     if(attr)
     {
+        if(m_type == AudioFileRTPC::Count)
+        {
+            return false;
+        }
         m_type = AudioFileRTPC::FromString(attr->value());
     }
 
@@ -409,6 +413,7 @@ void AudioFileRTPCParams::ReadFromXML(const AZ::rapidxml::xml_node<char> &node)
     {
         m_shift = AZ::StringFunc::ToFloat(attr->value());
     }
+    return true;
 }
 
 void AudioFileRTPCParams::WriteToXML(AZ::rapidxml::xml_node<char> &node, AZ::rapidxml::memory_pool<> &xmlAlloc) const
@@ -426,12 +431,16 @@ void AudioFileRTPCParams::WriteToXML(AZ::rapidxml::xml_node<char> &node, AZ::rap
     node.append_attribute(attr);
 }
 
-void GlobalRTPCParams::ReadFromXML(const AZ::rapidxml::xml_node<char> &node)
+bool GlobalRTPCParams::ReadFromXML(const AZ::rapidxml::xml_node<char> &node)
 {
     auto attr = node.first_attribute(AudioFileRTPC::Tag);
     if(attr)
     {
         m_type = GlobalRTPC::FromString(attr->value());
+        if(m_type == GlobalRTPC::Count)
+        {
+            return false;
+        }
     }
 
     attr = node.first_attribute(TagMult);
@@ -445,6 +454,8 @@ void GlobalRTPCParams::ReadFromXML(const AZ::rapidxml::xml_node<char> &node)
     {
         m_shift = AZ::StringFunc::ToFloat(attr->value());
     }
+
+    return true;
 }
 
 void GlobalRTPCParams::WriteToXML(AZ::rapidxml::xml_node<char> &node, AZ::rapidxml::memory_pool<> &xmlAlloc) const

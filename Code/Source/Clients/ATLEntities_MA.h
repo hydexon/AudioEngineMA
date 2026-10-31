@@ -4,6 +4,7 @@
 #include <AzCore/IO/Path/Path.h>
 #include <AzCore/std/containers/unordered_map.h>
 #include <AzCore/Name/Name.h>
+#include <AzCore/XML/rapidxml.h>
 
 #include "ATLData.h"
 #include <miniaudio.h>
@@ -51,5 +52,29 @@ struct SATLListenerData_MA : public Audio::IATLListenerData
     const int m_listenerIndex;
 };
 
+namespace RtpcImplementation
+{
+    enum Type
+    {
+        Global,
+        AudioFile
+    };
+}
+
+struct SATLRtpcImplData_MA : public Audio::IATLRtpcImplData
+{
+    bool ReadFromXML(const AZ::rapidxml::xml_node<char>& node);
+
+    RtpcImplementation::Type m_type;
+    struct {
+        GlobalRTPCParams m_params;
+    } m_global;
+
+    struct {
+        AZ::IO::FixedMaxPath m_audioFilePath;
+        AudioFileRTPCParams m_params;
+    } m_audioFile;
+
+};
 
 }
