@@ -33,4 +33,17 @@ namespace AudioEngineMA
         AudioFileRTPCParams m_params;
     };
 
+    class GlobalRTPCConnection : public AudioControls::IAudioConnection
+    {
+    public:
+        explicit GlobalRTPCConnection(AudioControls::CID id)
+            : AudioControls::IAudioConnection(id)
+        {}
+
+        ~GlobalRTPCConnection() = default;
+        bool HasProperties() override { return true; }
+
+        GlobalRTPCParams m_params;
+    };
+
 }

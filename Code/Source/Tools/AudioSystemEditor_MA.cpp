@@ -13,6 +13,7 @@
 #include "SoundGroupManagerForm.h"
 #include "ConnectionWidgets/AudioFileToTriggerParamsWidget.h"
 #include "ConnectionWidgets/AudioFileToRTPCParamsWidget.h"
+#include "ConnectionWidgets/GlobalRTPCParamsWidget.h"
 
 #include <QtViewPaneManager.h>
 
@@ -207,8 +208,11 @@ AudioControls::TConnectionPtr CAudioSystemEditor_MiniAudio::CreateConnectionToCo
         default: break;
         }
     }
-        //TODO MAControlTypes::RTPC, and friends.
-    default: break;
+    case MAControlTypes::GlobalRTPC:
+        connection = AZStd::make_shared<GlobalRTPCConnection>(middlewareControl->GetId());
+        break;
+    default:
+        break;
     }
 
     if(connection)
@@ -277,7 +281,12 @@ AudioControls::TConnectionPtr CAudioSystemEditor_MiniAudio::CreateConnectionFrom
         }
     }
 
-    //TODO: Connections globalrtpcs, switches and states, maybe environment?
+    if(AZ::StringFunc::Equal(node->name(), GlobalRTPC::Tag))
+    {
+        auto conn = AZStd::make_shared<GlobalRTPCConnection>(control->GetId());
+        conn->m_params.ReadFromXML(*node);
+        connection = conn;
+    }
 
     return connection;
 }
@@ -285,7 +294,6 @@ AudioControls::TConnectionPtr CAudioSystemEditor_MiniAudio::CreateConnectionFrom
 AZ::rapidxml::xml_node<char> *CAudioSystemEditor_MiniAudio::CreateXMLNodeFromConnection(const AudioControls::TConnectionPtr connection, const AudioControls::EACEControlType atlControlType)
 {
     using namespace Audio;
-    AZ_UNUSED(atlControlType);
 
     const IAudioSystemControl* control = GetControl(connection->GetID());
     if(!control)
@@ -297,7 +305,6 @@ AZ::rapidxml::xml_node<char> *CAudioSystemEditor_MiniAudio::CreateXMLNodeFromCon
     auto connNode = xmlAlloc.allocate_node(AZ::rapidxml::node_element);
     const auto controlType = static_cast<MAControlTypes::Types>(control->GetType());
 
-    //TODO: Switch(controlType)
     if(controlType == MAControlTypes::AudioFile)
     {
         connNode->name(MAXMLTags::AudioFileTag);
@@ -323,6 +330,12 @@ AZ::rapidxml::xml_node<char> *CAudioSystemEditor_MiniAudio::CreateXMLNodeFromCon
         default:
             return nullptr;
         }
+    }
+    else if(controlType == MAControlTypes::GlobalRTPC)
+    {
+        connNode->name(GlobalRTPC::Tag);
+        auto conn = static_cast<const GlobalRTPCConnection*>(connection.get());
+        conn->m_params.WriteToXML(*connNode, xmlAlloc);
     }
     else
     {
@@ -406,6 +419,8 @@ QWidget *CAudioSystemEditor_MiniAudio::CreateConnectionPropertiesWidget(const Au
             return nullptr;
         }
     }
+    case MAControlTypes::GlobalRTPC:
+        return new GlobalRTPCParamsWidget(connection);
     default:
         return nullptr;
     }

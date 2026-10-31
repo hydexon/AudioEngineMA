@@ -429,7 +429,7 @@ void AudioFileRTPCParams::WriteToXML(AZ::rapidxml::xml_node<char> &node, AZ::rap
 
 bool GlobalRTPCParams::ReadFromXML(const AZ::rapidxml::xml_node<char> &node)
 {
-    auto attr = node.first_attribute(AudioFileRTPC::Tag);
+    auto attr = node.first_attribute("type");
     if(attr)
     {
         m_type = GlobalRTPC::FromString(attr->value());
@@ -456,7 +456,7 @@ bool GlobalRTPCParams::ReadFromXML(const AZ::rapidxml::xml_node<char> &node)
 
 void GlobalRTPCParams::WriteToXML(AZ::rapidxml::xml_node<char> &node, AZ::rapidxml::memory_pool<> &xmlAlloc) const
 {
-    auto attr = xmlAlloc.allocate_attribute(GlobalRTPC::Tag, GlobalRTPC::ToString(m_type));
+    auto attr = xmlAlloc.allocate_attribute("type", GlobalRTPC::ToString(m_type));
     node.append_attribute(attr);
     attr = xmlAlloc.allocate_attribute(TagMult, xmlAlloc.allocate_string(AZStd::to_string(m_mult).c_str()));
     node.append_attribute(attr);
