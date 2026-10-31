@@ -250,7 +250,7 @@ AudioControls::TConnectionPtr CAudioSystemEditor_MiniAudio::CreateConnectionFrom
             isLocalized = AZ::StringFunc::Equal(attr->value(), "true");
         }
 
-        control = GetControlByName(controlName, isLocalized);
+        control = GetControlByName(controlName, isLocalized, &m_audioFilesCtrl);
         if(!control)
         {
             control = CreateControl(SControlDef(controlName, MAControlTypes::AudioFile, isLocalized));
@@ -281,8 +281,16 @@ AudioControls::TConnectionPtr CAudioSystemEditor_MiniAudio::CreateConnectionFrom
         }
     }
 
+
     if(AZ::StringFunc::Equal(node->name(), GlobalRTPC::Tag))
     {
+        const char* controlName = node->name();
+        control = GetControlByName(controlName, false, &m_rtpcCtrl);
+        if(!control)
+        {
+            control = CreateControl(SControlDef(controlName, MAControlTypes::GlobalRTPC));
+            control->SetPlaceholder(true);
+        }
         auto conn = AZStd::make_shared<GlobalRTPCConnection>(control->GetId());
         conn->m_params.ReadFromXML(*node);
         connection = conn;
@@ -428,6 +436,7 @@ QWidget *CAudioSystemEditor_MiniAudio::CreateConnectionPropertiesWidget(const Au
 
 AudioControls::IAudioSystemControl *CAudioSystemEditor_MiniAudio::GetControlByName(AZStd::string name, bool isLocalized, AudioControls::IAudioSystemControl *parent) const
 {
+    AZ_UNUSED(parent);
     if(isLocalized)
     {
         AZ::StringFunc::Path::Join(m_currentLanguageName.c_str(), name.c_str(), name);

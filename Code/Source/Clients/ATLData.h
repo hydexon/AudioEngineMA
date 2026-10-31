@@ -162,7 +162,7 @@ namespace AudioEngineMA
             Count
         };
 
-        constexpr static const char* Tag = "GlobalRTPCType";
+        constexpr static const char* Tag = "GlobalRTPC";
 
         const char* ToString(Type type);
         Type FromString(const char* str);

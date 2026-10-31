@@ -257,6 +257,9 @@ EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectDa
         return EAudioRequestStatus::Failure;
     }
 
+    if(sourceData)
+        AZ_Info(Constants::LogWindow, "SourceInfo id: %d, codecId: %d, fileId: %d", sourceData->m_sourceInfo.m_codecType, sourceData->m_sourceInfo.m_fileId);
+
     auto audioSrcIt = m_audioSources.find(trigger->m_audioFilePath);
     if(audioSrcIt == m_audioSources.end()) {
         AZ_Warning(Constants::LogWindow, false, "We coudln't find audio source: %s, did you forgot to put the audio file into a preload control?", trigger->m_audioFilePath.c_str());
