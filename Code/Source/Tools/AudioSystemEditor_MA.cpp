@@ -10,6 +10,7 @@
 #include "../Clients/Config_MA.h"
 #include "../Clients/Common_MA.h"
 
+#include "SoundGroupManagerWindow.h"
 #include "ConnectionWidgets/AudioFileToTriggerParamsWidget.h"
 #include "ConnectionWidgets/AudioFileToRTPCParamsWidget.h"
 #include "ConnectionWidgets/GlobalRTPCParamsWidget.h"
@@ -59,7 +60,7 @@ CAudioSystemEditor_MiniAudio::CAudioSystemEditor_MiniAudio()
     m_rtpcCtrl.SetParent(&m_rootControl);
     m_rootControl.AddChild(&m_rtpcCtrl);
 
-    //RegisterQtViewPane<SoundGroupManagerForm>(nullptr, "MiniAudio Sound Group Manager", LyViewPane::CategoryOther);
+    RegisterQtViewPane<SoundGroupManagerWindow>(nullptr, "MiniAudio Sound Group Manager", LyViewPane::CategoryOther);
 }
 
 void CAudioSystemEditor_MiniAudio::Reload()

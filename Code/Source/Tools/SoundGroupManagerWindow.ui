@@ -1,0 +1,532 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SoundGroupManagerWindow</class>
+ <widget class="QMainWindow" name="SoundGroupManagerWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>694</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MiniAudio Sound Group Manager</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_5">
+    <item>
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Orientation::Horizontal</enum>
+      </property>
+      <widget class="QWidget" name="layoutWidget">
+       <layout class="QVBoxLayout" name="verticalLayout_12">
+        <property name="spacing">
+         <number>12</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QPushButton" name="btnAddGroup">
+            <property name="text">
+             <string>Add Group</string>
+            </property>
+            <property name="icon">
+             <iconset resource="EditorMA.qrc">
+              <normaloff>:/AudioMAEditor/icons/toolbar/list-add.png</normaloff>:/AudioMAEditor/icons/toolbar/list-add.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnRemoveGroup">
+            <property name="text">
+             <string>Remove Group</string>
+            </property>
+            <property name="icon">
+             <iconset resource="EditorMA.qrc">
+              <normaloff>:/AudioMAEditor/icons/toolbar/list-remove.png</normaloff>:/AudioMAEditor/icons/toolbar/list-remove.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTreeWidget" name="tw_soundGroups">
+          <column>
+           <property name="text">
+            <string>Sound Group Name</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="propertiesWidget" native="true">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QGroupBox" name="gb_flags">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="title">
+           <string>Init Flags:</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <item>
+            <widget class="QCheckBox" name="chkbox_DisableSpatial">
+             <property name="text">
+              <string>Disable Spatialization</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="chkbox_DisablePtich">
+             <property name="text">
+              <string>Disable Pitch</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="gb_properties">
+          <property name="title">
+           <string>Properties:</string>
+          </property>
+          <layout class="QFormLayout" name="formLayout">
+           <property name="labelAlignment">
+            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+           </property>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Volume:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QDoubleSpinBox" name="dsb_volume">
+             <property name="maximum">
+              <double>1.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_2">
+             <property name="text">
+              <string>Pitch:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QDoubleSpinBox" name="dsb_pitch"/>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_3">
+             <property name="text">
+              <string>Pan:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QDoubleSpinBox" name="dsb_pan"/>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>Attenuation Mode:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QComboBox" name="cb_attenuationMode">
+             <item>
+              <property name="text">
+               <string>None</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Inverse</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Linear</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Exponential</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>Positioning:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QComboBox" name="cb_positioning">
+             <item>
+              <property name="text">
+               <string>Absolute</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Relative</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QLabel" name="label_6">
+             <property name="text">
+              <string>Pan Mode:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QComboBox" name="cb_panMode">
+             <item>
+              <property name="text">
+               <string>Balance</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Pan</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="6" column="0">
+            <widget class="QLabel" name="label_12">
+             <property name="text">
+              <string>Doppler Factor:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="1">
+            <widget class="QDoubleSpinBox" name="dsb_dopplerFacotr"/>
+           </item>
+           <item row="7" column="0">
+            <widget class="QLabel" name="label_20">
+             <property name="text">
+              <string>Rolloff Factor:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="1">
+            <widget class="QDoubleSpinBox" name="dsb_rolloffFactor"/>
+           </item>
+           <item row="8" column="0">
+            <widget class="QLabel" name="label_7">
+             <property name="text">
+              <string>Distances:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_3">
+               <item>
+                <widget class="QLabel" name="label_8">
+                 <property name="text">
+                  <string>Min</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QDoubleSpinBox" name="dsb_distanceMin"/>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_4">
+               <item>
+                <widget class="QLabel" name="label_9">
+                 <property name="text">
+                  <string>Max</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QDoubleSpinBox" name="dsb_distanceMax"/>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+           <item row="9" column="0">
+            <widget class="QLabel" name="label_15">
+             <property name="text">
+              <string>Gains:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="9" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_7">
+               <item>
+                <widget class="QLabel" name="label_13">
+                 <property name="text">
+                  <string>Min</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QDoubleSpinBox" name="dsb_grainsMin"/>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_8">
+               <item>
+                <widget class="QLabel" name="label_14">
+                 <property name="text">
+                  <string>Max</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QDoubleSpinBox" name="dsb_gainsMax"/>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+           <item row="10" column="0">
+            <widget class="QLabel" name="label_16">
+             <property name="text">
+              <string>Attenuation Cone:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_9">
+               <item>
+                <widget class="QLabel" name="label_17">
+                 <property name="text">
+                  <string>Inner Angle</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QDoubleSpinBox" name="dsb_innerAngle"/>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_10">
+               <item>
+                <widget class="QLabel" name="label_18">
+                 <property name="text">
+                  <string>Outer Angle</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QDoubleSpinBox" name="dsb_outerAngle"/>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_11">
+               <item>
+                <widget class="QLabel" name="label_19">
+                 <property name="text">
+                  <string>Outer Grain</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QDoubleSpinBox" name="dsb_outerGrain"/>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuSound_Groups">
+    <property name="title">
+     <string>Sound Groups</string>
+    </property>
+    <addaction name="actionNew_Layout"/>
+    <addaction name="actionOpen_Layout"/>
+    <addaction name="actionSave_Layout"/>
+    <addaction name="actionSave_Layout_As"/>
+   </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionImport_Layout_from_XML"/>
+    <addaction name="actionExport_Layout_as_XML"/>
+   </widget>
+   <addaction name="menuSound_Groups"/>
+   <addaction name="menuTools"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <property name="movable">
+    <bool>false</bool>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::ToolBarArea::TopToolBarArea</set>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionNew_Layout"/>
+   <addaction name="actionOpen_Layout"/>
+   <addaction name="actionSave_Layout"/>
+   <addaction name="separator"/>
+   <addaction name="actionImport_Layout_from_XML"/>
+   <addaction name="actionExport_Layout_as_XML"/>
+  </widget>
+  <action name="actionNew_Layout">
+   <property name="icon">
+    <iconset>
+     <normalon>:/AudioMAEditor/icons/toolbar/document-new.png</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>New Layout</string>
+   </property>
+  </action>
+  <action name="actionOpen_Layout">
+   <property name="icon">
+    <iconset>
+     <normalon>:/AudioMAEditor/icons/toolbar/document-open.png</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Open Layout</string>
+   </property>
+  </action>
+  <action name="actionSave_Layout">
+   <property name="icon">
+    <iconset>
+     <normalon>:/AudioMAEditor/icons/toolbar/document-save.png</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Save Layout</string>
+   </property>
+  </action>
+  <action name="actionSave_Layout_As">
+   <property name="icon">
+    <iconset>
+     <normalon>:/AudioMAEditor/icons/toolbar/document-save-as.png</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Save Layout As</string>
+   </property>
+  </action>
+  <action name="actionImport_Layout_from_XML">
+   <property name="icon">
+    <iconset>
+     <normalon>:/AudioMAEditor/icons/toolbar/xml_imports.png</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Import Layout from XML</string>
+   </property>
+  </action>
+  <action name="actionExport_Layout_as_XML">
+   <property name="icon">
+    <iconset>
+     <normalon>:/AudioMAEditor/icons/toolbar/xml_exports.png</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Export Layout as XML</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="EditorMA.qrc"/>
+ </resources>
+ <connections/>
+</ui>

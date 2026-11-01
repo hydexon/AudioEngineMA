@@ -6,6 +6,9 @@ set(FILES
     Source/Tools/AudioSystemEditor_MA.cpp
     Source/Tools/AudioSystemEditor_MA.h
     Source/Tools/AudioConnections.h
+    Source/Tools/SoundGroupManagerWindow.cpp
+    Source/Tools/SoundGroupManagerWindow.h
+    Source/Tools/SoundGroupManagerWindow.ui
     #Connection Widgets.
     Source/Tools/ConnectionWidgets/AudioFileToTriggerParamsWidget.cpp
     Source/Tools/ConnectionWidgets/AudioFileToTriggerParamsWidget.h
