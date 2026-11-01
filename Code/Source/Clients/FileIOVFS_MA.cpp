@@ -57,6 +57,9 @@ ma_result FileIO_Close(ma_vfs *pVFS, ma_vfs_file file)
         return MA_INVALID_FILE;
     }
 
+    azdestroy(iodata);
+    iodata = nullptr;
+
     return MA_SUCCESS;
 }
 
