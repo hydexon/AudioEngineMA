@@ -196,17 +196,17 @@ EAudioRequestStatus AudioSystemImpl_MA::StopAllSounds()
     return EAudioRequestStatus::Success;
 }
 
-EAudioRequestStatus AudioSystemImpl_MA::RegisterAudioObject(Audio::IATLAudioObjectData *objectData, const char *objectName)
+EAudioRequestStatus AudioSystemImpl_MA::RegisterAudioObject([[maybe_unused]] Audio::IATLAudioObjectData *objectData, [[maybe_unused]] const char *objectName)
 {
     return EAudioRequestStatus::Success;
 }
 
-EAudioRequestStatus AudioSystemImpl_MA::UnregisterAudioObject(Audio::IATLAudioObjectData *objectData)
+EAudioRequestStatus AudioSystemImpl_MA::UnregisterAudioObject([[maybe_unused]] Audio::IATLAudioObjectData *objectData)
 {
     return EAudioRequestStatus::Success;
 }
 
-EAudioRequestStatus AudioSystemImpl_MA::ResetAudioObject(Audio::IATLAudioObjectData *objectData)
+EAudioRequestStatus AudioSystemImpl_MA::ResetAudioObject([[maybe_unused]] Audio::IATLAudioObjectData *objectData)
 {
     return EAudioRequestStatus::Success;
 }
@@ -224,27 +224,27 @@ EAudioRequestStatus AudioSystemImpl_MA::UpdateAudioObject(Audio::IATLAudioObject
     return EAudioRequestStatus::Success;
 }
 
-EAudioRequestStatus AudioSystemImpl_MA::PrepareTriggerSync(Audio::IATLAudioObjectData *audioObjectData, const Audio::IATLTriggerImplData *triggerData)
+EAudioRequestStatus AudioSystemImpl_MA::PrepareTriggerSync([[maybe_unused]] Audio::IATLAudioObjectData *audioObjectData, [[maybe_unused]] const Audio::IATLTriggerImplData *triggerData)
 {
     return EAudioRequestStatus::Success;
 }
 
-EAudioRequestStatus AudioSystemImpl_MA::UnprepareTriggerSync(Audio::IATLAudioObjectData *objectData, const Audio::IATLTriggerImplData *triggerData)
+EAudioRequestStatus AudioSystemImpl_MA::UnprepareTriggerSync([[maybe_unused]] Audio::IATLAudioObjectData *objectData, [[maybe_unused]] const Audio::IATLTriggerImplData *triggerData)
 {
     return EAudioRequestStatus::Success;
 }
 
-EAudioRequestStatus AudioSystemImpl_MA::PrepareTriggerAsync(Audio::IATLAudioObjectData *objectData, const Audio::IATLTriggerImplData *triggerData, Audio::IATLEventData *eventData)
+EAudioRequestStatus AudioSystemImpl_MA::PrepareTriggerAsync([[maybe_unused]] Audio::IATLAudioObjectData *objectData, [[maybe_unused]] const Audio::IATLTriggerImplData *triggerData, [[maybe_unused]] Audio::IATLEventData *eventData)
 {
     return EAudioRequestStatus::Success;
 }
 
-EAudioRequestStatus AudioSystemImpl_MA::UnprepareTriggerAsync(Audio::IATLAudioObjectData *pAudioObjectData, const Audio::IATLTriggerImplData *pTriggerData, Audio::IATLEventData *pEventData)
+EAudioRequestStatus AudioSystemImpl_MA::UnprepareTriggerAsync([[maybe_unused]] Audio::IATLAudioObjectData *pAudioObjectData, [[maybe_unused]] const Audio::IATLTriggerImplData *pTriggerData, Audio::IATLEventData *pEventData)
 {
     return EAudioRequestStatus::Success;
 }
 
-EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectData *objectData, const Audio::IATLTriggerImplData *triggerData, Audio::IATLEventData *eventData, const Audio::SATLSourceData *sourceData)
+EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectData *objectData, const Audio::IATLTriggerImplData *triggerData, Audio::IATLEventData *eventData, [[maybe_unused]] const Audio::SATLSourceData *sourceData)
 {
     AZ_Info(Constants::LogWindow, "Trying Activating Trigger");
     auto object   = static_cast<SATLAudioObjectData_MA*>(objectData);
@@ -256,9 +256,6 @@ EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectDa
         AZ_Warning(Constants::LogWindow, false, "Activating Trigger becaause one of the following objects failed typecast: object, trigger or event");
         return EAudioRequestStatus::Failure;
     }
-
-    if(sourceData)
-        AZ_Info(Constants::LogWindow, "SourceInfo id: %d, codecId: %d, fileId: %d", sourceData->m_sourceInfo.m_codecType, sourceData->m_sourceInfo.m_fileId);
 
     auto audioSrcIt = m_audioSources.find(trigger->m_audioFilePath);
     if(audioSrcIt == m_audioSources.end()) {
@@ -446,7 +443,7 @@ EAudioRequestStatus AudioSystemImpl_MA::SetPosition(Audio::IATLAudioObjectData *
     return EAudioRequestStatus::Success;
 }
 
-EAudioRequestStatus AudioSystemImpl_MA::SetMultiplePositions(Audio::IATLAudioObjectData *objectData, const Audio::MultiPositionParams &multiPositions)
+EAudioRequestStatus AudioSystemImpl_MA::SetMultiplePositions([[maybe_unused]] Audio::IATLAudioObjectData *objectData, [[maybe_unused]] const Audio::MultiPositionParams &multiPositions)
 {
     return EAudioRequestStatus::Failure;
 }
@@ -475,17 +472,17 @@ EAudioRequestStatus AudioSystemImpl_MA::SetRtpc(Audio::IATLAudioObjectData *obje
     return EAudioRequestStatus::Success;
 }
 
-EAudioRequestStatus AudioSystemImpl_MA::SetSwitchState(Audio::IATLAudioObjectData *objectData, const Audio::IATLSwitchStateImplData *switchStateData)
+EAudioRequestStatus AudioSystemImpl_MA::SetSwitchState([[maybe_unused]]  Audio::IATLAudioObjectData *objectData, [[maybe_unused]]  const Audio::IATLSwitchStateImplData *switchStateData)
 {
     return EAudioRequestStatus::Success;
 }
 
-EAudioRequestStatus AudioSystemImpl_MA::SetObstructionOcclusion(Audio::IATLAudioObjectData *objectData, float obstruction, float occlusion)
+EAudioRequestStatus AudioSystemImpl_MA::SetObstructionOcclusion([[maybe_unused]] Audio::IATLAudioObjectData *objectData, [[maybe_unused]] float obstruction, [[maybe_unused]] float occlusion)
 {
     return EAudioRequestStatus::Success;
 }
 
-EAudioRequestStatus AudioSystemImpl_MA::SetEnvironment(Audio::IATLAudioObjectData *objectData, const Audio::IATLEnvironmentImplData *environmentData, float amount)
+EAudioRequestStatus AudioSystemImpl_MA::SetEnvironment([[maybe_unused]] Audio::IATLAudioObjectData *objectData, [[maybe_unused]] const Audio::IATLEnvironmentImplData *environmentData, float amount)
 {
     return EAudioRequestStatus::Success;
 }
@@ -502,7 +499,7 @@ EAudioRequestStatus AudioSystemImpl_MA::SetListenerPosition(Audio::IATLListenerD
     return EAudioRequestStatus::Success;
 }
 
-EAudioRequestStatus AudioSystemImpl_MA::ResetRtpc(Audio::IATLAudioObjectData *objectData, const Audio::IATLRtpcImplData *rtpcData)
+EAudioRequestStatus AudioSystemImpl_MA::ResetRtpc([[maybe_unused]] Audio::IATLAudioObjectData *objectData, [[maybe_unused]] const Audio::IATLRtpcImplData *rtpcData)
 {
     //¯\_(ツ)_/¯
     return EAudioRequestStatus::Success;
@@ -681,22 +678,22 @@ void AudioSystemImpl_MA::DeleteAudioRtpcImplData(Audio::IATLRtpcImplData *oldRtp
     azdestroy(oldRtpcData, Audio::AudioImplAllocator, SATLRtpcImplData_MA);
 }
 
-IATLSwitchStateImplData *AudioSystemImpl_MA::NewAudioSwitchStateImplData(const AZ::rapidxml::xml_node<char> *audioSwitchStateNode)
+IATLSwitchStateImplData *AudioSystemImpl_MA::NewAudioSwitchStateImplData([[maybe_unused]] const AZ::rapidxml::xml_node<char> *audioSwitchStateNode)
 {
     return nullptr;
 }
 
-void AudioSystemImpl_MA::DeleteAudioSwitchStateImplData(Audio::IATLSwitchStateImplData *oldAudioSwitchStateData)
+void AudioSystemImpl_MA::DeleteAudioSwitchStateImplData([[maybe_unused]] Audio::IATLSwitchStateImplData *oldAudioSwitchStateData)
 {
 
 }
 
-IATLEnvironmentImplData *AudioSystemImpl_MA::NewAudioEnvironmentImplData(const AZ::rapidxml::xml_node<char> *audioEnvironmentNode)
+IATLEnvironmentImplData *AudioSystemImpl_MA::NewAudioEnvironmentImplData([[maybe_unused]] const AZ::rapidxml::xml_node<char> *audioEnvironmentNode)
 {
     return nullptr;
 }
 
-void AudioSystemImpl_MA::DeleteAudioEnvironmentImplData(Audio::IATLEnvironmentImplData *oldEnvironmentData)
+void AudioSystemImpl_MA::DeleteAudioEnvironmentImplData([[maybe_unused]] Audio::IATLEnvironmentImplData *oldEnvironmentData)
 {
 
 }
@@ -737,14 +734,14 @@ void AudioSystemImpl_MA::DeleteAudioObjectData(Audio::IATLAudioObjectData *oldOb
     }
 }
 
-IATLListenerData *AudioSystemImpl_MA::NewDefaultAudioListenerObjectData(Audio::TATLIDType objectId)
+IATLListenerData *AudioSystemImpl_MA::NewDefaultAudioListenerObjectData([[maybe_unused]] Audio::TATLIDType objectId)
 {
     //Index 0 is always reserved for this default audio listener, and it's enabled by default.
     auto listener = azcreate(SATLListenerData_MA, (0), Audio::AudioImplAllocator);
     return listener;
 }
 
-IATLListenerData *AudioSystemImpl_MA::NewAudioListenerObjectData(Audio::TATLIDType objectId)
+IATLListenerData *AudioSystemImpl_MA::NewAudioListenerObjectData([[maybe_unused]] Audio::TATLIDType objectId)
 {
     if(m_availableListeners.empty())
     {
@@ -772,7 +769,7 @@ void AudioSystemImpl_MA::DeleteAudioListenerObjectData(Audio::IATLListenerData *
     azdestroy(oldListenerData, Audio::AudioImplAllocator, Audio::IATLListenerData);
 }
 
-IATLEventData *AudioSystemImpl_MA::NewAudioEventData(Audio::TAudioEventID eventID)
+IATLEventData *AudioSystemImpl_MA::NewAudioEventData([[maybe_unused]] Audio::TAudioEventID eventID)
 {
     return azcreate(SATLEventData_MA, (), Audio::AudioImplAllocator);
 }
@@ -830,17 +827,17 @@ AZStd::vector<AudioImplMemoryPoolInfo> AudioSystemImpl_MA::GetMemoryPoolInfo()
     return AZStd::vector<AudioImplMemoryPoolInfo>();
 }
 
-bool AudioSystemImpl_MA::CreateAudioSource(const Audio::SAudioInputConfig &sourceConfig)
+bool AudioSystemImpl_MA::CreateAudioSource([[maybe_unused]] const Audio::SAudioInputConfig &sourceConfig)
 {
     return false;
 }
 
-void AudioSystemImpl_MA::DestroyAudioSource(Audio::TAudioSourceId sourceId)
+void AudioSystemImpl_MA::DestroyAudioSource([[maybe_unused]] Audio::TAudioSourceId sourceId)
 {
 
 }
 
-void AudioSystemImpl_MA::SetPanningMode(Audio::PanningMode mode)
+void AudioSystemImpl_MA::SetPanningMode([[maybe_unused]] Audio::PanningMode mode)
 {
     //Not available in MiniAudio.
 }
