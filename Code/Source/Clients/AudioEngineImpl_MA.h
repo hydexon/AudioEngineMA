@@ -6,7 +6,7 @@
 #include <AzCore/IO/Path/Path.h>
 
 #include "ATLEntities_MA.h"
-#include "MASoundGrpManager.h"
+#include "SoundGroupManager.h"
 #include <miniaudio.h>
 
 namespace AudioEngineMA

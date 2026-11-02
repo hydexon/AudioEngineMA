@@ -20,7 +20,6 @@ struct SoundGroupData
 
     bool m_noPitch = false;
     bool m_noSpatialization = false;
-    bool m_noDefaultAttachment = false;
 
     float m_volume = 0.0f;
     float m_pitch  = 1.0f;

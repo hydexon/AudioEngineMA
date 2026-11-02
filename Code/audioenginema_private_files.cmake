@@ -1,5 +1,6 @@
 
 set(FILES
+    Source/EditorEngineInterop.h
     Source/AudioEngineMAModuleInterface.cpp
     Source/AudioEngineMAModuleInterface.h
     Source/Clients/AudioEngineMASystemComponent.cpp
@@ -18,6 +19,6 @@ set(FILES
     Source/Clients/ATLEntities_MA.h
     Source/Clients/FileIOVFS_MA.cpp
     Source/Clients/FileIOVFS_MA.h
-    Source/Clients/MASoundGrpManager.cpp
-    Source/Clients/MASoundGrpManager.h
+    Source/Clients/SoundGroupManager.cpp
+    Source/Clients/SoundGroupManager.h
 )

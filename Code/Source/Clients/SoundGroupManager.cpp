@@ -1,4 +1,4 @@
-#include "MASoundGrpManager.h"
+#include "SoundGroupManager.h"
 #include "SoundGroupData.h"
 #include "Common_MA.h"
 
@@ -181,7 +181,7 @@ ma_uint32 SoundGroupManager::GetFlagsFromBools(bool noDefaultAttach, bool noSpat
 
 AZStd::unique_ptr<SoundGroup> SoundGroupManager::PopulateSoundGroup(const SoundGroupData &data, SoundGroup *parent)
 {
-    ma_uint32 flags = GetFlagsFromBools(data.m_noDefaultAttachment, data.m_noSpatialization, data.m_noPitch);
+    ma_uint32 flags = GetFlagsFromBools(false, data.m_noSpatialization, data.m_noPitch);
     auto groupNode = AZStd::make_unique<SoundGroup>(parent, m_engine, data.m_groupName, flags);
     if(!groupNode->Initialize())
     {
