@@ -42,7 +42,7 @@ namespace MemHooks
 
 namespace Logging
 {
-    void AzLogCallback(void* pUserData, ma_uint32 logLevel, const char* pMessage)
+    void AzLogCallback([[maybe_unused]]void* pUserData, ma_uint32 logLevel, const char* pMessage)
     {
         switch(logLevel)
         {
@@ -239,7 +239,7 @@ EAudioRequestStatus AudioSystemImpl_MA::PrepareTriggerAsync([[maybe_unused]] Aud
     return EAudioRequestStatus::Success;
 }
 
-EAudioRequestStatus AudioSystemImpl_MA::UnprepareTriggerAsync([[maybe_unused]] Audio::IATLAudioObjectData *pAudioObjectData, [[maybe_unused]] const Audio::IATLTriggerImplData *pTriggerData, Audio::IATLEventData *pEventData)
+EAudioRequestStatus AudioSystemImpl_MA::UnprepareTriggerAsync([[maybe_unused]] Audio::IATLAudioObjectData *pAudioObjectData, [[maybe_unused]] const Audio::IATLTriggerImplData *pTriggerData, [[maybe_unused]] Audio::IATLEventData *pEventData)
 {
     return EAudioRequestStatus::Success;
 }
@@ -482,7 +482,7 @@ EAudioRequestStatus AudioSystemImpl_MA::SetObstructionOcclusion([[maybe_unused]]
     return EAudioRequestStatus::Success;
 }
 
-EAudioRequestStatus AudioSystemImpl_MA::SetEnvironment([[maybe_unused]] Audio::IATLAudioObjectData *objectData, [[maybe_unused]] const Audio::IATLEnvironmentImplData *environmentData, float amount)
+EAudioRequestStatus AudioSystemImpl_MA::SetEnvironment([[maybe_unused]] Audio::IATLAudioObjectData *objectData, [[maybe_unused]] const Audio::IATLEnvironmentImplData *environmentData, [[maybe_unused]] float amount)
 {
     return EAudioRequestStatus::Success;
 }
