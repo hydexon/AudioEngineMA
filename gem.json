@@ -1,18 +1,20 @@
 {
     "gem_name": "AudioEngineMA",
     "version": "1.0.0",
-    "display_name": "AudioEngineMA",
+    "display_name": "MiniAudio Audio Engine",
     "license": "MIT",
     "license_url": "https://opensource.org/license/MIT0",
     "origin": "hydexon",
     "origin_url": "https://github.com/hydexon/AudioEngineMA",
     "type": "Code",
-    "summary": "A short description of this Gem",
+    "summary": "MiniAudio basic implementation for O3DE's ATL/AudioSystem",
     "canonical_tags": [
         "Gem"
     ],
     "user_tags": [
-        "AudioEngineMA"
+        "Audio",
+        "Utility",
+        "Tools"
     ],
     "platforms": [
         ""
@@ -21,6 +23,7 @@
     "requirements": "The gem needs to disable the MiniAudio gem that's enabled by default in new projects",
     "documentation_url": "Link to any documentation of your Gem",
     "dependencies": [
+        "AudioSystem"
     ],
     "repo_uri": "https://github.com/hydexon/AudioEngineMA",
     "compatible_engines": [
