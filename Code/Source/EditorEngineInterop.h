@@ -21,15 +21,15 @@ namespace AudioEngineMA
         static const bool EnableEventQueue = true;
 
         virtual ~SoundGroupManagerRequests() = default;
-
+#if 0
         virtual void ResetSoundGroupLayout() = 0;
         virtual void LoadSoundGroupLayout(AZ::IO::FixedMaxPath layoutFilePath) = 0;
         virtual void SaveSoundGroupLayout(AZ::IO::FixedMaxPath layoutFilePath) = 0;
-
-        virtual void AddSoundGroup(AZ::Name name, uint32_t flags) = 0;
+#endif
+        virtual void AddSoundGroup(AZ::Name name, bool noSpatial, bool noPitch, AZ::Name parentName = AZ::Name()) = 0;
         virtual void RemoveSoundGroup(AZ::Name name) = 0;
         virtual void ChangeSoundGroupName(AZ::Name name) = 0;
-
+#if 0
         virtual void AssignSoundToSoundGroup(AZ::Name name, ma_sound* sound) = 0;
         virtual void RemoveSoundFromSoundGroup(AZ::Name name, ma_sound* sound) = 0;
 
@@ -39,17 +39,14 @@ namespace AudioEngineMA
         virtual void SetSoundGroupAttenuationMode(AZ::Name name, AttenuationMode::Type type) = 0;
         virtual void SetSoundGroupPositioning(AZ::Name name, PositioningMode::Type type) = 0;
         virtual void SetSoundGroupPanMode(AZ::Name name, PanMode::Type type) = 0;
-        virtual void SetDopplerFactor(AZ::Name name,float factor) = 0;
-        virtual void SetMinDistances(AZ::Name name, float minDistance) = 0;
-        virtual void SetMaxDistances(AZ::Name name, float maxDistance) = 0;
-        virtual void SetMinGains(AZ::Name name, float minGain) = 0;
-        virtual void SetMaxGains(AZ::Name name, float maxGain) = 0;
-        virtual void SetAttenuationConeInnerAngle(AZ::Name name, float angle) = 0;
-        virtual void SetAttenuationConeOuterAngle(AZ::Name name, float angle) = 0;
-        virtual void SetAttenuationConeOuterGrain(AZ::Name name, float angle) = 0;
+        virtual void SetSoundGroupDopplerFactor(AZ::Name name,float factor) = 0;
+        virtual void SetSoundGroupDistances(AZ::Name name, float minDistance, float maxDistance) = 0;
+        virtual void SetSoundGroupGains(AZ::Name name, float minGain, float maxGain) = 0;
+        virtual void SetSoundGroupAttenuationCone(AZ::Name name, float innerAngle, float outerAngle, float outerGrain) = 0;
 
         virtual void RequestSoundGroupLayout() = 0;
         virtual void RequestSoundGroupNames() = 0;
+#endif
     };
     using SoundGroupManagerRequestBus = AZ::EBus<SoundGroupManagerRequests>;
 
@@ -63,9 +60,24 @@ namespace AudioEngineMA
 
         virtual ~SoundGroupManagerNotifications() = default;
 
-        virtual void OnRequestFinished_AddSoundGroup([[maybe_unused]]bool success, [[maybe_unused]] SoundGroupData data) {};
-        virtual void OnRequestFinished_RemoveSoundGroup([[maybe_unused]]bool success, [[maybe_unused]] AZ::Name soundGroupName) {};
-        virtual void OnRequestFinished_RenameSoundGroup([[maybe_unused]]bool success, [[maybe_unused]] AZ::Name newGroupName) {};
+        virtual void OnRequestCompleted_AddSoundGroup([[maybe_unused]]bool success, [[maybe_unused]] SoundGroupData data, [[maybe_unused]] AZ::Name parentGroup) {};
+        virtual void OnRequestCompleted_RemoveSoundGroup([[maybe_unused]]bool success, [[maybe_unused]] AZ::Name soundGroupName) {};
+        virtual void OnRequestCompleted_RenameSoundGroup([[maybe_unused]]bool success, [[maybe_unused]] AZ::Name newGroupName) {};
+#if 0
+        virtual void OnRequestCompleted_SetSoundGroupVolume([[maybe_unused]] bool success, [[maybe_unused]]AZ::Name groupName, [[maybe_unused]]float volume) {};
+        virtual void OnRequestCompleted_SetSoundGroupPitch([[maybe_unused]] bool success, [[maybe_unused]] AZ::Name groupName, [[maybe_unused]]float pitch) {};
+        virtual void OnRequestCompleted_SetSoundGroupPan([[maybe_unused]]bool success, [[maybe_unused]] AZ::Name groupName, [[maybe_unused]]float pan) {};
+        virtual void OnRequestCompleted_SetSoundGroupAttenuationMode([[maybe_unused]] bool success, [[maybe_unused]] AZ::Name groupName, [[maybe_unused]]AttenuationMode::Type type) {};
+        virtual void OnRequestCompleted_SetSoundGroupPositioning([[maybe_unused]] bool success, [[maybe_unused]] AZ::Name groupName, [[maybe_unused]] PositioningMode::Type type) {};
+        virtual void OnRequestCompleted_SetSoundGroupPanMode([[maybe_unused]]bool success, [[maybe_unused]] AZ::Name groupName, [[maybe_unused]] PanMode::Type type) {};
+        virtual void OnRequestCompleted_SetSoundGroupDopplerFactor([[maybe_unused]]bool success, [[maybe_unused]] AZ::Name groupName, [[maybe_unused]]float factor) {};
+        virtual void OnRequestCompleted_SetSoundGroupDistances([[maybe_unused]]bool success, [[maybe_unused]] AZ::Name groupName, [[maybe_unused]]float minDistance, [[maybe_unused]] float maxDistance ) {};
+        virtual void OnRequestCompleted_SetSoundGroupGains([[maybe_unused]]bool success, [[maybe_unused]]AZ::Name groupName, [[maybe_unused]]float minGains, [[maybe_unused]]float maxGains) {};
+        virtual void OnRequestCompleted_SetSoundGroupAttenuationCone([[maybe_unused]]bool success, [[maybe_unused]]AZ::Name groupName, [[maybe_unused]]float innerAngle, [[maybe_unused]]float outerAngle, [[maybe_unused]]float outerGrain) {};
+
+        virtual void OnUpdateSoundGroupLayout([[maybe_unused]] SoundGroupLayoutData sndGroupLayout) {};
+        virtual void OnUpdateSoundGroupNames([[maybe_unused]] AZStd::vector<AZ::Name> groupNames) {};
+#endif
 
     };
     using SoundGroupManagerNotificationBus = AZ::EBus<SoundGroupManagerNotifications>;

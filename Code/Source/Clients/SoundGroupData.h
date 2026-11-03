@@ -21,9 +21,9 @@ struct SoundGroupData
     bool m_noPitch = false;
     bool m_noSpatialization = false;
 
-    float m_volume = 0.0f;
+    float m_volume = 1.0f;
     float m_pitch  = 1.0f;
-    float m_pan    = 0.0f;
+    float m_pan    = 1.0f;
 
     AZStd::vector<SoundGroupData> m_children;
 };

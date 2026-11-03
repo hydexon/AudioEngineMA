@@ -6,13 +6,15 @@ namespace AudioEngineMA
 {
 
 
-SoundGroup::SoundGroup(SoundGroup *parent, ma_engine *engine, const AZ::Name &name, ma_uint32 flags)
+SoundGroup::SoundGroup(SoundGroup *parent, ma_engine *engine, const AZ::Name &name, bool noSpatialization, bool noPitch)
     : m_parent(parent)
     , m_name(name)
-    , m_flags(flags)
     , m_engine(engine)
     , m_isInitialized(false)
+    , m_noPitch(noPitch)
+    , m_noSpatialization(noSpatialization)
 {
+    m_flags = GetFlagsFromBools(false, noSpatialization, noPitch);
 }
 
 bool SoundGroup::Initialize()
@@ -39,6 +41,51 @@ void SoundGroup::Uninitialize()
 AZStd::vector<AZStd::unique_ptr<SoundGroup> > &SoundGroup::GetChildren()
 {
     return m_children;
+}
+void SoundGroup::FetchInfo(SoundGroupData &data)
+{
+    data.m_groupName = GetName();
+    data.m_noSpatialization = m_noSpatialization;
+    data.m_noPitch = m_noPitch;
+}
+
+ma_uint32 SoundGroup::GetFlagsFromBools(bool noDefaultAttach, bool noSpatial, bool noPitch) const
+{
+    ma_uint32 flags = 0;
+    flags ^= (noDefaultAttach ? MA_SOUND_FLAG_NO_DEFAULT_ATTACHMENT : 0U);
+    flags ^= (noSpatial ? MA_SOUND_FLAG_NO_SPATIALIZATION : 0U);
+    flags ^= (noPitch ? MA_SOUND_FLAG_NO_PITCH : 0U);
+    return flags;
+}
+
+void SoundGroupManager::AddSoundGroup(AZ::Name name, bool noSpatial, bool noPitch, AZ::Name parentName) {
+    SoundGroup* parent = nullptr;
+    parent = GetSoundGroup(parentName);
+
+    SoundGroup* group = CreateSoundGroup(name, parent, false, noSpatial, noPitch);
+    bool success = group != nullptr;
+    SoundGroupData groupData;
+    if(group)
+    {
+        group->FetchInfo(groupData);
+    }
+
+    SoundGroupManagerNotificationBus::QueueBroadcast(
+                &SoundGroupManagerNotificationBus::Events::OnRequestCompleted_AddSoundGroup,
+                success, groupData, parent ? parent->GetName() : AZ::Name() );
+
+    if(success)
+    {
+    }
+
+}
+
+void SoundGroupManager::RemoveSoundGroup(AZ::Name name)
+{
+}
+
+void SoundGroupManager::ChangeSoundGroupName(AZ::Name name)
+{
 }
 
 SoundGroupManager::SoundGroupManager(ma_engine *engine)
@@ -76,8 +123,7 @@ const bool SoundGroupManager::SoundGroupExists(const AZ::Name &name)
 
 SoundGroup *SoundGroupManager::CreateSoundGroup(const AZ::Name &name, SoundGroup *parent, bool noDefaultAttach, bool noSpatial, bool noPitch)
 {
-    ma_uint32 flags = GetFlagsFromBools(noDefaultAttach, noSpatial, noPitch);
-    auto newGrp = AZStd::make_unique<SoundGroup>(parent, m_engine, name, flags);
+    auto newGrp = AZStd::make_unique<SoundGroup>(parent, m_engine, name, noSpatial, noPitch);
 
     if(!newGrp->Initialize())
     {
@@ -143,6 +189,19 @@ bool SoundGroupManager::RenameSoundGroup(const AZ::Name &oldName, const AZ::Name
     return true;
 }
 
+bool SoundGroupManager::DestroySoundGroup(const AZ::Name &name)
+{
+    auto match = m_groupsMap.find(name);
+    if(match == m_groupsMap.end())
+    {
+        return false;
+    }
+
+    match->second->Uninitialize();
+
+    return true;
+}
+
 bool SoundGroupManager::LoadGroupDefinitions(AZ::IO::PathView definitionFilePath)
 {
     SoundGroupLayoutData layout;
@@ -170,19 +229,10 @@ size_t SoundGroupManager::GetRootNodeCount() const
     return m_groups.size();
 }
 
-ma_uint32 SoundGroupManager::GetFlagsFromBools(bool noDefaultAttach, bool noSpatial, bool noPitch) const
-{
-    ma_uint32 flags = 0;
-    flags ^= (noDefaultAttach ? MA_SOUND_FLAG_NO_DEFAULT_ATTACHMENT : 0U);
-    flags ^= (noSpatial ? MA_SOUND_FLAG_NO_SPATIALIZATION : 0U);
-    flags ^= (noPitch ? MA_SOUND_FLAG_NO_PITCH : 0U);
-    return flags;
-}
 
 AZStd::unique_ptr<SoundGroup> SoundGroupManager::PopulateSoundGroup(const SoundGroupData &data, SoundGroup *parent)
 {
-    ma_uint32 flags = GetFlagsFromBools(false, data.m_noSpatialization, data.m_noPitch);
-    auto groupNode = AZStd::make_unique<SoundGroup>(parent, m_engine, data.m_groupName, flags);
+    auto groupNode = AZStd::make_unique<SoundGroup>(parent, m_engine, data.m_groupName, data.m_noSpatialization, data.m_noPitch);
     if(!groupNode->Initialize())
     {
         return nullptr;

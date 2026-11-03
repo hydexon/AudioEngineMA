@@ -8,6 +8,7 @@
 #include <AzCore/std/smart_ptr/unique_ptr.h>
 #include <AzCore/IO/Path/Path.h>
 
+#include "../EditorEngineInterop.h"
 #include <miniaudio.h>
 
 namespace AudioEngineMA {
@@ -23,7 +24,7 @@ public:
     AZ_DISABLE_COPY_MOVE(SoundGroup);
     friend class SoundGroupManager;
 
-    SoundGroup(SoundGroup* parent, ma_engine* engine, const AZ::Name& name, ma_uint32 flags = 0);
+    SoundGroup(SoundGroup* parent, ma_engine* engine, const AZ::Name& name, bool noSpatialization, bool noPitch);
 
     bool Initialize();
     void Uninitialize();
@@ -32,6 +33,7 @@ public:
     ma_sound_group* GetMASoundGroup() { return &m_group; }
     SoundGroup* GetParent() { return m_parent; }
     AZStd::vector<AZStd::unique_ptr<SoundGroup>>& GetChildren();
+    void FetchInfo(SoundGroupData& data);
 
 private:
     ma_engine* m_engine;
@@ -41,10 +43,16 @@ private:
     AZ::Name m_name;
     ma_uint32 m_flags;
     SoundGroup* m_parent;
+    AZStd::vector<AZStd::reference_wrapper<ma_sound>> m_sounds;
     AZStd::vector<AZStd::unique_ptr<SoundGroup>> m_children;
+
+    bool m_noSpatialization;
+    bool m_noPitch;
+
+    ma_uint32 GetFlagsFromBools(bool noDefaultAttach, bool noSpatial, bool noPitch) const;
 };
 
-class SoundGroupManager
+class SoundGroupManager : private SoundGroupManagerRequestBus::Handler
 {
 public:
     AUDIO_IMPL_CLASS_ALLOCATOR(SoundGroupManager);
@@ -58,8 +66,10 @@ public:
     SoundGroup* GetSoundGroup(const AZ::Name& name);
     SoundGroup* GetRootSoundGroupAtIndex(const int index);
     const bool SoundGroupExists(const AZ::Name& name);
+
     SoundGroup* CreateSoundGroup(const AZ::Name& name, SoundGroup* parent = nullptr, bool noDefaultAttach = false, bool noSpatial = false, bool noPitch = false);
     bool RenameSoundGroup(const AZ::Name& oldName, const AZ::Name& newName);
+    bool DestroySoundGroup(const AZ::Name& name);
 
     bool LoadGroupDefinitions(AZ::IO::PathView definitionFilePath);
     //bool SaveGroupDefinitions(AZ::IO::PathView definitionFilePath);
@@ -70,8 +80,16 @@ private:
     AZStd::vector<AZStd::unique_ptr<SoundGroup>> m_groups;
     AZStd::unordered_map<AZ::Name, SoundGroup*> m_groupsMap;
 
-    ma_uint32 GetFlagsFromBools(bool noDefaultAttach, bool noSpatial, bool noPitch) const;
     AZStd::unique_ptr<SoundGroup> PopulateSoundGroup(const SoundGroupData& data, SoundGroup* parent);
+
+    void AddSoundGroup(AZ::Name name, bool noSpatial,
+                       bool noPitch,
+                       AZ::Name parentName = AZ::Name()) override;
+
+    void RemoveSoundGroup(AZ::Name name) override;
+
+    void ChangeSoundGroupName(AZ::Name name) override;
+
 };
 
 }
