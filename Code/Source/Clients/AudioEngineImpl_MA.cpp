@@ -154,7 +154,7 @@ EAudioRequestStatus AudioSystemImpl_MA::Initialize()
         m_availableListeners.push_back(i);
     }
 
-    m_soundGroupsManager = AZStd::make_unique<SoundGroupManager>(m_engine.get());
+    //m_soundGroupsManager = AZStd::make_unique<SoundGroupManager>(m_engine.get());
     AZ_Info(Constants::LogWindow, "MiniAudio-backend for AudioSystem initalialized");
     return EAudioRequestStatus::Success;
 }

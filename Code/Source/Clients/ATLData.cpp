@@ -136,6 +136,8 @@ ma_positioning PositioningMode::ToMA(Type type)
 
 void AudioFileTriggerParameters::ReadFromXML(const AZ::rapidxml::xml_node<char> &node)
 {
+    using namespace MAXMLTags;
+
     auto triggerParamsNode = node.first_node(TagTriggerParams);
     if(!triggerParamsNode)
         return;
@@ -273,6 +275,7 @@ void AudioFileTriggerParameters::ReadFromXML(const AZ::rapidxml::xml_node<char> 
 
 void AudioFileTriggerParameters::WriteToXML(AZ::rapidxml::xml_node<char> &node, AZ::rapidxml::memory_pool<> &xmlAlloc) const
 {
+    using namespace MAXMLTags;
     //Append subnode to parent "node".
     auto subnode = xmlAlloc.allocate_node(AZ::rapidxml::node_element, TagTriggerParams);
 

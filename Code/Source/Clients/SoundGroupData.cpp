@@ -26,6 +26,15 @@ void SoundGroupData::Reflect(AZ::ReflectContext* context)
     }
 }
 
+void SoundGroupData::ReadFromXML(const AZ::rapidxml::xml_node<char> &node)
+{
+
+}
+
+void SoundGroupData::WriteToXML(AZ::rapidxml::xml_node<char> &node, AZ::rapidxml::memory_pool<> &xmlAlloc) const
+{
+}
+
 void SoundGroupLayoutData::Reflect(AZ::ReflectContext* context)
 {
     if(auto* serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
@@ -79,6 +88,15 @@ bool SoundGroupLayoutData::Load(AZ::IO::PathView filePath)
     }
 
     return true;
+}
+
+void SoundGroupLayoutData::ReadFromXML(const AZ::rapidxml::xml_node<char> &node)
+{
+
+}
+
+void SoundGroupLayoutData::WriteToXML(AZ::rapidxml::xml_node<char> &node, AZ::rapidxml::memory_pool<> &xmlAlloc) const
+{
 }
 
 }

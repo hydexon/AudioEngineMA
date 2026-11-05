@@ -217,7 +217,7 @@ namespace AudioEngineMA
         AZStd::unordered_map<AZ::IO::FixedMaxPath, AudioSourceBuffer> m_audioSources;
         AZStd::unordered_set<AudioObjectPtr> m_audioObjects;
 
-        AZStd::unique_ptr<SoundGroupManager> m_soundGroupsManager;
+        //AZStd::unique_ptr<SoundGroupManager> m_soundGroupsManager;
         //Listeners:
         AZStd::vector<int> m_availableListeners;
         void CheckObjectForExpiredMASounds(SATLAudioObjectData_MA& audioObj);

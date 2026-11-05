@@ -8,88 +8,79 @@
 #include <AzCore/std/smart_ptr/unique_ptr.h>
 #include <AzCore/IO/Path/Path.h>
 
-#include "../EditorEngineInterop.h"
+//#include "../EditorEngineInterop.h"
+#include "SoundGroupData.h"
 #include <miniaudio.h>
 
-namespace AudioEngineMA {
+namespace AudioEngineMA
+{
 
 class SoundGroupManager;
-
-struct SoundGroupData;
 
 class SoundGroup
 {
 public:
+    AZ_DISABLE_COPY(SoundGroup);
     AUDIO_IMPL_CLASS_ALLOCATOR(SoundGroup);
-    AZ_DISABLE_COPY_MOVE(SoundGroup);
     friend class SoundGroupManager;
 
-    SoundGroup(SoundGroup* parent, ma_engine* engine, const AZ::Name& name, bool noSpatialization, bool noPitch);
+    //SoundGroup(ma_engine* engine, AZ::Name& name, bool noSpatial, bool noPitch, SoundGroup* parent = nullptr);
+    //~SoundGroup();
 
-    bool Initialize();
-    void Uninitialize();
+    AZ::Name& GetName() { return m_groupName; }
+    bool SetName(AZ::Name& name);
 
-    const AZ::Name& GetName() const { return m_name; }
-    ma_sound_group* GetMASoundGroup() { return &m_group; }
-    SoundGroup* GetParent() { return m_parent; }
-    AZStd::vector<AZStd::unique_ptr<SoundGroup>>& GetChildren();
-    void FetchInfo(SoundGroupData& data);
 
 private:
     ma_engine* m_engine;
-    ma_sound_group m_group;
-
-    bool m_isInitialized;
-    AZ::Name m_name;
-    ma_uint32 m_flags;
+    ma_sound_group* m_group;
+    AZ::Name m_groupName;
     SoundGroup* m_parent;
-    AZStd::vector<AZStd::reference_wrapper<ma_sound>> m_sounds;
-    AZStd::vector<AZStd::unique_ptr<SoundGroup>> m_children;
+    AZStd::vector<SoundGroup> m_children;
 
-    bool m_noSpatialization;
-    bool m_noPitch;
-
-    ma_uint32 GetFlagsFromBools(bool noDefaultAttach, bool noSpatial, bool noPitch) const;
+    //Common Data:
+    float m_volume = 1.0f;
+    float m_pitch  = 1.0f;
+    float m_pan    = 1.0f;
+    float m_rolloff = 1.0f;
+    float m_coneinnerAngle = (2 * 3.14159265358979323846264f);
+    float m_coneOuterAngle = (2 * 3.14159265358979323846264f);
+    float m_coneOuterGrain = 1.0f;
+    float m_minDistance = 1.0f;
+    float m_maxDistance = FLT_MAX;
+    float m_dopplerFactor = 1.0f;
+    float m_minGains = 0.1f;
+    float m_maxGains = 1.0f;
+    bool m_spatializationEnable = true;
+    AttenuationMode::Type m_attenuationMode = AttenuationMode::Inverse;
+    PositioningMode::Type m_positioningType = PositioningMode::Absolute;
+    PanMode::Type m_panMode = PanMode::Balance;
 };
 
+#if 0
 class SoundGroupManager : private SoundGroupManagerRequestBus::Handler
 {
-public:
+public:    
     AUDIO_IMPL_CLASS_ALLOCATOR(SoundGroupManager);
-    AZ_DISABLE_COPY_MOVE(SoundGroupManager)
+    AZ_DISABLE_COPY_MOVE(SoundGroupManager);
 
-    SoundGroupManager(ma_engine* engine);
-    ~SoundGroupManager();
+    SoundGroup* CreateSoundGroup(AZ::Name& name, bool noSpatial, bool noPitch, AZ::Name& parentName);
+    bool DestroySoundGroup(AZ::Name& name);
 
-    void Reset();
+    bool IsSoundGroupExists(const AZ::Name& name);
+    SoundGroup* GetSoundGroup(const AZ::Name& name) const;
 
-    SoundGroup* GetSoundGroup(const AZ::Name& name);
-    SoundGroup* GetRootSoundGroupAtIndex(const int index);
-    const bool SoundGroupExists(const AZ::Name& name);
-
-    SoundGroup* CreateSoundGroup(const AZ::Name& name, SoundGroup* parent = nullptr, bool noDefaultAttach = false, bool noSpatial = false, bool noPitch = false);
-    bool RenameSoundGroup(const AZ::Name& oldName, const AZ::Name& newName);
-    bool DestroySoundGroup(const AZ::Name& name);
-
-    bool LoadGroupDefinitions(AZ::IO::PathView definitionFilePath);
-    //bool SaveGroupDefinitions(AZ::IO::PathView definitionFilePath);
-
-    size_t GetRootNodeCount() const;
 private:
-    ma_engine* m_engine;
-    AZStd::vector<AZStd::unique_ptr<SoundGroup>> m_groups;
-    AZStd::unordered_map<AZ::Name, SoundGroup*> m_groupsMap;
+    AZStd::vector<AZStd::unique_ptr<SoundGroup>> m_soundGroups;
+    AZStd::unordered_map<AZ::Name, SoundGroup*>  m_soundGroupsFlatMap;
 
-    AZStd::unique_ptr<SoundGroup> PopulateSoundGroup(const SoundGroupData& data, SoundGroup* parent);
-
-    void AddSoundGroup(AZ::Name name, bool noSpatial,
-                       bool noPitch,
+    void AddSoundGroup(AZ::Name name, bool noSpatial, bool noPitch,
                        AZ::Name parentName = AZ::Name()) override;
 
     void RemoveSoundGroup(AZ::Name name) override;
 
     void ChangeSoundGroupName(AZ::Name name) override;
-
 };
+#endif
 
 }
