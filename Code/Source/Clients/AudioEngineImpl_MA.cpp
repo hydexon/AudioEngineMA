@@ -154,7 +154,7 @@ EAudioRequestStatus AudioSystemImpl_MA::Initialize()
         m_availableListeners.push_back(i);
     }
 
-    //m_soundGroupsManager = AZStd::make_unique<SoundGroupManager>(m_engine.get());
+    m_soundGroupsManager = AZStd::make_unique<SoundGroupManager>(m_engine.get());
     AZ_Info(Constants::LogWindow, "MiniAudio-backend for AudioSystem initalialized");
     return EAudioRequestStatus::Success;
 }
@@ -282,7 +282,8 @@ EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectDa
             return EAudioRequestStatus::Failure;
         }
 
-        res = ma_sound_init_from_data_source(m_engine.get(), decoder, MA_SOUND_FLAG_DECODE, nullptr, sound); //@TODO: sound groups!
+        SoundGroup* sgroup = m_soundGroupsManager->GetSoundGroup(trigger->m_audioTriggerParams.m_soundGroupName);
+        res = ma_sound_init_from_data_source(m_engine.get(), decoder, MA_SOUND_FLAG_DECODE, sgroup ? sgroup->group() : nullptr, sound);
 
         if(res != MA_SUCCESS)
         {

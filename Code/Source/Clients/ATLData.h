@@ -44,6 +44,7 @@ namespace AudioEngineMA
         const char* ToString(Type type);
         Type FromString(const char* str);
         ma_attenuation_model ToMAModel(Type type);
+        Type FromMA(ma_attenuation_model matype);
     }
 
     namespace PanMode
@@ -60,6 +61,7 @@ namespace AudioEngineMA
         const char* ToString(Type type);
         Type FromString(const char* str);
         ma_pan_mode ToMA(Type type);
+        Type FromMA(ma_pan_mode matype);
     }
 
     namespace PositioningMode
@@ -76,6 +78,7 @@ namespace AudioEngineMA
         const char* ToString(Type type);
         Type FromString(const char* str);
         ma_positioning ToMA(Type type);
+        Type FromMA(ma_positioning matype);
     }
 
     struct AudioFileTriggerParameters
@@ -88,7 +91,7 @@ namespace AudioEngineMA
 
         constexpr static const char* TagTriggerParams = "TriggerParams";
 
-        AZ::Name m_soundGroupName = AZ::Name(Constants::MasterGroupName);
+        AZ::Name m_soundGroupName = AZ::Name();
         SoundAction::Type m_soundAction = SoundAction::Type::Start;
         AttenuationMode::Type m_attenuationMode = AttenuationMode::Type::Inverse;
         PanMode::Type m_panMode = PanMode::Balance;

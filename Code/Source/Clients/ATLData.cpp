@@ -468,5 +468,48 @@ void GlobalRTPCParams::WriteToXML(AZ::rapidxml::xml_node<char> &node, AZ::rapidx
     node.append_attribute(attr);
 }
 
+AttenuationMode::Type AttenuationMode::FromMA(ma_attenuation_model matype)
+{
+    switch(matype)
+    {
+    case ma_attenuation_model_none:
+        return AttenuationMode::None;
+    case ma_attenuation_model_linear:
+        return AttenuationMode::Linear;
+    case ma_attenuation_model_inverse:
+        return AttenuationMode::Inverse;
+    case ma_attenuation_model_exponential:
+        return AttenuationMode::Exponential;
+    default:
+        return AttenuationMode::Count;
+    }
+}
+
+PanMode::Type PanMode::FromMA(ma_pan_mode matype)
+{
+    switch(matype)
+    {
+    case ma_pan_mode_balance:
+        return PanMode::Balance;
+    case ma_pan_mode_pan:
+        return PanMode::Pan;
+    default:
+        return PanMode::Count;
+    }
+}
+
+PositioningMode::Type PositioningMode::FromMA(ma_positioning matype)
+{
+    switch(matype)
+    {
+    case ma_positioning_absolute:
+        return PositioningMode::Absolute;
+    case ma_positioning_relative:
+        return PositioningMode::Relative;
+    default:
+        return PositioningMode::Count;
+    }
+}
+
 
 } // namespace AudioEngineMA
