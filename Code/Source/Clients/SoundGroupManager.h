@@ -80,14 +80,22 @@ private:
 
 class SoundGroupManager : private SoundGroupManagerRequestBus::Handler
 {
-public:    
+public:
     AUDIO_IMPL_CLASS_ALLOCATOR(SoundGroupManager);
     AZ_DISABLE_COPY_MOVE(SoundGroupManager);
 
+    static AZ::Name EmptySoundGroup;
     explicit SoundGroupManager(ma_engine* engine);
     ~SoundGroupManager();
 
+    void Reset();
+
+    bool LoadSoundGroupsLayout(AZ::IO::PathView layoutFilePath);
+    bool SaveSoundGroupsLayout(AZ::IO::PathView layoutFilePath);
+
     SoundGroup* CreateSoundGroup(AZ::Name& name, AZ::Name& parentName);
+    SoundGroup* CreateSoundGroup(AZ::Name& name, SoundGroup* parent);
+
     bool DestroySoundGroup(AZ::Name& name);
     bool RenameSoundGroup(AZ::Name& oldname, AZ::Name newName );
 
@@ -99,12 +107,27 @@ private:
     AZStd::vector<AZStd::unique_ptr<SoundGroup>> m_soundGroups;
     AZStd::unordered_map<AZ::Name, SoundGroup*>  m_soundGroupsFlatMap;
 
+    void GatherSoundGroupLayout(SoundGroupLayoutData& layout) const;
+    void GatherChildSoundGroupData(SoundGroup *groupPtr, SoundGroupData& data) const;
+
+    bool PopulateChildSoundGroups(SoundGroup *parent, AZStd::vector<SoundGroupData>& childgroups);
+
+    //SoundGroupManagerRequests
+    void RequestSoundGroupLayout() override;
+
+    void ResetSoundGroupLayout() override;
+
+    void LoadSoundGroupLayout(AZ::IO::FixedMaxPath layoutFilePath) override;
+
+    void SaveSoundGroupLayout(AZ::IO::FixedMaxPath layoutFilePath) override;
+
     void AddSoundGroup(AZ::Name name,
                        AZ::Name parentName = AZ::Name()) override;
 
     void RemoveSoundGroup(AZ::Name name) override;
 
     void ChangeSoundGroupName(AZ::Name oldname, AZ::Name newName) override;
+
 };
 
 }

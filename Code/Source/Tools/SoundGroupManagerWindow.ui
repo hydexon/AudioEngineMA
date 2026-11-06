@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>872</width>
     <height>701</height>
    </rect>
   </property>
@@ -15,6 +15,22 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_5">
+    <item>
+     <widget class="QLabel" name="lblFile">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="textFormat">
+       <enum>Qt::TextFormat::RichText</enum>
+      </property>
+     </widget>
+    </item>
     <item>
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
@@ -426,7 +442,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>872</width>
      <height>23</height>
     </rect>
    </property>

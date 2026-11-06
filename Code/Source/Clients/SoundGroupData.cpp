@@ -17,9 +17,22 @@ void SoundGroupData::Reflect(AZ::ReflectContext* context)
         serializeContext->Class<SoundGroupData>()
                 ->Version(1)
                 ->Field("Name", &SoundGroupData::m_groupName)
+                ->Field("m_spatializationEnabled", &SoundGroupData::m_spatialization)
                 ->Field("Volume", &SoundGroupData::m_volume)
                 ->Field("Pitch", &SoundGroupData::m_pitch)
                 ->Field("Pan", &SoundGroupData::m_pan)
+                ->Field("Rolloff", &SoundGroupData::m_rolloff)
+                ->Field("ConeInnerAngle", &SoundGroupData::m_coneinnerAngle)
+                ->Field("ConeOuterAngle", &SoundGroupData::m_coneOuterAngle)
+                ->Field("ConeOuterGrain", &SoundGroupData::m_coneOuterGrain)
+                ->Field("MinDistance", &SoundGroupData::m_minDistance)
+                ->Field("MaxDistance", &SoundGroupData::m_maxDistance)
+                ->Field("DopplerFactor", &SoundGroupData::m_dopplerFactor)
+                ->Field("MinGains", &SoundGroupData::m_minGains)
+                ->Field("MaxGains", &SoundGroupData::m_maxGains)
+                ->Field("AttenuationMode", &SoundGroupData::m_attenuationMode) //Raw integer value fallback, should consider O3DE RTTI enums?
+                ->Field("PositioningType", &SoundGroupData::m_positioningType)
+                ->Field("PanMode", &SoundGroupData::m_panMode)
                 ->Field("Children", &SoundGroupData::m_children);
     }
 }

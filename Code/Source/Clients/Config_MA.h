@@ -10,6 +10,6 @@ namespace AudioEngineMA
         constexpr const auto AudioFilesPath = AZ::IO::FixedMaxPath("Assets/Audio/MiniAudio").LexicallyNormal();
         constexpr const char* LocalizationDirName = "localization";
         constexpr const char* SupportedFileFormatsArray[] = {"wav", "mp3", "ogg", "flac"};
-        constexpr const char* MANodeLayoutExt = ".ma_nodegraph";
+        constexpr const char* MASoundGroupLayoutExt = ".ma_soundgroups";
     }
 }

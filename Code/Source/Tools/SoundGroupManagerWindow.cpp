@@ -1,11 +1,17 @@
 #include "SoundGroupManagerWindow.h"
 #include "ui_SoundGroupManagerWindow.h"
 
+#include "Clients/Config_MA.h"
+
 #include <QTreeWidgetItem>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QFileDialog>
 #include <QLineEdit>
+#include <QFileInfo>
+
 #include <AzQtComponents/Components/Widgets/CheckBox.h>
+#include <AzCore/IO/FileIO.h>
 
 using namespace AudioEngineMA;
 
@@ -17,17 +23,24 @@ SoundGroupManagerWindow::SoundGroupManagerWindow(QWidget *parent) :
 
     AzQtComponents::CheckBox::applyToggleSwitchStyle(ui->chkbox_spatializationEnabled);
 
+    connect(ui->actionNew_Layout, &QAction::triggered, this, &SoundGroupManagerWindow::onNewLayoutActionTriggered);
+    connect(ui->actionOpen_Layout, &QAction::triggered, this, &SoundGroupManagerWindow::onLoadLayoutActionTriggered);
+    connect(ui->actionSave_Layout, &QAction::triggered, this, &SoundGroupManagerWindow::onSaveLayoutActionTriggered);
+    connect(ui->actionSave_Layout_As, &QAction::triggered, this, &SoundGroupManagerWindow::onSaveLayoutAsActionTriggered);
+
     connect(ui->btnAddGroup, &QPushButton::clicked, this, &SoundGroupManagerWindow::onAddGroupClicked);
     connect(ui->btnRemoveGroup, &QPushButton::clicked, this, &SoundGroupManagerWindow::onRemoveGroupClicked);
     connect(ui->btnRenameGroup, &QPushButton::clicked, this, &SoundGroupManagerWindow::onRenameGroupClicked);
     connect(ui->btnClearSelection, &QPushButton::clicked, this, &SoundGroupManagerWindow::onClearSelectionClicked);
     connect(ui->tw_soundGroups, &QTreeWidget::currentItemChanged, this, &SoundGroupManagerWindow::onSoundGroupItemSelected);
 
+
     ui->btnRemoveGroup->setEnabled(false);
     ui->propertiesWidget->setEnabled(false);
+    ui->lblFile->setVisible(false);
 
     SoundGroupManagerNotificationBus::Handler::BusConnect();
-    //TODO: Request Sound Group Tree Layout.
+    SoundGroupManagerRequestBus::QueueBroadcast(&SoundGroupManagerRequestBus::Events::RequestSoundGroupLayout);
 }
 
 SoundGroupManagerWindow::~SoundGroupManagerWindow()
@@ -112,11 +125,7 @@ void SoundGroupManagerWindow::onRenameGroupClicked()
 
 void SoundGroupManagerWindow::onClearSelectionClicked()
 {
-    ui->tw_soundGroups->clearSelection();
-    ui->tw_soundGroups->setCurrentItem(nullptr);
-    ui->propertiesWidget->setEnabled(false);
-    ui->btnRemoveGroup->setEnabled(false);
-    ui->btnClearSelection->setEnabled(false);
+    ResetSelectionState();
 }
 
 void SoundGroupManagerWindow::onSoundGroupItemSelected(QTreeWidgetItem *current, QTreeWidgetItem *previous)
@@ -130,32 +139,128 @@ void SoundGroupManagerWindow::onSoundGroupItemSelected(QTreeWidgetItem *current,
     ui->btnClearSelection->setEnabled(true);
 }
 
-void SoundGroupManagerWindow::OnRequestCompleted_AddSoundGroup(bool success, AudioEngineMA::SoundGroupData data, AZ::Name parentGroup)
+void SoundGroupManagerWindow::onNewLayoutActionTriggered()
 {
-    if(!success)
+    SetCurrentSavePath(QString());
+    ResetSelectionState();
+    SoundGroupManagerRequestBus::QueueBroadcast(
+                &SoundGroupManagerRequestBus::Events::RequestSoundGroupLayout);
+}
+
+void SoundGroupManagerWindow::onLoadLayoutActionTriggered()
+{
+    QString path = QFileDialog::getOpenFileName(
+                this, "Open an Sound Group Layout", AZ::IO::FileIOBase::GetInstance()->GetAlias("@devassets@"),
+                QString("MiniAudio Sound Group Layout (*.%1)").arg(Config::MASoundGroupLayoutExt));
+
+    if(path.isEmpty())
     {
-        //TODO: Show error dialog?
         return;
     }
 
-    auto parentMatch = ui->tw_soundGroups->findItems(parentGroup.GetCStr(), Qt::MatchExactly | Qt::MatchRecursive, 0);
-    QTreeWidgetItem* parent = nullptr;
-    if(parentMatch.size() == 1)
-    {
-        parent = parentMatch[0];
-    }
+    SetCurrentSavePath(path);
+    m_loadLayoutWasRequested = true;
 
-    QTreeWidgetItem* newItem = new QTreeWidgetItem();
-    newItem->setText(0, data.m_groupName.GetCStr());
-    newItem->setIcon(0, QIcon(":/AudioMAEditor/icons/ctrls/audio_file.png"));
+    SoundGroupManagerRequestBus::QueueBroadcast(
+                &SoundGroupManagerRequestBus::Events::LoadSoundGroupLayout,
+                path.toUtf8().data());
+}
 
-    if(parent)
+void SoundGroupManagerWindow::onSaveLayoutActionTriggered()
+{
+    SaveLayoutFile(false);
+}
+
+void SoundGroupManagerWindow::onSaveLayoutAsActionTriggered()
+{
+    SaveLayoutFile(true);
+}
+
+void SoundGroupManagerWindow::SetCurrentSavePath(const QString &path)
+{
+    m_currentLayoutPath = path;
+
+    if(!path.isEmpty())
     {
-        parent->addChild(newItem);
-        parent->setExpanded(true);
+        ui->lblFile->setText(QString("<b>Sound Group Layout:</b> %1").arg(QFileInfo(m_currentLayoutPath).baseName()));
+        ui->lblFile->setVisible(true);
     }
     else
     {
+        ui->lblFile->setVisible(false);
+    }
+}
+
+void SoundGroupManagerWindow::SaveLayoutFile(bool saveAs)
+{
+    if(saveAs || m_currentLayoutPath.isEmpty())
+    {
+        QString path = QFileDialog::getSaveFileName(
+                    this, "Save the Sound Group Layout",
+                    AZ::IO::FileIOBase::GetInstance()->GetAlias("@devassets@"),
+                    QString("MiniAudio Sound Group Layout (*.%1)").arg(Config::MASoundGroupLayoutExt));
+
+
+        if(!path.isEmpty())
+            SetCurrentSavePath(path);
+    }
+
+    if(!m_currentLayoutPath.isEmpty())
+    {
+        SoundGroupManagerRequestBus::QueueBroadcast(
+                    &SoundGroupManagerRequestBus::Events::SaveSoundGroupLayout,
+                    m_currentLayoutPath.toUtf8().data());
+    }
+
+}
+
+void SoundGroupManagerWindow::ResetSelectionState()
+{
+    ui->tw_soundGroups->clearSelection();
+    ui->tw_soundGroups->setCurrentItem(nullptr);
+    ui->propertiesWidget->setEnabled(false);
+    ui->btnRemoveGroup->setEnabled(false);
+    ui->btnClearSelection->setEnabled(false);
+}
+
+void SoundGroupManagerWindow::PopulateChildItems(QTreeWidgetItem *parent, AZStd::vector<AudioEngineMA::SoundGroupData> &data)
+{
+    if(!parent)
+        return;
+
+    for(auto child : data)
+    {
+        QTreeWidgetItem* item = new QTreeWidgetItem();
+        item->setText(0, child.m_groupName.GetCStr());
+        item->setIcon(0, QIcon(":/AudioMAEditor/icons/ctrls/audio_file.png"));
+        PopulateChildItems(item, child.m_children);
+        parent->addChild(item);
+        item->setExpanded(true);
+    }
+}
+
+void SoundGroupManagerWindow::OnRequestCompleted_AddSoundGroup(
+        bool success, AudioEngineMA::SoundGroupData data, AZ::Name parentGroup) {
+    if (!success) {
+        // TODO: Show error dialog?
+        return;
+    }
+
+    auto parentMatch = ui->tw_soundGroups->findItems(
+                parentGroup.GetCStr(), Qt::MatchExactly | Qt::MatchRecursive, 0);
+    QTreeWidgetItem *parent = nullptr;
+    if (parentMatch.size() == 1) {
+        parent = parentMatch[0];
+    }
+
+    QTreeWidgetItem *newItem = new QTreeWidgetItem();
+    newItem->setText(0, data.m_groupName.GetCStr());
+    newItem->setIcon(0, QIcon(":/AudioMAEditor/icons/ctrls/audio_file.png"));
+
+    if (parent) {
+        parent->addChild(newItem);
+        parent->setExpanded(true);
+    } else {
         ui->tw_soundGroups->addTopLevelItem(newItem);
     }
 }
@@ -188,4 +293,30 @@ void SoundGroupManagerWindow::OnRequestCompleted_RenameSoundGroup(bool success, 
         return;
 
     item->setText(0, newGroupName.GetCStr());
+}
+
+void SoundGroupManagerWindow::OnUpdateSoundGroupLayout(AudioEngineMA::SoundGroupLayoutData sndGroupLayout)
+{
+    if(m_loadLayoutWasRequested)
+    {
+        m_loadLayoutWasRequested = false;
+    }
+    else
+    {
+        SetCurrentSavePath(QString());
+    }
+
+    ResetSelectionState();
+    ui->tw_soundGroups->clear();
+
+    for(auto group : sndGroupLayout.m_groups)
+    {
+        QTreeWidgetItem* item = new QTreeWidgetItem();
+        item->setText(0, group.m_groupName.GetCStr());
+        item->setIcon(0, QIcon(":/AudioMAEditor/icons/ctrls/audio_file.png"));
+
+        PopulateChildItems(item, group.m_children);
+        ui->tw_soundGroups->addTopLevelItem(item);
+        item->setExpanded(true);
+    }
 }

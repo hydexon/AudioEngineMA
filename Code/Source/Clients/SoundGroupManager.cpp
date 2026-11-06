@@ -4,7 +4,6 @@
 
 namespace AudioEngineMA
 {
-
 SoundGroup::SoundGroup(ma_engine *engine, AZ::Name &name, SoundGroup *parent, SoundGroupData *srcdata)
     : m_engine(engine)
     , m_name(name)
@@ -240,6 +239,39 @@ void SoundGroup::setName(const AZ::Name &newName)
     m_name = newName;
 }
 
+
+AZ::Name SoundGroupManager::EmptySoundGroup = AZ::Name();
+
+void SoundGroupManager::ResetSoundGroupLayout()
+{
+    Reset();
+    SoundGroupLayoutData groupLayout;
+    GatherSoundGroupLayout(groupLayout);
+
+    SoundGroupManagerNotificationBus::QueueBroadcast(&SoundGroupManagerNotificationBus::Events::OnUpdateSoundGroupLayout, groupLayout);
+}
+
+void SoundGroupManager::LoadSoundGroupLayout(AZ::IO::FixedMaxPath layoutFilePath)
+{
+    LoadSoundGroupsLayout(layoutFilePath);
+    SoundGroupLayoutData layout;
+    GatherSoundGroupLayout(layout);
+
+    SoundGroupManagerNotificationBus::QueueBroadcast(&SoundGroupManagerNotificationBus::Events::OnUpdateSoundGroupLayout, layout);
+}
+
+void SoundGroupManager::SaveSoundGroupLayout(AZ::IO::FixedMaxPath layoutFilePath)
+{
+    SaveSoundGroupsLayout(layoutFilePath);
+}
+
+void SoundGroupManager::RequestSoundGroupLayout()
+{
+    SoundGroupLayoutData layout;
+    GatherSoundGroupLayout(layout);
+    SoundGroupManagerNotificationBus::QueueBroadcast(&SoundGroupManagerNotificationBus::Events::OnUpdateSoundGroupLayout, layout);
+}
+
 SoundGroupManager::SoundGroupManager(ma_engine *engine)
     : m_engine(engine)
 {
@@ -251,6 +283,45 @@ SoundGroupManager::~SoundGroupManager()
     SoundGroupManagerRequestBus::Handler::BusDisconnect();
 }
 
+void SoundGroupManager::Reset()
+{
+    m_soundGroups.clear();
+    m_soundGroupsFlatMap.clear();
+}
+
+bool SoundGroupManager::LoadSoundGroupsLayout(AZ::IO::PathView layoutFilePath)
+{
+    SoundGroupLayoutData layout;
+    if(!layout.Load(layoutFilePath))
+    {
+        return false;
+    }
+
+    Reset();
+
+    for(auto& groupData : layout.m_groups)
+    {
+        SoundGroup* group = CreateSoundGroup(groupData.m_groupName, EmptySoundGroup);
+        if(!group)
+        {
+            Reset();
+            return false;
+        }
+
+        group->ApplyData(&groupData);
+        PopulateChildSoundGroups(group, groupData.m_children);
+    }
+
+    return true;
+}
+
+bool SoundGroupManager::SaveSoundGroupsLayout(AZ::IO::PathView layoutFilePath)
+{
+    SoundGroupLayoutData layout;
+    GatherSoundGroupLayout(layout);
+    return layout.Save(layoutFilePath);
+}
+
 SoundGroup *SoundGroupManager::CreateSoundGroup(AZ::Name &name, AZ::Name &parentName)
 {
     if(IsSoundGroupExists(name))
@@ -260,6 +331,30 @@ SoundGroup *SoundGroupManager::CreateSoundGroup(AZ::Name &name, AZ::Name &parent
     }
 
     auto parent = GetSoundGroup(parentName);
+    auto newGroup = AZStd::make_unique<SoundGroup>(m_engine, name, parent, nullptr);
+    if(!newGroup)
+    {
+        return nullptr;
+    }
+
+    SoundGroup* newPtr = nullptr;
+    if(parent)
+    {
+        parent->children().push_back(AZStd::move(newGroup));
+        newPtr = parent->children().back().get();
+    }
+    else
+    {
+        m_soundGroups.push_back(AZStd::move(newGroup));
+        newPtr = m_soundGroups.back().get();
+    }
+
+    m_soundGroupsFlatMap[name] = newPtr;
+    return newPtr;
+}
+
+SoundGroup *SoundGroupManager::CreateSoundGroup(AZ::Name &name, SoundGroup *parent)
+{
     auto newGroup = AZStd::make_unique<SoundGroup>(m_engine, name, parent, nullptr);
     if(!newGroup)
     {
@@ -369,6 +464,49 @@ SoundGroup *SoundGroupManager::GetSoundGroup(const AZ::Name &name) const
     }
 
     return nullptr;
+}
+
+bool SoundGroupManager::PopulateChildSoundGroups(SoundGroup* parent, AZStd::vector<SoundGroupData> &childgroups)
+{
+    for(auto& data : childgroups)
+    {
+        SoundGroup* child = CreateSoundGroup(data.m_groupName, parent);
+        if(!child)
+        {
+            return false;
+        }
+        child->ApplyData(&data);
+        PopulateChildSoundGroups(child, data.m_children);
+    }
+
+    return true;
+}
+
+void SoundGroupManager::GatherSoundGroupLayout(SoundGroupLayoutData &layout) const
+{
+    layout.m_groups.clear();
+    layout.m_groups.reserve(m_soundGroups.size());
+
+    for(auto& groupPtr : m_soundGroups)
+    {
+        SoundGroupData data;
+        groupPtr->GatherData(data);
+        GatherChildSoundGroupData(groupPtr.get(), data);
+        layout.m_groups.emplace_back(data);
+    }
+}
+
+void SoundGroupManager::GatherChildSoundGroupData(SoundGroup *groupPtr, SoundGroupData &data) const
+{
+    data.m_children.reserve(groupPtr->m_children.size());
+    for(auto& childPtr : groupPtr->m_children)
+    {
+        SoundGroupData childData;
+        childPtr->GatherData(childData);
+        GatherChildSoundGroupData(childPtr.get(), childData);
+
+        data.m_children.emplace_back(childData);
+    }
 }
 
 void SoundGroupManager::AddSoundGroup(AZ::Name name, AZ::Name parentName)
