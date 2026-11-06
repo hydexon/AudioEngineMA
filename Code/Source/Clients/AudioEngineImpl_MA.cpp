@@ -78,6 +78,7 @@ AudioSystemImpl_MA::~AudioSystemImpl_MA()
 void AudioSystemImpl_MA::Update(float updateIntervalMS)
 {
     AZ_UNUSED(updateIntervalMS);
+    SoundGroupManagerRequestBus::ExecuteQueuedEvents();
 }
 
 EAudioRequestStatus AudioSystemImpl_MA::Initialize()

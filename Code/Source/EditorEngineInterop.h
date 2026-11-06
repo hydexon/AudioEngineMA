@@ -26,9 +26,9 @@ namespace AudioEngineMA
         virtual void LoadSoundGroupLayout(AZ::IO::FixedMaxPath layoutFilePath) = 0;
         virtual void SaveSoundGroupLayout(AZ::IO::FixedMaxPath layoutFilePath) = 0;
 #endif
-        virtual void AddSoundGroup(AZ::Name name, bool noSpatial, bool noPitch, AZ::Name parentName = AZ::Name()) = 0;
+        virtual void AddSoundGroup(AZ::Name name, AZ::Name parentName = AZ::Name()) = 0;
         virtual void RemoveSoundGroup(AZ::Name name) = 0;
-        virtual void ChangeSoundGroupName(AZ::Name name) = 0;
+        virtual void ChangeSoundGroupName(AZ::Name oldname, AZ::Name newName) = 0;
 #if 0
         virtual void AssignSoundToSoundGroup(AZ::Name name, ma_sound* sound) = 0;
         virtual void RemoveSoundFromSoundGroup(AZ::Name name, ma_sound* sound) = 0;
@@ -62,7 +62,7 @@ namespace AudioEngineMA
 
         virtual void OnRequestCompleted_AddSoundGroup([[maybe_unused]]bool success, [[maybe_unused]] SoundGroupData data, [[maybe_unused]] AZ::Name parentGroup) {};
         virtual void OnRequestCompleted_RemoveSoundGroup([[maybe_unused]]bool success, [[maybe_unused]] AZ::Name soundGroupName) {};
-        virtual void OnRequestCompleted_RenameSoundGroup([[maybe_unused]]bool success, [[maybe_unused]] AZ::Name newGroupName) {};
+        virtual void OnRequestCompleted_RenameSoundGroup([[maybe_unused]]bool success, [[maybe_unused]] AZ::Name oldGroupName, [[maybe_unused]] AZ::Name newGroupName) {};
 #if 0
         virtual void OnRequestCompleted_SetSoundGroupVolume([[maybe_unused]] bool success, [[maybe_unused]]AZ::Name groupName, [[maybe_unused]]float volume) {};
         virtual void OnRequestCompleted_SetSoundGroupPitch([[maybe_unused]] bool success, [[maybe_unused]] AZ::Name groupName, [[maybe_unused]]float pitch) {};

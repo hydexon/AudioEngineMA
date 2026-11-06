@@ -46,6 +46,7 @@ namespace MAControlTypes {
 }
 
 CAudioSystemEditor_MiniAudio::CAudioSystemEditor_MiniAudio()
+    : QObject()
 {
     InitQtResources();
 
@@ -61,6 +62,8 @@ CAudioSystemEditor_MiniAudio::CAudioSystemEditor_MiniAudio()
     m_rootControl.AddChild(&m_rtpcCtrl);
 
     RegisterQtViewPane<SoundGroupManagerWindow>(nullptr, "MiniAudio Sound Group Manager", LyViewPane::CategoryOther);
+
+    startTimer(0);
 }
 
 void CAudioSystemEditor_MiniAudio::Reload()
@@ -432,6 +435,11 @@ QWidget *CAudioSystemEditor_MiniAudio::CreateConnectionPropertiesWidget(const Au
     default:
         return nullptr;
     }
+}
+
+void CAudioSystemEditor_MiniAudio::timerEvent(QTimerEvent *event)
+{
+    SoundGroupManagerNotificationBus::ExecuteQueuedEvents();
 }
 
 AudioControls::IAudioSystemControl *CAudioSystemEditor_MiniAudio::GetControlByName(AZStd::string name, bool isLocalized, AudioControls::IAudioSystemControl *parent) const

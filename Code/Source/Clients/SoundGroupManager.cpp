@@ -5,17 +5,12 @@
 namespace AudioEngineMA
 {
 
-SoundGroup::SoundGroup(ma_engine *engine, AZ::Name &name, bool noSpatial, bool noPitch, SoundGroup *parent, SoundGroupData *srcdata)
+SoundGroup::SoundGroup(ma_engine *engine, AZ::Name &name, SoundGroup *parent, SoundGroupData *srcdata)
     : m_engine(engine)
     , m_name(name)
-    , m_noSpatial(noSpatial)
-    , m_noPitch(noPitch)
     , m_parent(parent)
 {
-    ma_uint32 flags = 0;
-    flags ^= m_noSpatial ? MA_SOUND_FLAG_NO_SPATIALIZATION : 0U;
-    flags ^= m_noPitch ? MA_SOUND_FLAG_NO_PITCH : 0U;
-    ma_sound_group_init(m_engine, flags, parent ? &parent->m_group : nullptr, &m_group);
+    ma_sound_group_init(m_engine, 0, parent ? &parent->m_group : nullptr, &m_group);
 
     //Apply properties:
     ApplyData(srcdata);
@@ -46,6 +41,7 @@ void SoundGroup::ApplyData(SoundGroupData *srcdata)
     if(!srcdata)
         return;
 
+    setSpatializationEnabled(srcdata->m_spatialization);
     setVolume(srcdata->m_volume);
     setPitch(srcdata->m_pitch);
     setPitch(srcdata->m_pan);
@@ -63,6 +59,7 @@ void SoundGroup::ApplyData(SoundGroupData *srcdata)
 
 void SoundGroup::GatherData(SoundGroupData &dstData)
 {
+    dstData.m_spatialization = isSpatializationEnabled();
     dstData.m_groupName = name();
     dstData.m_volume = getVolume();
     dstData.m_pitch  = getPitch();
@@ -76,6 +73,16 @@ void SoundGroup::GatherData(SoundGroupData &dstData)
     dstData.m_positioningType = getPositioningMode();
     dstData.m_panMode = getPanMode();
     getCone(dstData.m_coneinnerAngle, dstData.m_coneOuterAngle, dstData.m_coneOuterGrain);
+}
+
+bool SoundGroup::isSpatializationEnabled()
+{
+    return ma_sound_group_is_spatialization_enabled(&m_group);
+}
+
+void SoundGroup::setSpatializationEnabled(bool enabled)
+{
+    ma_sound_group_set_spatialization_enabled(&m_group, enabled);
 }
 
 float SoundGroup::getVolume() const
@@ -244,7 +251,7 @@ SoundGroupManager::~SoundGroupManager()
     SoundGroupManagerRequestBus::Handler::BusDisconnect();
 }
 
-SoundGroup *SoundGroupManager::CreateSoundGroup(AZ::Name &name, bool noSpatial, bool noPitch, AZ::Name &parentName)
+SoundGroup *SoundGroupManager::CreateSoundGroup(AZ::Name &name, AZ::Name &parentName)
 {
     if(IsSoundGroupExists(name))
     {
@@ -253,7 +260,7 @@ SoundGroup *SoundGroupManager::CreateSoundGroup(AZ::Name &name, bool noSpatial, 
     }
 
     auto parent = GetSoundGroup(parentName);
-    auto newGroup = AZStd::make_unique<SoundGroup>(m_engine, name, noSpatial, noPitch, parent, nullptr);
+    auto newGroup = AZStd::make_unique<SoundGroup>(m_engine, name, parent, nullptr);
     if(!newGroup)
     {
         return nullptr;
@@ -315,6 +322,33 @@ bool SoundGroupManager::DestroySoundGroup(AZ::Name &name)
     return false;
 }
 
+bool SoundGroupManager::RenameSoundGroup(AZ::Name &oldname, AZ::Name newName)
+{
+    if(!IsSoundGroupExists(oldname))
+        return false;
+
+    if(oldname == newName)
+        return true;
+
+    SoundGroup* grpNewMatch = GetSoundGroup(newName);
+    if(grpNewMatch)
+        return false;
+
+    SoundGroup* group = GetSoundGroup(oldname);
+    if(!group)
+        return false;
+
+    auto grpHandle = m_soundGroupsFlatMap.extract(oldname);
+    if(grpHandle.empty())
+        return false;
+
+    grpHandle.key() = newName;
+    m_soundGroupsFlatMap.insert(AZStd::move(grpHandle));
+    m_soundGroupsFlatMap[newName]->setName(newName);
+
+    return true;
+}
+
 bool SoundGroupManager::IsSoundGroupExists(const AZ::Name &name)
 {
     if(name.IsEmpty())
@@ -337,9 +371,9 @@ SoundGroup *SoundGroupManager::GetSoundGroup(const AZ::Name &name) const
     return nullptr;
 }
 
-void SoundGroupManager::AddSoundGroup(AZ::Name name, bool noSpatial, bool noPitch, AZ::Name parentName)
+void SoundGroupManager::AddSoundGroup(AZ::Name name, AZ::Name parentName)
 {
-    SoundGroup* group = CreateSoundGroup(name, noSpatial, noPitch, parentName);
+    SoundGroup* group = CreateSoundGroup(name, parentName);
     SoundGroupData  data;
 
     if(group)
@@ -349,7 +383,8 @@ void SoundGroupManager::AddSoundGroup(AZ::Name name, bool noSpatial, bool noPitc
     }
 
     SoundGroupManagerNotificationBus::QueueBroadcast(
-                &SoundGroupManagerNotificationBus::Events::OnRequestCompleted_AddSoundGroup, group != nullptr, data,
+                &SoundGroupManagerNotificationBus::Events::OnRequestCompleted_AddSoundGroup,
+                group != nullptr, data,
                 group->parent() ? group->m_parent->m_name : AZ::Name()
                 );
 }
@@ -361,9 +396,12 @@ void SoundGroupManager::RemoveSoundGroup(AZ::Name name)
                 &SoundGroupManagerNotificationBus::Events::OnRequestCompleted_RemoveSoundGroup, success, name);
 }
 
-void SoundGroupManager::ChangeSoundGroupName(AZ::Name name)
+void SoundGroupManager::ChangeSoundGroupName(AZ::Name oldname, AZ::Name newName)
 {
-    //Nah, not yet.
+    bool success = RenameSoundGroup(oldname, newName);
+    SoundGroupManagerNotificationBus::QueueBroadcast(
+                &SoundGroupManagerNotificationBus::Events::OnRequestCompleted_RenameSoundGroup,
+                success, oldname, newName);
 }
 
 

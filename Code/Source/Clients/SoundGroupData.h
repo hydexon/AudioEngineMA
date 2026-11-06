@@ -31,9 +31,7 @@ struct SoundGroupData
 
     AZ::Name m_groupName;
 
-    bool m_noPitch = false;
-    bool m_noSpatialization = false;
-
+    bool  m_spatialization = true;
     float m_volume = 1.0f;
     float m_pitch  = 1.0f;
     float m_pan    = 1.0f;
@@ -46,7 +44,6 @@ struct SoundGroupData
     float m_dopplerFactor = 1.0f;
     float m_minGains = 0.1f;
     float m_maxGains = 1.0f;
-    bool m_spatializationEnable = true;
 
     AttenuationMode::Type m_attenuationMode = AttenuationMode::Inverse;
     PositioningMode::Type m_positioningType = PositioningMode::Absolute;

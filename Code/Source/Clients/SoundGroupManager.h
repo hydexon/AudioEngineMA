@@ -24,7 +24,7 @@ public:
     AUDIO_IMPL_CLASS_ALLOCATOR(SoundGroup);
     friend class SoundGroupManager;
 
-    SoundGroup(ma_engine* engine, AZ::Name& name, bool noSpatial, bool noPitch, SoundGroup* parent = nullptr, SoundGroupData* srcdata = nullptr);
+    SoundGroup(ma_engine* engine, AZ::Name& name, SoundGroup* parent = nullptr, SoundGroupData* srcdata = nullptr);
     ~SoundGroup();
 
     bool AddSound(ma_sound* sound);
@@ -33,6 +33,8 @@ public:
     void ApplyData(SoundGroupData* srcdata);
     void GatherData(SoundGroupData& dstData);
 
+    bool isSpatializationEnabled();
+    void setSpatializationEnabled(bool enabled);
     float getVolume() const;
     void setVolume(float volume);
     float getPitch() const;
@@ -72,8 +74,6 @@ private:
     ma_sound_group m_group;
     AZ::Name m_name;
     SoundGroup* m_parent;
-    bool m_noSpatial;
-    bool m_noPitch;
     AZStd::vector<AZStd::unique_ptr<SoundGroup>> m_children;
     AZStd::vector<ma_sound*> m_associatedSounds;
 };
@@ -87,8 +87,9 @@ public:
     explicit SoundGroupManager(ma_engine* engine);
     ~SoundGroupManager();
 
-    SoundGroup* CreateSoundGroup(AZ::Name& name, bool noSpatial, bool noPitch, AZ::Name& parentName);
+    SoundGroup* CreateSoundGroup(AZ::Name& name, AZ::Name& parentName);
     bool DestroySoundGroup(AZ::Name& name);
+    bool RenameSoundGroup(AZ::Name& oldname, AZ::Name newName );
 
     bool IsSoundGroupExists(const AZ::Name& name);
     SoundGroup* GetSoundGroup(const AZ::Name& name) const;
@@ -98,12 +99,12 @@ private:
     AZStd::vector<AZStd::unique_ptr<SoundGroup>> m_soundGroups;
     AZStd::unordered_map<AZ::Name, SoundGroup*>  m_soundGroupsFlatMap;
 
-    void AddSoundGroup(AZ::Name name, bool noSpatial, bool noPitch,
+    void AddSoundGroup(AZ::Name name,
                        AZ::Name parentName = AZ::Name()) override;
 
     void RemoveSoundGroup(AZ::Name name) override;
 
-    void ChangeSoundGroupName(AZ::Name name) override;
+    void ChangeSoundGroupName(AZ::Name oldname, AZ::Name newName) override;
 };
 
 }

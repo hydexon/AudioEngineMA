@@ -4,11 +4,16 @@
 #include <IAudioConnection.h>
 #include <IAudioSystemControl.h>
 
+#include <QObject>
+
 namespace AudioEngineMA
 {
-    class CAudioSystemEditor_MiniAudio :
-            public AudioControls::IAudioSystemEditor
+    class CAudioSystemEditor_MiniAudio
+            : public QObject
+            , public AudioControls::IAudioSystemEditor
     {
+        Q_OBJECT
+
     public:
         CAudioSystemEditor_MiniAudio();
         ~CAudioSystemEditor_MiniAudio() = default;
@@ -29,6 +34,8 @@ namespace AudioEngineMA
         AZ::IO::FixedMaxPath GetDataPath() const override;
         void DataSaved() override;
         QWidget* CreateConnectionPropertiesWidget(const AudioControls::TConnectionPtr connection, AudioControls::EACEControlType atlControlType) override;
+    protected:
+        void timerEvent(QTimerEvent* event) override;
     private:
         AZStd::string m_currentLanguageName;
         AudioControls::IAudioSystemControl m_rootControl;

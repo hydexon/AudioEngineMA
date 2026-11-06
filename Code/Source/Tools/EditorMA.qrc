@@ -11,5 +11,6 @@
         <file>icons/toolbar/list-remove.png</file>
         <file>icons/toolbar/xml_exports.png</file>
         <file>icons/toolbar/xml_imports.png</file>
+        <file>icons/toolbar/edit.png</file>
     </qresource>
 </RCC>

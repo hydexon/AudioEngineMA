@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>694</height>
+    <height>701</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -45,6 +45,17 @@
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="btnRenameGroup">
+            <property name="text">
+             <string>Rename Group</string>
+            </property>
+            <property name="icon">
+             <iconset resource="EditorMA.qrc">
+              <normaloff>:/AudioMAEditor/icons/toolbar/edit.png</normaloff>:/AudioMAEditor/icons/toolbar/edit.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="btnRemoveGroup">
             <property name="text">
              <string>Remove Group</string>
@@ -52,6 +63,13 @@
             <property name="icon">
              <iconset resource="EditorMA.qrc">
               <normaloff>:/AudioMAEditor/icons/toolbar/list-remove.png</normaloff>:/AudioMAEditor/icons/toolbar/list-remove.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnClearSelection">
+            <property name="text">
+             <string>Clear Selection</string>
             </property>
            </widget>
           </item>
@@ -72,6 +90,12 @@
         </item>
         <item>
          <widget class="QTreeWidget" name="tw_soundGroups">
+          <property name="editTriggers">
+           <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+          </property>
+          <property name="alternatingRowColors">
+           <bool>true</bool>
+          </property>
           <column>
            <property name="text">
             <string>Sound Group Name</string>
@@ -84,35 +108,6 @@
       <widget class="QWidget" name="propertiesWidget" native="true">
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <widget class="QGroupBox" name="gb_flags">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="title">
-           <string>Init Flags:</string>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_2">
-           <item>
-            <widget class="QCheckBox" name="chkbox_DisableSpatial">
-             <property name="text">
-              <string>Disable Spatialization</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="chkbox_DisablePtich">
-             <property name="text">
-              <string>Disable Pitch</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
          <widget class="QGroupBox" name="gb_properties">
           <property name="title">
            <string>Properties:</string>
@@ -122,13 +117,27 @@
             <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
            </property>
            <item row="0" column="0">
+            <widget class="QLabel" name="label_10">
+             <property name="text">
+              <string>Spatialization Enabled:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QCheckBox" name="chkbox_spatializationEnabled">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
             <widget class="QLabel" name="label">
              <property name="text">
               <string>Volume:</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="1">
+           <item row="1" column="1">
             <widget class="QDoubleSpinBox" name="dsb_volume">
              <property name="maximum">
               <double>1.000000000000000</double>
@@ -138,34 +147,34 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="0">
+           <item row="2" column="0">
             <widget class="QLabel" name="label_2">
              <property name="text">
               <string>Pitch:</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="1">
+           <item row="2" column="1">
             <widget class="QDoubleSpinBox" name="dsb_pitch"/>
            </item>
-           <item row="2" column="0">
+           <item row="3" column="0">
             <widget class="QLabel" name="label_3">
              <property name="text">
               <string>Pan:</string>
              </property>
             </widget>
            </item>
-           <item row="2" column="1">
+           <item row="3" column="1">
             <widget class="QDoubleSpinBox" name="dsb_pan"/>
            </item>
-           <item row="3" column="0">
+           <item row="4" column="0">
             <widget class="QLabel" name="label_4">
              <property name="text">
               <string>Attenuation Mode:</string>
              </property>
             </widget>
            </item>
-           <item row="3" column="1">
+           <item row="4" column="1">
             <widget class="QComboBox" name="cb_attenuationMode">
              <item>
               <property name="text">
@@ -189,14 +198,14 @@
              </item>
             </widget>
            </item>
-           <item row="4" column="0">
+           <item row="5" column="0">
             <widget class="QLabel" name="label_5">
              <property name="text">
               <string>Positioning:</string>
              </property>
             </widget>
            </item>
-           <item row="4" column="1">
+           <item row="5" column="1">
             <widget class="QComboBox" name="cb_positioning">
              <item>
               <property name="text">
@@ -210,14 +219,14 @@
              </item>
             </widget>
            </item>
-           <item row="5" column="0">
+           <item row="6" column="0">
             <widget class="QLabel" name="label_6">
              <property name="text">
               <string>Pan Mode:</string>
              </property>
             </widget>
            </item>
-           <item row="5" column="1">
+           <item row="6" column="1">
             <widget class="QComboBox" name="cb_panMode">
              <item>
               <property name="text">
@@ -231,34 +240,34 @@
              </item>
             </widget>
            </item>
-           <item row="6" column="0">
+           <item row="7" column="0">
             <widget class="QLabel" name="label_12">
              <property name="text">
               <string>Doppler Factor:</string>
              </property>
             </widget>
            </item>
-           <item row="6" column="1">
+           <item row="7" column="1">
             <widget class="QDoubleSpinBox" name="dsb_dopplerFacotr"/>
            </item>
-           <item row="7" column="0">
+           <item row="8" column="0">
             <widget class="QLabel" name="label_20">
              <property name="text">
               <string>Rolloff Factor:</string>
              </property>
             </widget>
            </item>
-           <item row="7" column="1">
+           <item row="8" column="1">
             <widget class="QDoubleSpinBox" name="dsb_rolloffFactor"/>
            </item>
-           <item row="8" column="0">
+           <item row="9" column="0">
             <widget class="QLabel" name="label_7">
              <property name="text">
               <string>Distances:</string>
              </property>
             </widget>
            </item>
-           <item row="8" column="1">
+           <item row="9" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout_2">
              <item>
               <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -296,14 +305,14 @@
              </item>
             </layout>
            </item>
-           <item row="9" column="0">
+           <item row="10" column="0">
             <widget class="QLabel" name="label_15">
              <property name="text">
               <string>Gains:</string>
              </property>
             </widget>
            </item>
-           <item row="9" column="1">
+           <item row="10" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout_4">
              <item>
               <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -341,14 +350,14 @@
              </item>
             </layout>
            </item>
-           <item row="10" column="0">
+           <item row="11" column="0">
             <widget class="QLabel" name="label_16">
              <property name="text">
               <string>Attenuation Cone:</string>
              </property>
             </widget>
            </item>
-           <item row="10" column="1">
+           <item row="11" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout_5">
              <item>
               <layout class="QVBoxLayout" name="verticalLayout_9">
