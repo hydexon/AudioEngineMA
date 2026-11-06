@@ -150,7 +150,7 @@ void SoundGroupManagerWindow::onNewLayoutActionTriggered()
 void SoundGroupManagerWindow::onLoadLayoutActionTriggered()
 {
     QString path = QFileDialog::getOpenFileName(
-                this, "Open an Sound Group Layout", AZ::IO::FileIOBase::GetInstance()->GetAlias("@devassets@"),
+                this, "Open an Sound Group Layout", AZ::IO::FileIOBase::GetInstance()->GetAlias("@projectroot@"),
                 QString("MiniAudio Sound Group Layout (*.%1)").arg(Config::MASoundGroupLayoutExt));
 
     if(path.isEmpty())
@@ -197,7 +197,7 @@ void SoundGroupManagerWindow::SaveLayoutFile(bool saveAs)
     {
         QString path = QFileDialog::getSaveFileName(
                     this, "Save the Sound Group Layout",
-                    AZ::IO::FileIOBase::GetInstance()->GetAlias("@devassets@"),
+                    AZ::IO::FileIOBase::GetInstance()->GetAlias("@projectroot@"),
                     QString("MiniAudio Sound Group Layout (*.%1)").arg(Config::MASoundGroupLayoutExt));
 
 

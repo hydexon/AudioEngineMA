@@ -5,6 +5,8 @@
 
 #include <AzCore/Serialization/SerializeContext.h>
 #include "AudioEngineImpl_MA.h"
+#include "SoundGroupData.h"
+
 namespace AudioEngineMA
 {
     AZ_COMPONENT_IMPL(AudioEngineMASystemComponent, "AudioEngineMASystemComponent",
@@ -18,6 +20,9 @@ namespace AudioEngineMA
                 ->Version(0)
                 ;
         }
+
+        SoundGroupData::Reflect(context);
+        SoundGroupLayoutData::Reflect(context);
     }
 
     void AudioEngineMASystemComponent::GetProvidedServices(AZ::ComponentDescriptor::DependencyArrayType& provided)

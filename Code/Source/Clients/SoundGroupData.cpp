@@ -15,9 +15,9 @@ void SoundGroupData::Reflect(AZ::ReflectContext* context)
     if(auto* serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
     {
         serializeContext->Class<SoundGroupData>()
-                ->Version(1)
+                ->Version(2)
                 ->Field("Name", &SoundGroupData::m_groupName)
-                ->Field("m_spatializationEnabled", &SoundGroupData::m_spatialization)
+                ->Field("SpatializationEnabled", &SoundGroupData::m_spatialization)
                 ->Field("Volume", &SoundGroupData::m_volume)
                 ->Field("Pitch", &SoundGroupData::m_pitch)
                 ->Field("Pan", &SoundGroupData::m_pan)
@@ -51,7 +51,7 @@ void SoundGroupLayoutData::Reflect(AZ::ReflectContext* context)
     if(auto* serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
     {
         serializeContext->Class<SoundGroupLayoutData>()
-                ->Version(1)
+                ->Version(2)
                 ->Field("Groups", &SoundGroupLayoutData::m_groups);
     }
 }
