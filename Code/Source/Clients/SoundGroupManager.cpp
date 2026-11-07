@@ -542,5 +542,275 @@ void SoundGroupManager::ChangeSoundGroupName(AZ::Name oldname, AZ::Name newName)
                 success, oldname, newName);
 }
 
+void SoundGroupManager::SetSoundGroupVolume(AZ::Name name, float volume)
+{
+    bool success = false;
+    SoundGroup* group = GetSoundGroup(name);
+    if(!group)
+    {
+        AZ_Error(Constants::LogWindow, false, "unable to change the volume of sound group '%s' because it doesn't exist",
+                 name.GetCStr());
+    }
+    else
+    {
+        group->setVolume(volume);
+        success = true;
+    }
+
+    SoundGroupManagerNotificationBus::QueueBroadcast(
+                &SoundGroupManagerNotificationBus::Events::OnRequestCompleted_SetSoundGroupVolume, success, name, volume);
+}
+
+void SoundGroupManager::SetSoundGroupPitch(AZ::Name name, float pitch)
+{
+    bool success = false;
+    SoundGroup* group = GetSoundGroup(name);
+
+    if(!group)
+    {
+        AZ_Error(Constants::LogWindow, false, "unable to change the pitch of sound group '%s' because it doesn't exist",
+                 name.GetCStr());
+    }
+    else
+    {
+        group->setPitch(pitch);
+        success = true;
+    }
+
+    SoundGroupManagerNotificationBus::QueueBroadcast(
+                &SoundGroupManagerNotificationBus::Events::OnRequestCompleted_SetSoundGroupPitch, success, name, pitch);
+}
+
+void SoundGroupManager::SetSoundGroupPan(AZ::Name name, float pan)
+{
+    bool success = false;
+    SoundGroup* group = GetSoundGroup(name);
+
+    if(!group)
+    {
+        AZ_Error(Constants::LogWindow, false, "unable to change the pan of sound group '%s' because it doesn't exist",
+                 name.GetCStr());
+    }
+    else
+    {
+        group->setPan(pan);
+        success = true;
+    }
+
+    SoundGroupManagerNotificationBus::QueueBroadcast(
+                &SoundGroupManagerNotificationBus::Events::OnRequestCompleted_SetSoundGroupPan, success, name, pan);
+
+}
+
+void SoundGroupManager::SetSoundGroupRolloff(AZ::Name name, float rolloff)
+{
+    bool success = false;
+    SoundGroup* group = GetSoundGroup(name);
+
+    if(!group)
+    {
+        AZ_Error(Constants::LogWindow, false, "unable to change the rolloff of sound group '%s' because it doesn't exist",
+                 name.GetCStr());
+    }
+    else
+    {
+        group->setRolloff(rolloff);
+        success = true;
+    }
+
+    SoundGroupManagerNotificationBus::QueueBroadcast(
+                &SoundGroupManagerNotificationBus::Events::OnRequestCompleted_SetSoundGroupRolloff, success, name, rolloff);
+
+}
+
+void SoundGroupManager::SetSoundGroupMinDistance(AZ::Name name, float minDistance)
+{
+    bool success = false;
+    SoundGroup* group = GetSoundGroup(name);
+
+    if(!group)
+    {
+        AZ_Error(Constants::LogWindow, false, "unable to change the min distance of sound group '%s' because it doesn't exist",
+                 name.GetCStr());
+    }
+    else
+    {
+        group->setMinDistance(minDistance);
+        success = true;
+    }
+
+    SoundGroupManagerNotificationBus::QueueBroadcast(
+                &SoundGroupManagerNotificationBus::Events::OnRequestCompleted_SetSoundGroupMinDistance, success, name, minDistance);
+
+}
+
+void SoundGroupManager::SetSoundGroupMaxDistance(AZ::Name name, float maxDistance)
+{
+    bool success = false;
+    SoundGroup* group = GetSoundGroup(name);
+
+    if(!group)
+    {
+        AZ_Error(Constants::LogWindow, false, "unable to change the max distance of sound group '%s' because it doesn't exist",
+                 name.GetCStr());
+    }
+    else
+    {
+        group->setMaxDistance(maxDistance);
+        success = true;
+    }
+
+    SoundGroupManagerNotificationBus::QueueBroadcast(
+                &SoundGroupManagerNotificationBus::Events::OnRequestCompleted_SetSoundGroupMaxDistance, success, name, maxDistance);
+
+}
+
+void SoundGroupManager::SetSoundGroupMinGains(AZ::Name name, float minGains)
+{
+    bool success = false;
+    SoundGroup* group = GetSoundGroup(name);
+
+    if(!group)
+    {
+        AZ_Error(Constants::LogWindow, false, "unable to change the min gains of sound group '%s' because it doesn't exist",
+                 name.GetCStr());
+    }
+    else
+    {
+        group->setMinDistance(minGains);
+        success = true;
+    }
+
+    SoundGroupManagerNotificationBus::QueueBroadcast(
+                &SoundGroupManagerNotificationBus::Events::OnRequestCompleted_SetSoundGroupMinGains, success, name, minGains);
+
+
+}
+
+void SoundGroupManager::SetSoundGroupMaxGains(AZ::Name name, float maxGains)
+{
+    bool success = false;
+    SoundGroup* group = GetSoundGroup(name);
+
+    if(!group)
+    {
+        AZ_Error(Constants::LogWindow, false, "unable to change the max gains of sound group '%s' because it doesn't exist",
+                 name.GetCStr());
+    }
+    else
+    {
+        group->setMaxGains(maxGains);
+        success = true;
+    }
+
+    SoundGroupManagerNotificationBus::QueueBroadcast(
+                &SoundGroupManagerNotificationBus::Events::OnRequestCompleted_SetSoundGroupMaxGains, success, name, maxGains);
+
+}
+
+void SoundGroupManager::SetSoundGroupAttenuationMode(AZ::Name name, AttenuationMode::Type type)
+{
+    bool success = false;
+    SoundGroup* group = GetSoundGroup(name);
+
+    if(!group)
+    {
+        AZ_Error(Constants::LogWindow, false, "unable to change the attenuation mode of sound group '%s' because it doesn't exist",
+                 name.GetCStr());
+    }
+    else
+    {
+        group->setAttenuationMode(type);
+        success = true;
+    }
+
+    SoundGroupManagerNotificationBus::QueueBroadcast(
+                &SoundGroupManagerNotificationBus::Events::OnRequestCompleted_SetSoundGroupAttenuationMode, success, name, type);
+
+}
+
+void SoundGroupManager::SetSoundGroupPositioning(AZ::Name name, PositioningMode::Type type)
+{
+    bool success = false;
+    SoundGroup* group = GetSoundGroup(name);
+
+    if(!group)
+    {
+        AZ_Error(Constants::LogWindow, false, "unable to change the positioning mode of sound group '%s' because it doesn't exist",
+                 name.GetCStr());
+    }
+    else
+    {
+        group->setPositioningMode(type);
+        success = true;
+    }
+
+    SoundGroupManagerNotificationBus::QueueBroadcast(
+                &SoundGroupManagerNotificationBus::Events::OnRequestCompleted_SetSoundGroupPositioning, success, name, type);
+
+}
+
+void SoundGroupManager::SetSoundGroupPanMode(AZ::Name name, PanMode::Type type)
+{
+    bool success = false;
+    SoundGroup* group = GetSoundGroup(name);
+
+    if(!group)
+    {
+        AZ_Error(Constants::LogWindow, false, "unable to change the pan mode of sound group '%s' because it doesn't exist",
+                 name.GetCStr());
+    }
+    else
+    {
+        group->setPanMode(type);
+        success = true;
+    }
+
+    SoundGroupManagerNotificationBus::QueueBroadcast(
+                &SoundGroupManagerNotificationBus::Events::OnRequestCompleted_SetSoundGroupPan, success, name, type);
+
+}
+
+void SoundGroupManager::SetSoundGroupDopplerFactor(AZ::Name name, float factor)
+{
+    bool success = false;
+    SoundGroup* group = GetSoundGroup(name);
+
+    if(!group)
+    {
+        AZ_Error(Constants::LogWindow, false, "unable to change the doppler factor of sound group '%s' because it doesn't exist",
+                 name.GetCStr());
+    }
+    else
+    {
+        group->setMaxGains(factor);
+        success = true;
+    }
+
+    SoundGroupManagerNotificationBus::QueueBroadcast(
+                &SoundGroupManagerNotificationBus::Events::OnRequestCompleted_SetSoundGroupDopplerFactor, success, name, factor);
+
+}
+
+void SoundGroupManager::SetSoundGroupAttenuationCone(AZ::Name name, float innerAngle, float outerAngle, float outerGrain)
+{
+    bool success = false;
+    SoundGroup* group = GetSoundGroup(name);
+
+    if(!group)
+    {
+        AZ_Error(Constants::LogWindow, false, "unable to change the doppler factor of sound group '%s' because it doesn't exist",
+                 name.GetCStr());
+    }
+    else
+    {
+        group->setCone(innerAngle, outerAngle, outerGrain);
+        success = true;
+    }
+
+    SoundGroupManagerNotificationBus::QueueBroadcast(
+                &SoundGroupManagerNotificationBus::Events::OnRequestCompleted_SetSoundGroupAttenuationCone, success, name, innerAngle, outerAngle, outerGrain);
+
+}
 
 }

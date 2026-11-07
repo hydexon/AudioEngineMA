@@ -128,6 +128,36 @@ private:
 
     void ChangeSoundGroupName(AZ::Name oldname, AZ::Name newName) override;
 
+    void SetSoundGroupVolume(AZ::Name name, float volume) override;
+
+    void SetSoundGroupPitch(AZ::Name name, float pitch) override;
+
+    void SetSoundGroupPan(AZ::Name name, float pan) override;
+
+    void SetSoundGroupRolloff(AZ::Name name, float rolloff) override;
+
+    void SetSoundGroupMinDistance(AZ::Name name, float minDistance) override;
+
+    void SetSoundGroupMaxDistance(AZ::Name name, float maxDistance) override;
+
+    void SetSoundGroupMinGains(AZ::Name name, float minGains) override;
+
+    void SetSoundGroupMaxGains(AZ::Name name, float maxGains) override;
+
+    void SetSoundGroupAttenuationMode(AZ::Name name,
+                                      AttenuationMode::Type type) override;
+
+    void SetSoundGroupPositioning(AZ::Name name,
+                                  PositioningMode::Type type) override;
+
+    void SetSoundGroupPanMode(AZ::Name name, PanMode::Type type) override;
+
+    void SetSoundGroupDopplerFactor(AZ::Name name, float factor) override;
+
+    void SetSoundGroupAttenuationCone(AZ::Name name, float innerAngle,
+                                      float outerAngle,
+                                      float outerGrain) override;
+
 };
 
 }
