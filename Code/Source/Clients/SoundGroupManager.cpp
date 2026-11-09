@@ -483,6 +483,20 @@ SoundGroup *SoundGroupManager::GetSoundGroup(const AZ::Name &name) const
     return nullptr;
 }
 
+
+AZStd::vector<AZ::Name> SoundGroupManager::GetSoundGroupEntries() const
+{
+    AZStd::vector<AZ::Name> entries;
+
+
+    for(auto& group : m_soundGroupsFlatMap)
+    {
+        entries.push_back(group.first);
+    }
+
+    return entries;
+}
+
 bool SoundGroupManager::PopulateChildSoundGroups(SoundGroup* parent, AZStd::vector<SoundGroupData> &childgroups)
 {
     for(auto& data : childgroups)
@@ -497,6 +511,11 @@ bool SoundGroupManager::PopulateChildSoundGroups(SoundGroup* parent, AZStd::vect
     }
 
     return true;
+}
+
+void SoundGroupManager::RequestSoundGroupEntries()
+{
+    SoundGroupManagerNotificationBus::QueueBroadcast(&SoundGroupManagerNotificationBus::Events::OnUpdateSoundGroupEntries, GetSoundGroupEntries());
 }
 
 void SoundGroupManager::GatherSoundGroupLayout(SoundGroupLayoutData &layout) const

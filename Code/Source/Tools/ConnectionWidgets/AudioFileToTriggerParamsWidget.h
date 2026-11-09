@@ -3,12 +3,15 @@
 
 #include <QWidget>
 #include <ACETypes.h>
+#include <EditorEngineInterop.h>
 
 namespace Ui {
 class AudioFileToTriggerParamsWidget;
 }
 
-class AudioFileToTriggerParamsWidget : public QWidget
+class AudioFileToTriggerParamsWidget
+        : public QWidget
+        , private AudioEngineMA::SoundGroupManagerNotificationBus::Handler
 {
     Q_OBJECT
 
@@ -29,6 +32,7 @@ private:
     bool m_inUpdateWidgetsFromConnection = false;
 
     void UpdateWidgetsFromConnection();
+    void OnUpdateSoundGroupEntries(AZStd::vector<AZ::Name> entries) override;
 };
 
 #endif // AUDIOFILETOTRIGGERPARAMSWIDGET_H

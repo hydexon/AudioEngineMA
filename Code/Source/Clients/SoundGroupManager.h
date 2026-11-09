@@ -101,6 +101,7 @@ public:
 
     bool IsSoundGroupExists(const AZ::Name& name);
     SoundGroup* GetSoundGroup(const AZ::Name& name) const;
+    AZStd::vector<AZ::Name> GetSoundGroupEntries() const;
 
 private:
     ma_engine* m_engine;
@@ -113,6 +114,8 @@ private:
     bool PopulateChildSoundGroups(SoundGroup *parent, AZStd::vector<SoundGroupData>& childgroups);
 
     //SoundGroupManagerRequests
+    void RequestSoundGroupEntries() override;
+
     void RequestSoundGroupLayout() override;
 
     void ResetSoundGroupLayout() override;

@@ -22,6 +22,7 @@ namespace AudioEngineMA
 
         virtual ~SoundGroupManagerRequests() = default;
 
+        virtual void RequestSoundGroupEntries() = 0;
         virtual void RequestSoundGroupLayout() = 0;
         virtual void ResetSoundGroupLayout() = 0;
         virtual void RequestSoundGroupData(AZ::Name name) = 0;
@@ -78,6 +79,7 @@ namespace AudioEngineMA
         virtual void OnRequestCompleted_SetSoundGroupMaxGains([[maybe_unused]]bool success, [[maybe_unused]]AZ::Name groupName, [[maybe_unused]]float maxGains) {};
         virtual void OnRequestCompleted_SetSoundGroupAttenuationCone([[maybe_unused]]bool success, [[maybe_unused]]AZ::Name groupName, [[maybe_unused]]float innerAngle, [[maybe_unused]]float outerAngle, [[maybe_unused]]float outerGrain) {};
 
+        virtual void OnUpdateSoundGroupEntries([[maybe_unused]]AZStd::vector<AZ::Name> entries) {};
         virtual void OnUpdateSoundGroupLayout([[maybe_unused]] SoundGroupLayoutData sndGroupLayout) {};
         virtual void OnUpdateSoundGroup([[maybe_unused]]bool success, [[maybe_unused]]SoundGroupData data) {};
 

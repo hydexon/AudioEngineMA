@@ -27,7 +27,11 @@ SoundGroupManagerWindow::SoundGroupManagerWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    ui->menuTools->setHidden(true);
     AzQtComponents::CheckBox::applyToggleSwitchStyle(ui->chkbox_spatializationEnabled);
+
+    ui->dsb_distanceMax->setMaximum(FLT_MAX);
+    ui->dsb_gainsMax->setMaximum(FLT_MAX);
 
     connect(ui->actionNew_Layout, &QAction::triggered, this, &SoundGroupManagerWindow::onNewLayoutActionTriggered);
     connect(ui->actionOpen_Layout, &QAction::triggered, this, &SoundGroupManagerWindow::onLoadLayoutActionTriggered);

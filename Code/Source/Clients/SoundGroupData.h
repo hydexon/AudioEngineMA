@@ -13,10 +13,6 @@
 namespace AudioEngineMA
 {
 
-struct SoundGroupParams
-{
-};
-
 struct SoundGroupData
 {
     AZ_TYPE_INFO(SoundGroupData, "{6C11E3AF-DDF5-48B7-BB8E-618695EDC1CC}");

@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>MiniAudio Sound Group Manager</string>
   </property>
+  <property name="toolButtonStyle">
+   <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_5">
     <item>
@@ -538,6 +541,9 @@
    <property name="text">
     <string>Import Layout from XML</string>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionExport_Layout_as_XML">
    <property name="icon">
@@ -547,6 +553,9 @@
    </property>
    <property name="text">
     <string>Export Layout as XML</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
  </widget>

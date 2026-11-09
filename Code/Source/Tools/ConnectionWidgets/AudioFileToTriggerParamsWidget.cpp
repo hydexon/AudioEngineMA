@@ -4,6 +4,8 @@
 #include <AudioConnections.h>
 #include <AzQtComponents/Components/Widgets/CheckBox.h>
 
+#include <QIcon>
+
 using namespace AudioEngineMA;
 
 AudioFileToTriggerParamsWidget::AudioFileToTriggerParamsWidget(AudioControls::TConnectionPtr connection, QWidget *parent) :
@@ -41,10 +43,14 @@ AudioFileToTriggerParamsWidget::AudioFileToTriggerParamsWidget(AudioControls::TC
     connect(ui->dsb_dopplerFactor, &QDoubleSpinBox::valueChanged, this, &AudioFileToTriggerParamsWidget::UpdateConnectionFromWidgets);
 
     UpdateWidgetsFromConnection();
+
+    SoundGroupManagerNotificationBus::Handler::BusConnect();
+    SoundGroupManagerRequestBus::QueueBroadcast(&SoundGroupManagerRequestBus::Events::RequestSoundGroupEntries);
 }
 
 AudioFileToTriggerParamsWidget::~AudioFileToTriggerParamsWidget()
 {
+    SoundGroupManagerNotificationBus::Handler::BusDisconnect();
     delete ui;
 }
 
@@ -61,7 +67,7 @@ void AudioFileToTriggerParamsWidget::UpdateConnectionFromWidgets()
 
     AudioFileToTriggerConnection* conn = static_cast<AudioFileToTriggerConnection*>(m_connection.get());
     conn->m_params.m_soundAction = static_cast<SoundAction::Type>(ui->cb_SoundAction->currentIndex());
-    //TODO: Sound Groups.
+    conn->m_params.m_soundGroupName = ui->cb_soundGroup->currentText().toUtf8().constData();
     conn->m_params.m_volume  = ui->dsb_Volume->value();
     conn->m_params.m_looping = ui->chkBox_loop->isChecked();
     conn->m_params.m_spatialization = ui->chkBox_spatialization->isChecked();
@@ -90,7 +96,7 @@ void AudioFileToTriggerParamsWidget::UpdateWidgetsFromConnection()
     AudioFileToTriggerConnection* conn = static_cast<AudioFileToTriggerConnection*>(m_connection.get());
 
     ui->cb_SoundAction->setCurrentIndex(conn->m_params.m_soundAction);
-    //TODO: SoundGroups.
+    ui->cb_soundGroup->setCurrentText(conn->m_params.m_soundGroupName.GetCStr());
     ui->dsb_Volume->setValue(conn->m_params.m_volume);
     ui->chkBox_loop->setChecked(conn->m_params.m_looping);
     ui->chkBox_spatialization->setChecked(conn->m_params.m_spatialization);
@@ -110,4 +116,25 @@ void AudioFileToTriggerParamsWidget::UpdateWidgetsFromConnection()
     ui->dsb_dopplerFactor->setValue(conn->m_params.m_dopplerFactor);
 
     m_inUpdateWidgetsFromConnection = false;
+}
+
+
+void AudioFileToTriggerParamsWidget::OnUpdateSoundGroupEntries(AZStd::vector<AZ::Name> entries)
+{
+    ui->cb_soundGroup->blockSignals(true);
+    ui->cb_soundGroup->clear();
+
+    for(const auto& name : entries)
+    {
+        ui->cb_soundGroup->addItem(QIcon(":/AudioMAEditor/icons/ctrls/audio_file.png"), name.GetCStr());
+    }
+    auto* conn = static_cast<AudioFileToTriggerConnection*>(m_connection.get());
+    const AZ::Name& currentName = conn->m_params.m_soundGroupName;
+
+    if(AZStd::find(entries.begin(), entries.end(), currentName) == entries.end())
+    {
+        ui->cb_soundGroup->addItem(QIcon(":/AudioMAEditor/icons/ctrls/audio_file.png"), currentName.GetCStr());
+    }
+    ui->cb_soundGroup->setCurrentText(currentName.GetCStr());
+    ui->cb_soundGroup->blockSignals(false);
 }
