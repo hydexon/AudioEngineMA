@@ -14,6 +14,12 @@
 #include <AzCore/IO/FileIO.h>
 
 using namespace AudioEngineMA;
+#define GET_GROUP() \
+    QTreeWidgetItem* curr = ui->tw_soundGroups->currentItem(); \
+    if(!curr) \
+        return; \
+    auto group = AZ::Name(curr->text(0).toUtf8().constData()); \
+
 
 SoundGroupManagerWindow::SoundGroupManagerWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -34,6 +40,7 @@ SoundGroupManagerWindow::SoundGroupManagerWindow(QWidget *parent) :
     connect(ui->btnClearSelection, &QPushButton::clicked, this, &SoundGroupManagerWindow::onClearSelectionClicked);
     connect(ui->tw_soundGroups, &QTreeWidget::currentItemChanged, this, &SoundGroupManagerWindow::onSoundGroupItemSelected);
 
+    ConnectPropertyWidgetSignals();
 
     ui->btnRemoveGroup->setEnabled(false);
     ui->propertiesWidget->setEnabled(false);
@@ -134,8 +141,13 @@ void SoundGroupManagerWindow::onSoundGroupItemSelected(QTreeWidgetItem *current,
     if(!current)
         return;
 
+    if(current == previous)
+        return;
+
+    auto group = AZ::Name(current->text(0).toUtf8().constData());
+    SoundGroupManagerRequestBus::QueueBroadcast(&SoundGroupManagerRequestBus::Events::RequestSoundGroupData, group);
+
     ui->btnRemoveGroup->setEnabled(true);
-    ui->propertiesWidget->setEnabled(true);
     ui->btnClearSelection->setEnabled(true);
 }
 
@@ -174,6 +186,113 @@ void SoundGroupManagerWindow::onSaveLayoutActionTriggered()
 void SoundGroupManagerWindow::onSaveLayoutAsActionTriggered()
 {
     SaveLayoutFile(true);
+}
+
+void SoundGroupManagerWindow::ConnectPropertyWidgetSignals()
+{
+    connect(ui->chkbox_spatializationEnabled, &QCheckBox::checkStateChanged, this, [this](bool check)  {
+        GET_GROUP();
+        SoundGroupManagerRequestBus::QueueBroadcast(&SoundGroupManagerRequestBus::Events::SetSoundGroupSpatializationEnabled, group , check);
+    });
+
+    connect(ui->cb_attenuationMode, &QComboBox::currentIndexChanged, this, [this](int index) {
+        GET_GROUP();
+        SoundGroupManagerRequestBus::QueueBroadcast(&SoundGroupManagerRequestBus::Events::SetSoundGroupAttenuationMode, group, static_cast<AttenuationMode::Type>(index));
+    });
+
+    connect(ui->cb_positioning, &QComboBox::currentIndexChanged, this, [this](int index) {
+        GET_GROUP();
+        SoundGroupManagerRequestBus::QueueBroadcast(&SoundGroupManagerRequestBus::Events::SetSoundGroupPositioning, group, static_cast<PositioningMode::Type>(index));
+    });
+
+    connect(ui->cb_panMode, &QComboBox::currentIndexChanged, this, [this](int index) {
+        GET_GROUP();
+        SoundGroupManagerRequestBus::QueueBroadcast(&SoundGroupManagerRequestBus::Events::SetSoundGroupPanMode, group, static_cast<PanMode::Type>(index));
+    });
+
+    connect(ui->dsb_volume, &QDoubleSpinBox::valueChanged, this, [this](double value) {
+        GET_GROUP();
+        SoundGroupManagerRequestBus::QueueBroadcast(&SoundGroupManagerRequestBus::Events::SetSoundGroupVolume, group, value);
+    });
+
+    connect(ui->dsb_pitch, &QDoubleSpinBox::valueChanged, this, [this](double value) {
+        GET_GROUP();
+        SoundGroupManagerRequestBus::QueueBroadcast(&SoundGroupManagerRequestBus::Events::SetSoundGroupPitch, group, value);
+    });
+
+    connect(ui->dsb_pan, &QDoubleSpinBox::valueChanged, this, [this](double value) {
+        GET_GROUP();
+        SoundGroupManagerRequestBus::QueueBroadcast(&SoundGroupManagerRequestBus::Events::SetSoundGroupPan, group, value);
+    });
+
+    connect(ui->dsb_rolloffFactor, &QDoubleSpinBox::valueChanged, this, [this](double value) {
+        GET_GROUP();
+        SoundGroupManagerRequestBus::QueueBroadcast(&SoundGroupManagerRequestBus::Events::SetSoundGroupRolloff, group, value);
+    });
+
+    connect(ui->dsb_dopplerFactor, &QDoubleSpinBox::valueChanged, this, [this](double value) {
+        GET_GROUP();
+        SoundGroupManagerRequestBus::QueueBroadcast(&SoundGroupManagerRequestBus::Events::SetSoundGroupDopplerFactor, group, value);
+    });
+
+    connect(ui->dsb_distanceMin, &QDoubleSpinBox::valueChanged, this, [this](double value) {
+        GET_GROUP();
+        SoundGroupManagerRequestBus::QueueBroadcast(&SoundGroupManagerRequestBus::Events::SetSoundGroupMinDistance, group, value);
+    });
+
+    connect(ui->dsb_distanceMax, &QDoubleSpinBox::valueChanged, this, [this](double value) {
+        GET_GROUP();
+        SoundGroupManagerRequestBus::QueueBroadcast(&SoundGroupManagerRequestBus::Events::SetSoundGroupMaxDistance, group, value);
+    });
+
+    connect(ui->dsb_gainsMin, &QDoubleSpinBox::valueChanged, this, [this](double value) {
+        GET_GROUP();
+        SoundGroupManagerRequestBus::QueueBroadcast(&SoundGroupManagerRequestBus::Events::SetSoundGroupMinGains, group, value);
+    });
+
+    connect(ui->dsb_gainsMax, &QDoubleSpinBox::valueChanged, this, [this](double value) {
+        GET_GROUP();
+        SoundGroupManagerRequestBus::QueueBroadcast(&SoundGroupManagerRequestBus::Events::SetSoundGroupMaxGains, group, value);
+    });
+
+    connect(ui->dsb_innerAngle, &QDoubleSpinBox::valueChanged, this, [this](double value) {
+        GET_GROUP();
+        SoundGroupManagerRequestBus::QueueBroadcast(&SoundGroupManagerRequestBus::Events::SetSoundGroupAttenuationCone, group,
+                                                    value, ui->dsb_outerAngle->value(), ui->dsb_outerGrain->value());
+    });
+
+    connect(ui->dsb_outerAngle, &QDoubleSpinBox::valueChanged, this, [this](double value) {
+        GET_GROUP();
+        SoundGroupManagerRequestBus::QueueBroadcast(&SoundGroupManagerRequestBus::Events::SetSoundGroupAttenuationCone, group,
+                                                    ui->dsb_innerAngle->value(), value, ui->dsb_outerGrain->value());
+    });
+
+    connect(ui->dsb_outerGrain, &QDoubleSpinBox::valueChanged, this, [this](double value) {
+        GET_GROUP();
+        SoundGroupManagerRequestBus::QueueBroadcast(&SoundGroupManagerRequestBus::Events::SetSoundGroupAttenuationCone, group,
+                                                    ui->dsb_innerAngle->value(), ui->dsb_outerAngle->value(), value);
+    });
+}
+
+void SoundGroupManagerWindow::BlockPropertySignals(bool value)
+{
+    ui->chkbox_spatializationEnabled->blockSignals(value);
+    ui->cb_attenuationMode->blockSignals(value);
+    ui->cb_positioning->blockSignals(value);
+    ui->cb_panMode->blockSignals(value);
+
+    ui->dsb_volume->blockSignals(value);
+    ui->dsb_pitch->blockSignals(value);
+    ui->dsb_pan->blockSignals(value);
+    ui->dsb_rolloffFactor->blockSignals(value);
+    ui->dsb_dopplerFactor->blockSignals(value);
+    ui->dsb_distanceMin->blockSignals(value);
+    ui->dsb_distanceMax->blockSignals(value);
+    ui->dsb_innerAngle->blockSignals(value);
+    ui->dsb_outerAngle->blockSignals(value);
+    ui->dsb_outerGrain->blockSignals(value);
+    ui->dsb_gainsMin->blockSignals(value);
+    ui->dsb_gainsMax->blockSignals(value);
 }
 
 void SoundGroupManagerWindow::SetCurrentSavePath(const QString &path)
@@ -320,3 +439,36 @@ void SoundGroupManagerWindow::OnUpdateSoundGroupLayout(AudioEngineMA::SoundGroup
         item->setExpanded(true);
     }
 }
+
+void SoundGroupManagerWindow::OnUpdateSoundGroup(bool success, AudioEngineMA::SoundGroupData groupData)
+{
+    if(!success)
+        return;
+
+    blockSignals(true);
+
+    ui->chkbox_spatializationEnabled->setChecked(groupData.m_spatialization);
+
+    ui->cb_attenuationMode->setCurrentIndex(groupData.m_attenuationMode);
+    ui->cb_positioning->setCurrentIndex(groupData.m_positioningType);
+    ui->cb_panMode->setCurrentIndex(groupData.m_panMode);
+
+    ui->dsb_volume->setValue(groupData.m_volume);
+    ui->dsb_pitch->setValue(groupData.m_pitch);
+    ui->dsb_pan->setValue(groupData.m_pan);
+
+    ui->dsb_dopplerFactor->setValue(groupData.m_dopplerFactor);
+    ui->dsb_rolloffFactor->setValue(groupData.m_rolloff);
+    ui->dsb_distanceMin->setValue(groupData.m_minDistance);
+    ui->dsb_distanceMax->setValue(groupData.m_maxDistance);
+    ui->dsb_gainsMin->setValue(groupData.m_minGains);
+    ui->dsb_gainsMax->setValue(groupData.m_maxGains);
+    ui->dsb_innerAngle->setValue(groupData.m_coneinnerAngle);
+    ui->dsb_outerAngle->setValue(groupData.m_coneOuterAngle);
+    ui->dsb_outerGrain->setValue(groupData.m_coneOuterGrain);
+
+    blockSignals(false);
+    ui->propertiesWidget->setEnabled(true);
+}
+
+#undef GET_GROUP

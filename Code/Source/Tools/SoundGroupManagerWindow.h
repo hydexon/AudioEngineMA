@@ -36,6 +36,9 @@ private:
     QString m_currentLayoutPath;
     bool m_loadLayoutWasRequested = false;
 
+    void ConnectPropertyWidgetSignals();
+    void BlockPropertySignals(bool value);
+
     void SetCurrentSavePath(const QString& path);
     void SaveLayoutFile(bool saveAs);
     void ResetSelectionState();
@@ -46,6 +49,7 @@ private:
     void OnRequestCompleted_RemoveSoundGroup(bool success, AZ::Name soundGroupName) override;
     void OnRequestCompleted_RenameSoundGroup(bool success, AZ::Name oldGroupName, AZ::Name newGroupName) override;
     void OnUpdateSoundGroupLayout(AudioEngineMA::SoundGroupLayoutData sndGroupLayout) override;
+    void OnUpdateSoundGroup(bool success, AudioEngineMA::SoundGroupData groupData) override;
 
     Ui::SoundGroupManagerWindow *ui;
 };

@@ -251,6 +251,21 @@ void SoundGroupManager::ResetSoundGroupLayout()
     SoundGroupManagerNotificationBus::QueueBroadcast(&SoundGroupManagerNotificationBus::Events::OnUpdateSoundGroupLayout, groupLayout);
 }
 
+void SoundGroupManager::RequestSoundGroupData(AZ::Name name)
+{
+    SoundGroupData data;
+    SoundGroup* group = GetSoundGroup(name);
+    if(group)
+    {
+        group->GatherData(data);
+        SoundGroupManagerNotificationBus::QueueBroadcast(&SoundGroupManagerNotificationBus::Events::OnUpdateSoundGroup, true, data);
+    }
+    else
+    {
+        SoundGroupManagerNotificationBus::QueueBroadcast(&SoundGroupManagerNotificationBus::Events::OnUpdateSoundGroup, false, data);
+    }
+}
+
 void SoundGroupManager::LoadSoundGroupLayout(AZ::IO::FixedMaxPath layoutFilePath)
 {
     LoadSoundGroupsLayout(layoutFilePath);
@@ -271,6 +286,8 @@ void SoundGroupManager::RequestSoundGroupLayout()
     GatherSoundGroupLayout(layout);
     SoundGroupManagerNotificationBus::QueueBroadcast(&SoundGroupManagerNotificationBus::Events::OnUpdateSoundGroupLayout, layout);
 }
+
+
 
 SoundGroupManager::SoundGroupManager(ma_engine *engine)
     : m_engine(engine)
@@ -540,6 +557,26 @@ void SoundGroupManager::ChangeSoundGroupName(AZ::Name oldname, AZ::Name newName)
     SoundGroupManagerNotificationBus::QueueBroadcast(
                 &SoundGroupManagerNotificationBus::Events::OnRequestCompleted_RenameSoundGroup,
                 success, oldname, newName);
+}
+
+void SoundGroupManager::SetSoundGroupSpatializationEnabled(AZ::Name name, bool value)
+{
+    bool success = false;
+    SoundGroup* group = GetSoundGroup(name);
+    if(!group)
+    {
+        AZ_Error(Constants::LogWindow, false, "unable to change the spatialization of sound group '%s' because it doesn't exist",
+                 name.GetCStr());
+    }
+    else
+    {
+        group->setSpatializationEnabled(value);
+        success = true;
+    }
+
+    SoundGroupManagerNotificationBus::QueueBroadcast(
+                &SoundGroupManagerNotificationBus::Events::OnRequestCompleted_SetSpatializationEnabled, success, name, value);
+
 }
 
 void SoundGroupManager::SetSoundGroupVolume(AZ::Name name, float volume)

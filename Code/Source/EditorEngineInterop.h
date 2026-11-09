@@ -24,6 +24,7 @@ namespace AudioEngineMA
 
         virtual void RequestSoundGroupLayout() = 0;
         virtual void ResetSoundGroupLayout() = 0;
+        virtual void RequestSoundGroupData(AZ::Name name) = 0;
         virtual void LoadSoundGroupLayout(AZ::IO::FixedMaxPath layoutFilePath) = 0;
         virtual void SaveSoundGroupLayout(AZ::IO::FixedMaxPath layoutFilePath) = 0;
 
@@ -31,6 +32,7 @@ namespace AudioEngineMA
         virtual void RemoveSoundGroup(AZ::Name name) = 0;
         virtual void ChangeSoundGroupName(AZ::Name oldname, AZ::Name newName) = 0;
 
+        virtual void SetSoundGroupSpatializationEnabled(AZ::Name name, bool value) = 0;
         virtual void SetSoundGroupVolume(AZ::Name name, float volume) = 0;
         virtual void SetSoundGroupPitch(AZ::Name name, float pitch) = 0;
         virtual void SetSoundGroupPan(AZ::Name name, float pan) = 0;
@@ -76,9 +78,8 @@ namespace AudioEngineMA
         virtual void OnRequestCompleted_SetSoundGroupMaxGains([[maybe_unused]]bool success, [[maybe_unused]]AZ::Name groupName, [[maybe_unused]]float maxGains) {};
         virtual void OnRequestCompleted_SetSoundGroupAttenuationCone([[maybe_unused]]bool success, [[maybe_unused]]AZ::Name groupName, [[maybe_unused]]float innerAngle, [[maybe_unused]]float outerAngle, [[maybe_unused]]float outerGrain) {};
 
-#if 0
-#endif
         virtual void OnUpdateSoundGroupLayout([[maybe_unused]] SoundGroupLayoutData sndGroupLayout) {};
+        virtual void OnUpdateSoundGroup([[maybe_unused]]bool success, [[maybe_unused]]SoundGroupData data) {};
 
     };
     using SoundGroupManagerNotificationBus = AZ::EBus<SoundGroupManagerNotifications>;

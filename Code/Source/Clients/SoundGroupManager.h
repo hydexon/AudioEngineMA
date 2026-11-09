@@ -117,6 +117,8 @@ private:
 
     void ResetSoundGroupLayout() override;
 
+    void RequestSoundGroupData(AZ::Name name) override;
+
     void LoadSoundGroupLayout(AZ::IO::FixedMaxPath layoutFilePath) override;
 
     void SaveSoundGroupLayout(AZ::IO::FixedMaxPath layoutFilePath) override;
@@ -127,6 +129,8 @@ private:
     void RemoveSoundGroup(AZ::Name name) override;
 
     void ChangeSoundGroupName(AZ::Name oldname, AZ::Name newName) override;
+
+    void SetSoundGroupSpatializationEnabled(AZ::Name name, bool value) override;
 
     void SetSoundGroupVolume(AZ::Name name, float volume) override;
 

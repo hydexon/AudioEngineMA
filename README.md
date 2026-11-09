@@ -20,7 +20,10 @@ It reuses the same MiniAudio and audio decoder libraries uses in O3DE, so no ext
 * .ogg files are not supported in audio controls due to libvorbis miniaudio wrapper vtable don't implement in-memory decoding, .mp3, .wav and .flac works fine.
 
 ## Future Plans:
-* Sound Groups: Management and basic RTPCs
+* MiniAudio Sound Groups
+* Steam Audio Support.
+* LowPass/HighPass filter support
+    * Investigate if we can implement occlusion/obtrusion with them.
 * ~~AudioSources support: Microphone Input and large file streaming. or from other sources.~~ (Unless there's some demand for it, i might plan to implement it)
 
 ## License
