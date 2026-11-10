@@ -21,6 +21,7 @@ namespace AudioEngineMA
                 ;
         }
 
+        ATLData::ReflectEnums(context);
         SoundGroupData::Reflect(context);
         SoundGroupLayoutData::Reflect(context);
     }

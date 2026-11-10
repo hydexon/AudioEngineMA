@@ -7,6 +7,7 @@
 #include <AzCore/Interface/Interface.h>
 #include <AzCore/std/functional.h>
 #include <AzCore/std/string/string.h>
+#include "Clients/ATLData.h"
 
 namespace AudioEngineMA
 {
@@ -15,7 +16,23 @@ namespace AudioEngineMA
     public:
         AZ_RTTI(AudioEngineMARequests, AudioEngineMARequestsTypeId);
         virtual ~AudioEngineMARequests() = default;
-        // Put your public methods here
+
+        virtual void LoadSoundGroupLayout(AZStd::string defFilePath) = 0;
+        virtual void SetSoundGroupSpatializationEnabled(AZStd::string groupName, bool value) = 0;
+        virtual void SetSoundGroupVolume(AZStd::string groupName, float volume) = 0;
+        virtual void SetSoundGroupPitch(AZStd::string groupName, float pitch) = 0;
+        virtual void SetSoundGroupPan(AZStd::string groupName, float pan) = 0;
+        virtual void SetSoundGroupRolloff(AZStd::string groupName, float rolloff) = 0;
+        virtual void SetSoundGroupMinDistance(AZStd::string groupName, float minDistance) = 0;
+        virtual void SetSoundGroupMaxDistance(AZStd::string groupName, float maxDistance) = 0;
+        virtual void SetSoundGroupMinGains(AZStd::string groupName, float minGains) = 0;
+        virtual void SetSoundGroupMaxGains(AZStd::string groupName, float maxGains) = 0;
+        virtual void SetSoundGroupAttenuationMode(AZStd::string groupName, AttenuationMode::Type type) = 0;
+        virtual void SetSoundGroupPositioning(AZStd::string groupName, PositioningMode::Type type) = 0;
+        virtual void SetSoundGroupPanMode(AZStd::string groupName, PanMode::Type type) = 0;
+        virtual void SetSoundGroupDopplerFactor(AZStd::string groupName,float factor) = 0;
+        virtual void SetSoundGroupAttenuationCone(AZStd::string groupName, float innerAngle, float outerAngle, float outerGrain) = 0;
+
     };
 
     class AudioEngineMABusTraits
@@ -32,8 +49,6 @@ namespace AudioEngineMA
         static const bool EnableEventQueue = true;
 
         virtual ~AudioEngineMABusTraits() = default;
-
-        virtual void LoadSoundGroupDefinitions(AZStd::string defFilePath) = 0;
     };
 
     using AudioEngineMARequestBus = AZ::EBus<AudioEngineMARequests, AudioEngineMABusTraits>;

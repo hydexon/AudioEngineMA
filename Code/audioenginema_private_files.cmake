@@ -21,4 +21,6 @@ set(FILES
     Source/Clients/FileIOVFS_MA.h
     Source/Clients/SoundGroupManager.cpp
     Source/Clients/SoundGroupManager.h
+    Source/Clients/AudioEngineMARequestHandler.cpp
+    Source/Clients/AudioEngineMARequestHandler.h
 )

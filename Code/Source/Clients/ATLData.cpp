@@ -2,6 +2,8 @@
 
 #include <AzCore/StringFunc/StringFunc.h>
 #include <AzCore/std/string/conversions.h>
+#include <AzCore/Serialization/SerializeContext.h>
+#include <AzCore/RTTI/BehaviorContext.h>
 
 namespace AudioEngineMA
 {
@@ -509,6 +511,56 @@ PositioningMode::Type PositioningMode::FromMA(ma_positioning matype)
     default:
         return PositioningMode::Count;
     }
+}
+
+void ATLData::ReflectEnums(AZ::ReflectContext *context)
+{
+    if (auto serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
+    {
+        serializeContext->Enum<SoundAction::Type>()
+                ->Value("Start", SoundAction::Type::Start)
+                ->Value("Stop", SoundAction::Type::Stop)
+                ->Value("Pause", SoundAction::Type::Pause)
+                ->Value("Resume", SoundAction::Type::Resume);
+
+        serializeContext->Enum<AttenuationMode::Type>()
+                ->Value("None", AttenuationMode::Type::None)
+                ->Value("Linear", AttenuationMode::Type::Linear)
+                ->Value("Inverse", AttenuationMode::Type::Inverse)
+                ->Value("Exponential", AttenuationMode::Type::Exponential);
+
+        serializeContext->Enum<PositioningMode::Type>()
+                ->Value("Absolute", PositioningMode::Type::Absolute)
+                ->Value("Relative", PositioningMode::Type::Relative);
+
+        serializeContext->Enum<PanMode::Type>()
+                ->Value("Balance", PanMode::Type::Pan)
+                ->Value("Pan", PanMode::Type::Pan);
+    }
+
+    if (auto* behaviorContext = azrtti_cast<AZ::BehaviorContext*>(context))
+    {
+        behaviorContext->Class<SoundAction::Type>("SoundActionType")
+                ->Enum<static_cast<int>(SoundAction::Type::Start)>("Start")
+                ->Enum<static_cast<int>(SoundAction::Type::Stop)>("Stop")
+                ->Enum<static_cast<int>(SoundAction::Type::Pause)>("Pause")
+                ->Enum<static_cast<int>(SoundAction::Type::Resume)>("Resume");
+
+        behaviorContext->Class<AttenuationMode::Type>("AttenuationModeType")
+                ->Enum<static_cast<int>(AttenuationMode::Type::None)>("None")
+                ->Enum<static_cast<int>(AttenuationMode::Type::Linear)>("Linear")
+                ->Enum<static_cast<int>(AttenuationMode::Type::Inverse)>("Inverse")
+                ->Enum<static_cast<int>(AttenuationMode::Type::Exponential)>("Exponential");
+
+        behaviorContext->Class<PositioningMode::Type>()
+                ->Enum<static_cast<int>(PositioningMode::Type::Absolute)>("Absolute")
+                ->Enum<static_cast<int>(PositioningMode::Type::Relative)>("Relative");
+
+        behaviorContext->Class<PanMode::Type>()
+                ->Enum<static_cast<int>(PanMode::Type::Balance)>("Balance")
+                ->Enum<static_cast<int>(PanMode::Type::Pan)>("Pan");
+    }
+
 }
 
 

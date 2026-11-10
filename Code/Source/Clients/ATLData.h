@@ -2,6 +2,7 @@
 
 #include <AzCore/Name/Name.h>
 #include <AzCore/XML/rapidxml.h>
+#include <AzCore/RTTI/TypeInfo.h>
 
 #include "Common_MA.h"
 #include <miniaudio.h>
@@ -175,4 +176,16 @@ namespace AudioEngineMA
         float m_shift = 0.0f;
     };
 
+    namespace ATLData
+    {
+        void ReflectEnums(AZ::ReflectContext*  context);
+    }
+}
+
+namespace AZ
+{
+    AZ_TYPE_INFO_SPECIALIZE(AudioEngineMA::SoundAction::Type, "{09120DF3-53FF-4C18-A058-A463E8317C4C}");
+    AZ_TYPE_INFO_SPECIALIZE(AudioEngineMA::AttenuationMode::Type, "{0F6107B5-E220-4AA7-9DB2-DF74EA2A9F19}");
+    AZ_TYPE_INFO_SPECIALIZE(AudioEngineMA::PositioningMode::Type, "{E6D53F75-10C4-4EFA-8609-A02F5873599F}");
+    AZ_TYPE_INFO_SPECIALIZE(AudioEngineMA::PanMode::Type, "{971285F7-D018-4DA3-83F4-BAE1531C6860}");
 }
