@@ -6,6 +6,7 @@
 #include <AzCore/Serialization/SerializeContext.h>
 #include "AudioEngineImpl_MA.h"
 #include "SoundGroupData.h"
+#include "AudioEngineMARequestHandler.h"
 
 namespace AudioEngineMA
 {
@@ -24,6 +25,7 @@ namespace AudioEngineMA
         ATLData::ReflectEnums(context);
         SoundGroupData::Reflect(context);
         SoundGroupLayoutData::Reflect(context);
+        AudioEngineMARequestHandler::Reflect(context);
     }
 
     void AudioEngineMASystemComponent::GetProvidedServices(AZ::ComponentDescriptor::DependencyArrayType& provided)

@@ -1,6 +1,7 @@
 #include "ATLEntities_MA.h"
 
 #include <AzCore/StringFunc/StringFunc.h>
+#include "Common_MA.h"
 
 namespace AudioEngineMA
 {

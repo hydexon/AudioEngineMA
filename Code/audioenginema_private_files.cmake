@@ -13,6 +13,8 @@ set(FILES
     Source/Clients/Config_MA.h
     Source/Clients/ATLData.cpp
     Source/Clients/ATLData.h
+    Source/Clients/Utils.cpp
+    Source/Clients/Utils.h
     Source/Clients/SoundGroupData.cpp
     Source/Clients/SoundGroupData.h
     Source/Clients/ATLEntities_MA.cpp
@@ -23,4 +25,6 @@ set(FILES
     Source/Clients/SoundGroupManager.h
     Source/Clients/AudioEngineMARequestHandler.cpp
     Source/Clients/AudioEngineMARequestHandler.h
+    Source/Clients/SoundGroupLayoutLoaderComponent.cpp
+    Source/Clients/SoundGroupLayoutLoaderComponent.h
 )

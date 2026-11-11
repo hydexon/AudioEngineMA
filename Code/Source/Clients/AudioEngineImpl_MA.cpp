@@ -8,6 +8,7 @@
 #include <AzCore/Debug/Profiler.h>
 #include <AzCore/StringFunc/StringFunc.h>
 #include <AzCore/std/string/conversions.h>
+#include "Utils.h"
 
 //MiniAudio Headers:
 #include <extras/decoders/libopus/miniaudio_libopus.h>

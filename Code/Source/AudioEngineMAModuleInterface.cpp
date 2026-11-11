@@ -5,6 +5,7 @@
 #include <AudioEngineMA/AudioEngineMATypeIds.h>
 
 #include <Clients/AudioEngineMASystemComponent.h>
+#include <Clients/SoundGroupLayoutLoaderComponent.h>
 
 namespace AudioEngineMA
 {
@@ -21,6 +22,7 @@ namespace AudioEngineMA
         // This happens through the [MyComponent]::Reflect() function.
         m_descriptors.insert(m_descriptors.end(), {
             AudioEngineMASystemComponent::CreateDescriptor(),
+            SoundGroupLayoutLoaderComponent::CreateDescriptor()
             });
     }
 

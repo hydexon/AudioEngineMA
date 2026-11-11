@@ -4,8 +4,6 @@
 #include <AzCore/XML/rapidxml.h>
 #include <AzCore/RTTI/TypeInfo.h>
 
-#include "Common_MA.h"
-#include <miniaudio.h>
 #include <float.h>
 
 namespace AudioEngineMA
@@ -44,8 +42,6 @@ namespace AudioEngineMA
 
         const char* ToString(Type type);
         Type FromString(const char* str);
-        ma_attenuation_model ToMAModel(Type type);
-        Type FromMA(ma_attenuation_model matype);
     }
 
     namespace PanMode
@@ -61,8 +57,6 @@ namespace AudioEngineMA
 
         const char* ToString(Type type);
         Type FromString(const char* str);
-        ma_pan_mode ToMA(Type type);
-        Type FromMA(ma_pan_mode matype);
     }
 
     namespace PositioningMode
@@ -78,8 +72,6 @@ namespace AudioEngineMA
 
         const char* ToString(Type type);
         Type FromString(const char* str);
-        ma_positioning ToMA(Type type);
-        Type FromMA(ma_positioning matype);
     }
 
     struct AudioFileTriggerParameters

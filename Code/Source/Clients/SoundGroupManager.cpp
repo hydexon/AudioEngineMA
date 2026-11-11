@@ -2,6 +2,8 @@
 #include "SoundGroupData.h"
 #include "Common_MA.h"
 
+#include "Utils.h"
+
 namespace AudioEngineMA
 {
 SoundGroup::SoundGroup(ma_engine *engine, AZ::Name &name, SoundGroup *parent, SoundGroupData *srcdata)
