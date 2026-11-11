@@ -16,6 +16,7 @@
 #include "ConnectionWidgets/GlobalRTPCParamsWidget.h"
 
 #include <QtViewPaneManager.h>
+#include "PropLayoutFilePathCtrl.h"
 
 using namespace AudioControls;
 
@@ -62,6 +63,7 @@ CAudioSystemEditor_MiniAudio::CAudioSystemEditor_MiniAudio()
     m_rootControl.AddChild(&m_rtpcCtrl);
 
     RegisterQtViewPane<SoundGroupManagerWindow>(nullptr, "MiniAudio Sound Group Manager", LyViewPane::CategoryOther);
+    RegisterLayoutFilePathHandler();
 
     startTimer(0);
 }

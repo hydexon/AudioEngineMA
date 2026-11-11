@@ -26,6 +26,11 @@ namespace AudioEngineMA
 
     void SoundGroupLayoutLoaderComponent::Activate()
     {
+        if (!m_layoutFilePath.empty())
+        {
+            AZ::IO::FixedMaxPath path = m_layoutFilePath.c_str();
+            SoundGroupManagerRequestBus::QueueBroadcast(&SoundGroupManagerRequestBus::Events::LoadSoundGroupLayout, path);
+        }
     }
 
     void SoundGroupLayoutLoaderComponent::Deactivate()

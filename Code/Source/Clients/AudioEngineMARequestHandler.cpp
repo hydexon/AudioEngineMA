@@ -19,22 +19,22 @@ namespace AudioEngineMA
     {
         if (auto behaviorContext = azrtti_cast<AZ::BehaviorContext*>(context))
         {
-            behaviorContext->EBus<AudioEngineMARequestBus>("SoundGroupMARequestBus")
-                ->Event("LoadSoundGroupLayout", &AudioEngineMARequestBus::Events::LoadSoundGroupLayout)
+            behaviorContext->EBus<AudioEngineMARequestBus>("MiniAudioSoundGroupRequestBus")
+                ->Event("LoadSoundGroupLayout", &AudioEngineMARequestBus::Events::LoadSoundGroupLayout, {{{"Sound Group Layout File", ""}}})
                 ->Event("SetSoundGroupSpatializationEnabled", &AudioEngineMARequestBus::Events::SetSoundGroupSpatializationEnabled)
-                ->Event("SetSoundGroupVolume", &AudioEngineMARequestBus::Events::SetSoundGroupVolume)
-                ->Event("SetSoundGroupPitch", &AudioEngineMARequestBus::Events::SetSoundGroupPitch)
-                ->Event("SetSoundGroupPan", &AudioEngineMARequestBus::Events::SetSoundGroupPan)
-                ->Event("SetSoundGroupRolloff", &AudioEngineMARequestBus::Events::SetSoundGroupRolloff)
-                ->Event("SetSoundGroupMinDistance", &AudioEngineMARequestBus::Events::SetSoundGroupMinDistance)
-                ->Event("SetSoundGroupMaxDistance", &AudioEngineMARequestBus::Events::SetSoundGroupMaxDistance)
-                ->Event("SetSoundGroupMinGains", &AudioEngineMARequestBus::Events::SetSoundGroupMinGains)
-                ->Event("SetSoundGroupMaxGains", &AudioEngineMARequestBus::Events::SetSoundGroupMaxGains)
-                ->Event("SetSoundGroupAttenuationMode", &AudioEngineMARequestBus::Events::SetSoundGroupAttenuationMode)
-                ->Event("SetSoundGroupPositioning", &AudioEngineMARequestBus::Events::SetSoundGroupPositioning)
-                ->Event("SetSoundGroupPanMode", &AudioEngineMARequestBus::Events::SetSoundGroupPanMode)
-                ->Event("SetSoundGroupDopplerFactor", &AudioEngineMARequestBus::Events::SetSoundGroupDopplerFactor)
-                ->Event("SetSoundGroupAttenuationCone", &AudioEngineMARequestBus::Events::SetSoundGroupAttenuationCone);
+                ->Event("SetSoundGroupVolume", &AudioEngineMARequestBus::Events::SetSoundGroupVolume, {{{"Group Name", ""}, {"Volume",""}}})
+                ->Event("SetSoundGroupPitch", &AudioEngineMARequestBus::Events::SetSoundGroupPitch, {{{"Group Name", ""}, {"Pitch",""}}})
+                ->Event("SetSoundGroupPan", &AudioEngineMARequestBus::Events::SetSoundGroupPan, {{{"Group Name", ""}, {"Pan",""}}})
+                ->Event("SetSoundGroupRolloff", &AudioEngineMARequestBus::Events::SetSoundGroupRolloff,{{{"Group Name", ""}, {"Rolloff",""}}})
+                ->Event("SetSoundGroupMinDistance", &AudioEngineMARequestBus::Events::SetSoundGroupMinDistance, {{{"Group Name", ""}, {"Min Distance",""}}})
+                ->Event("SetSoundGroupMaxDistance", &AudioEngineMARequestBus::Events::SetSoundGroupMaxDistance, {{{"Group Name", ""}, {"Max Distance",""}}})
+                ->Event("SetSoundGroupMinGains", &AudioEngineMARequestBus::Events::SetSoundGroupMinGains, {{{"Group Name", ""}, {"Min Gains",""}}})
+                ->Event("SetSoundGroupMaxGains", &AudioEngineMARequestBus::Events::SetSoundGroupMaxGains, {{{"Group Name", ""}, {"Max Gains",""}}})
+                ->Event("SetSoundGroupAttenuationMode", &AudioEngineMARequestBus::Events::SetSoundGroupAttenuationMode, {{{"Group Name", ""}, {"Mode",""}}})
+                ->Event("SetSoundGroupPositioning", &AudioEngineMARequestBus::Events::SetSoundGroupPositioning, {{{"Group Name", ""}, {"Mode",""}}})
+                ->Event("SetSoundGroupPanMode", &AudioEngineMARequestBus::Events::SetSoundGroupPanMode, {{{"Group Name", ""}, {"Mode",""}}})
+                ->Event("SetSoundGroupDopplerFactor", &AudioEngineMARequestBus::Events::SetSoundGroupDopplerFactor, {{{"Group Name", ""}, {"Doppler Factor",""}}})
+                ->Event("SetSoundGroupAttenuationCone", &AudioEngineMARequestBus::Events::SetSoundGroupAttenuationCone, {{{"Group Name", ""}, {"Inner Angle",""}, {"Outer Angle",""}, {"Outer Grain",""}}});
         }
     }
 

@@ -488,11 +488,11 @@ void ATLData::ReflectEnums(AZ::ReflectContext *context)
                 ->Enum<static_cast<int>(AttenuationMode::Type::Inverse)>("Inverse")
                 ->Enum<static_cast<int>(AttenuationMode::Type::Exponential)>("Exponential");
 
-        behaviorContext->Class<PositioningMode::Type>()
+        behaviorContext->Class<PositioningMode::Type>("PositioningModeType")
                 ->Enum<static_cast<int>(PositioningMode::Type::Absolute)>("Absolute")
                 ->Enum<static_cast<int>(PositioningMode::Type::Relative)>("Relative");
 
-        behaviorContext->Class<PanMode::Type>()
+        behaviorContext->Class<PanMode::Type>("PanModeType")
                 ->Enum<static_cast<int>(PanMode::Type::Balance)>("Balance")
                 ->Enum<static_cast<int>(PanMode::Type::Pan)>("Pan");
     }
