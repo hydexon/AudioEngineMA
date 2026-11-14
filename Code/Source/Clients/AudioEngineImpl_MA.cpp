@@ -325,6 +325,9 @@ EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectDa
         auto range = object->m_activeMASounds.equal_range(audioFilePath);
         for(auto it = range.first; it != range.second; ++it)
         {
+            if (it->second.m_group)
+                it->second.m_group->RemoveSound(it->second.m_sound);
+
             ma_sound_stop(it->second.m_sound);
             ma_sound_uninit(it->second.m_sound);
             azdestroy(it->second.m_sound, Audio::AudioImplAllocator, ma_sound);
@@ -386,6 +389,9 @@ EAudioRequestStatus AudioSystemImpl_MA::StopEvent(Audio::IATLAudioObjectData *ob
         if(pair.second.m_sound == event->m_soundInstance)
         {
             AZ_Info(Constants::LogWindow, "Stopping Trigger: %s", pair.first.c_str());
+            if (pair.second.m_group)
+                pair.second.m_group->RemoveSound(pair.second.m_sound);
+
             ma_sound_stop(pair.second.m_sound);
             ma_sound_uninit(pair.second.m_sound);
             azdestroy(pair.second.m_sound, Audio::AudioImplAllocator, ma_sound);
@@ -412,6 +418,9 @@ EAudioRequestStatus AudioSystemImpl_MA::StopAllEvents(Audio::IATLAudioObjectData
     AZ_Info(Constants::LogWindow, "Stopping all events of objects!");
     for(auto& pair : object->m_activeMASounds)
     {
+        if (pair.second.m_group)
+            pair.second.m_group->RemoveSound(pair.second.m_sound);
+
         ma_sound_stop(pair.second.m_sound);
         ma_sound_uninit(pair.second.m_sound);
         azdestroy(pair.second.m_sound, Audio::AudioImplAllocator, ma_sound);
@@ -550,14 +559,12 @@ EAudioRequestStatus AudioSystemImpl_MA::ParseAudioFileEntry(const AZ::rapidxml::
     if(audioFileEntryNode && AZ::StringFunc::Equal(audioFileEntryNode->name(), MAXMLTags::AudioFileTag))
     {
         const char* audioFileEntryName = nullptr;
-        auto fileEntryNameAttr = audioFileEntryNode->first_attribute(MAXMLTags::AudioFilePathAttr, 0, false);
-        if(fileEntryNameAttr)
+        if(auto fileEntryNameAttr = audioFileEntryNode->first_attribute(MAXMLTags::AudioFilePathAttr, 0, false))
         {
             audioFileEntryName = fileEntryNameAttr->value();
         }
         bool isLocalized = false;
-        auto localizedAttr = audioFileEntryNode->first_attribute(MAXMLTags::AudioFileLocalizedAttr, 0, false);
-        if(localizedAttr)
+        if(auto localizedAttr = audioFileEntryNode->first_attribute(MAXMLTags::AudioFileLocalizedAttr, 0, false))
         {
             isLocalized = AZ::StringFunc::Equal(localizedAttr->value(), "true");
         }
