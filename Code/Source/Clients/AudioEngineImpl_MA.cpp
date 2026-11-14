@@ -9,6 +9,7 @@
 #include <AzCore/StringFunc/StringFunc.h>
 #include <AzCore/std/string/conversions.h>
 #include "Utils.h"
+#include "AudioEngineMA_CVars.h"
 
 //MiniAudio Headers:
 #include <extras/decoders/libopus/miniaudio_libopus.h>
@@ -120,9 +121,13 @@ EAudioRequestStatus AudioSystemImpl_MA::Initialize()
         .onInfo  = FileIO::FileIO_Info
     };
 
-    resmgr_config.ppCustomDecodingBackendVTables = customBackends;
-    resmgr_config.customDecodingBackendCount = AZ_ARRAY_SIZE(customBackends);
-    resmgr_config.pCustomDecodingBackendUserData = nullptr; // could pass `this` in, its passed into each call to res man
+    if (CVars::s_MiniAudio_DisableLibVorbisDecoding)
+    {
+        resmgr_config.ppCustomDecodingBackendVTables = customBackends;
+        resmgr_config.customDecodingBackendCount = AZ_ARRAY_SIZE(customBackends);
+        resmgr_config.pCustomDecodingBackendUserData = nullptr; // could pass `this` in, its passed into each call to res man
+    }
+
     ma_result result = ma_resource_manager_init(&resmgr_config, m_resourceManager.get());
     if(result != MA_SUCCESS)
     {
@@ -149,13 +154,6 @@ EAudioRequestStatus AudioSystemImpl_MA::Initialize()
         AZ_Error(Constants::LogWindow, false, "Failure initializing MiniAudio: %d", eng_res);
         return EAudioRequestStatus::Failure;
     }
-
-    //The listener #0 is reserved for the default listener.
-    for(int i = MA_ENGINE_MAX_LISTENERS-1; i>=1; --i)
-    {
-        m_availableListeners.push_back(i);
-    }
-
     m_soundGroupsManager = AZStd::make_unique<SoundGroupManager>(m_engine.get());
     AZ_Info(Constants::LogWindow, "MiniAudio-backend for AudioSystem initalialized");
     return EAudioRequestStatus::Success;
@@ -316,11 +314,11 @@ EAudioRequestStatus AudioSystemImpl_MA::ActivateTrigger(Audio::IATLAudioObjectDa
             auto posVec = object->m_position;
             ma_sound_set_position(sound, posVec.GetX(), posVec.GetY(), posVec.GetZ());
         }
-
+        if (sgroup) sgroup->AddSound(sound);
         ma_sound_start(sound);
         event->m_isPlayingEvent = true;
         event->m_soundInstance = sound;
-        object->m_activeMASounds.emplace(audioFilePath, ActiveMASoundData { false, decoder, sound, trigger->m_audioTriggerParams.m_volume });
+        object->m_activeMASounds.emplace(audioFilePath, ActiveMASoundData { sgroup, false, decoder, sound, trigger->m_audioTriggerParams.m_volume });
         break;
     }
     case SoundAction::Stop: {
@@ -746,29 +744,13 @@ IATLListenerData *AudioSystemImpl_MA::NewDefaultAudioListenerObjectData([[maybe_
 
 IATLListenerData *AudioSystemImpl_MA::NewAudioListenerObjectData([[maybe_unused]] Audio::TATLIDType objectId)
 {
-    if(m_availableListeners.empty())
-    {
-        AZ_Error(Constants::LogWindow, false, "Error: We reached the amount listeners max supported by MiniAudio!");
-        return nullptr;
-    }
-
-    int newListenerIndex = m_availableListeners.back();
-    m_availableListeners.pop_back();
-
-    ma_engine_listener_set_enabled(m_engine.get(), newListenerIndex, MA_TRUE);
-    auto listener = azcreate(SATLListenerData_MA, (newListenerIndex), Audio::AudioImplAllocator);
+    static int id = 0;
+    auto listener = azcreate(SATLListenerData_MA, (++id), Audio::AudioImplAllocator);
     return listener;
 }
 
 void AudioSystemImpl_MA::DeleteAudioListenerObjectData(Audio::IATLListenerData *oldListenerData)
 {
-    auto listener = static_cast<SATLListenerData_MA*>(oldListenerData);
-    if(listener->m_listenerIndex != 0)
-    {
-        ma_engine_listener_set_enabled(m_engine.get(), listener->m_listenerIndex, MA_FALSE);
-        m_availableListeners.push_back(listener->m_listenerIndex);
-    }
-
     azdestroy(oldListenerData, Audio::AudioImplAllocator, Audio::IATLListenerData);
 }
 
@@ -894,6 +876,9 @@ void AudioSystemImpl_MA::CheckObjectForExpiredMASounds(SATLAudioObjectData_MA &a
 
     for(auto it : iterators)
     {
+        if (it->second.m_group)
+            it->second.m_group->RemoveSound(it->second.m_sound);
+
         ma_sound_uninit(it->second.m_sound);
         azdestroy(it->second.m_sound, Audio::AudioImplAllocator, ma_sound);
 

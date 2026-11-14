@@ -17,7 +17,11 @@
                     "params": "copy",
                     "productAssetType": "{305C9250-E129-4694-A819-2975B1CF926A}"
                 },
-
+                "RC MiniAudio SoundGroupLayout": {
+                    "glob": "*.ma_soundgroups",
+                    "params": "copy",
+                    "productAssetType": "{A6A021D1-4863-4F08-A294-4E0611D48F24}"
+                },
                 "RC MiniAudio wav copy": {
                     "glob": "*.wav",
                     "params": "copy",

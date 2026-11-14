@@ -12,12 +12,15 @@
 namespace AudioEngineMA
 {
 
+    class SoundGroup;
+
 struct SATLAudioFileEntryData_MA : Audio::IATLAudioFileEntryData
 {
     AZ::IO::FixedMaxPath m_audioFilePath;
 };
 
 struct ActiveMASoundData {
+    SoundGroup* m_group = nullptr;
     bool m_isPaused = false;
     ma_decoder* m_decoder = nullptr;
     ma_sound* m_sound = nullptr;

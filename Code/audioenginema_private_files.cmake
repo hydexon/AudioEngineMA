@@ -5,6 +5,8 @@ set(FILES
     Source/AudioEngineMAModuleInterface.h
     Source/Clients/AudioEngineMASystemComponent.cpp
     Source/Clients/AudioEngineMASystemComponent.h
+    Source/Clients/AudioEngineMA_CVars.cpp
+    Source/Clients/AudioEngineMA_CVars.h
     Source/Clients/AudioEngineImpl_MA.cpp
     Source/Clients/AudioEngineImpl_MA.h
     Source/Clients/Common_MA.cpp

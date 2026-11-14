@@ -219,7 +219,6 @@ namespace AudioEngineMA
 
         AZStd::unique_ptr<SoundGroupManager> m_soundGroupsManager;
         //Listeners:
-        AZStd::vector<int> m_availableListeners;
         void CheckObjectForExpiredMASounds(SATLAudioObjectData_MA& audioObj);
         Audio::EAudioRequestStatus SetGlobalRTPC(const SATLRtpcImplData_MA& rtpc, float value);
         Audio::EAudioRequestStatus SetAudioFileRTPC(SATLAudioObjectData_MA& object, const SATLRtpcImplData_MA& rtpc, float value);
